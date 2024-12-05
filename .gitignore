@@ -1,0 +1,9 @@
+reports/
+node_modules/
+.env
+users.db
+.hintrc
+accounts.db
+requests.rest
+query.sql
+dummy.js
