@@ -104,4 +104,4 @@ function deleteAccount(id) {
     }
 }
 
-module.exports = {createAccount, authenticateAccount, updateAccount, deleteAccount};
+module.exports = {createAccount, authenticateAccount, getAccountById, updateAccount, deleteAccount};

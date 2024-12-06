@@ -3,8 +3,10 @@ const cs = require('node:console');
 const path = require('node:path');
 const {data, title} = require('./users');
 
-(async (dir) => {
+module.exports = async (account) => {
     cs.time('create/read');
+    const dir = './user_files';
+    const accountPath = path.join(dir, account.id);
     try {
         await fs.access(dir);
         console.log('Directory already exists.\n');
@@ -15,8 +17,17 @@ const {data, title} = require('./users');
     }
 
     try {
-        const files = await fs.readdir(dir, {recursive: true});
-        const filePath = path.join(__dirname, `${dir}/${title}_v${files.length + 1}.csv`);
+        await fs.access(accountPath);
+        console.log('Directory already exists.\n');
+    } catch (err) {
+        console.log('Directory does not exists. Creating it...');
+        await fs.mkdir(accountPath);
+        console.log(`Directory created successfully!\n`);
+    }
+
+    try {
+        const files = await fs.readdir(accountPath, {recursive: true});
+        const filePath = path.join(__dirname, `${accountPath}/${title}_v${files.length + 1}.csv`);
 
         const date = new Date();
         const dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
@@ -37,8 +48,10 @@ const {data, title} = require('./users');
         }
         console.log('\nFile read successfully!');
         cs.timeEnd('create/read');
+        return filePath;
     } catch (err) {
         console.error(`Error: ${err}`);
+        return null;
     }
-})('./reports');
+};
 

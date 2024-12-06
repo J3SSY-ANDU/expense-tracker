@@ -3,10 +3,12 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const fs = require('fs');
+const generateCSV = require('./generateCSV');
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
-const {createAccount, authenticateAccount, updateAccount, deleteAccount} = require('./database/accounts');
+const {createAccount, authenticateAccount, getAccountById, updateAccount, deleteAccount} = require('./accounts');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,11 +25,7 @@ app.use(session({
 }))
 
 app.use(express.static('public'));
-
-app.use((req, res, next) => {
-    console.log('Current Session:', req.session);
-    next();
-});
+app.use('/reports', express.static(path.join(__dirname, 'reports')));
 
 app.get('/', (req, res) => {
     if (!req.session.accountId) {
@@ -83,6 +81,8 @@ app.post('/process-login', async (req, res) => {
     if (account) {
         req.session.accountId = account.id;
         res.redirect('/');
+    } else {
+        res.redirect('/login');
     }
 })
 
@@ -90,6 +90,13 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login');
     });
+})
+
+app.get('/generate-csv', async (req, res) => {
+    const id = req.session.accountId;
+    const accountData = getAccountById(id);
+    const filePath = await generateCSV(accountData);
+    res.download(filePath);
 })
 
 app.listen(port, () => {
