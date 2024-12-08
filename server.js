@@ -3,7 +3,6 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const path = require('path');
-const fs = require('fs');
 const generateCSV = require('./generateCSV');
 dotenv.config();
 const app = express();
@@ -24,11 +23,11 @@ app.use(session({
     saveUninitialized: false
 }))
 
-app.use(express.static('public'));
 app.use('/reports', express.static(path.join(__dirname, 'reports')));
 
-app.get('/dashboard', (req, res) => {
+app.get('/', (req, res) => {
     if (!req.session.accountId) {
+        console.log('Redirecting to login screen...');
         return res.redirect('/login');
     }
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -46,6 +45,7 @@ app.get('/signup', (req, res) => {
             <input type="text" name="lastname" placeholder="Lastname" /> <br>
             <input type="email" name="email" placeholder="Email" /> <br>
             <input type="password" name="password" placeholder="Password" /> <br>
+            <input type="password" name="password-confirmation" placeholder="Confirm password" /> <br>
             <button type="submit">Signup</button>
         </form>
         `)
@@ -60,7 +60,7 @@ app.post('/process-signup', async (req, res) => {
         return res.redirect('/signup');
     }
     req.session.accountId = account.id;
-    res.redirect('/dashboard');
+    res.redirect('/');
 })
 
 app.get('/login', (req, res) => {
@@ -84,7 +84,7 @@ app.post('/process-login', async (req, res) => {
     const account = await authenticateAccount(email, password);
     if (account) {
         req.session.accountId = account.id;
-        res.redirect('/dashboard');
+        res.redirect('/');
     } else {
         res.redirect('/login');
     }
