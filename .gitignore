@@ -1,9 +1,10 @@
 reports/
 node_modules/
+user_files/
 .env
 users.db
 .hintrc
 accounts.db
 requests.rest
-query.sql
+test.sql
 dummy.js

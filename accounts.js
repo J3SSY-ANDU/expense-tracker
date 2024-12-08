@@ -24,11 +24,13 @@ function createAccount(firstname, lastname, email, password) {
         const id = uuidv4(); // Generate a unique ID
         const fullname = `${firstname} ${lastname}`;
         stmt.run(id, firstname, lastname, fullname, email, password);
-        if (!getAccountById(id)) {
+        const account = getAccountById(id);
+        if (!account) {
             console.log(`Failed. Try again.`);
             return null;
         }
         console.log('Account created successfully!');
+        return account;
     } catch (err) {
         console.error(`Error creating account: ${err}`);
         return null;

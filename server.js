@@ -27,7 +27,7 @@ app.use(session({
 app.use(express.static('public'));
 app.use('/reports', express.static(path.join(__dirname, 'reports')));
 
-app.get('/', (req, res) => {
+app.get('/dashboard', (req, res) => {
     if (!req.session.accountId) {
         return res.redirect('/login');
     }
@@ -55,8 +55,12 @@ app.get('/signup', (req, res) => {
 app.post('/process-signup', async (req, res) => {
     const {firstname, lastname, email, password} = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    createAccount(firstname, lastname, email, hashedPassword);
-    res.redirect('/');
+    const account = createAccount(firstname, lastname, email, hashedPassword);
+    if (!account) {
+        return res.redirect('/signup');
+    }
+    req.session.accountId = account.id;
+    res.redirect('/dashboard');
 })
 
 app.get('/login', (req, res) => {
@@ -80,7 +84,7 @@ app.post('/process-login', async (req, res) => {
     const account = await authenticateAccount(email, password);
     if (account) {
         req.session.accountId = account.id;
-        res.redirect('/');
+        res.redirect('/dashboard');
     } else {
         res.redirect('/login');
     }
