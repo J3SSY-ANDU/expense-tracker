@@ -7,7 +7,7 @@ const generateCSV = require('./generateCSV');
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
-const {createAccount, authenticateAccount, getAccountById, updateAccount, deleteAccount} = require('./accounts');
+const {createAccount, authenticateAccount, getAccountById, updateAccount, deleteAccount} = require('./database/accounts');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -30,7 +30,14 @@ app.get('/', (req, res) => {
         console.log('Redirecting to login screen...');
         return res.redirect('/login');
     }
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.setHeader('Content-Type', 'text/HTML');
+    res.write(`
+        <h1>Welcome to my Data File Generator!</h1>
+        <form method="get" action="/generate-csv">
+            <button type="submit">Generate File</button>
+        </form>
+        `)
+    res.end();
 })
 
 app.get('/signup', (req, res) => {

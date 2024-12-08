@@ -1,7 +1,7 @@
 const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
-const db = new Database('accounts.db');
+const db = new Database('./database/accounts.db');
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS accounts (

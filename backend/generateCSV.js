@@ -1,11 +1,11 @@
 const fs = require('node:fs/promises');
 const cs = require('node:console');
 const path = require('node:path');
-const {data, title} = require('./users');
+const {data, title} = require('./database/users');
 
 module.exports = async (account) => {
     cs.time('create/read');
-    const dir = './user_files';
+    const dir = './database/user_files';
     const accountPath = path.join(dir, account.id);
     try {
         await fs.access(dir);
@@ -27,7 +27,7 @@ module.exports = async (account) => {
 
     try {
         const files = await fs.readdir(accountPath, {recursive: true});
-        const filePath = path.join(__dirname, `${accountPath}/${title}_v${files.length + 1}.csv`);
+        const filePath = path.join(accountPath, `${title}_v${files.length + 1}.csv`);
 
         const date = new Date();
         const dateStr = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
