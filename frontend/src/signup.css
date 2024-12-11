@@ -1,0 +1,9 @@
+.signup__link {
+  font-size: 0.8rem;
+  color: #352b2b;
+  text-decoration: none;
+}
+
+.signup__link:hover {
+  text-decoration: underline;
+}

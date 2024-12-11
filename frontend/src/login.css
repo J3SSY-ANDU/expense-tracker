@@ -1,0 +1,15 @@
+.login__link {
+  font-size: 0.8rem;
+  color: #352b2b;
+  text-decoration: none;
+}
+
+.login__link--forgot-password {
+  font-size: 0.8rem;
+  color: #352b2bcb;
+  align-self: flex-start;
+}
+
+.login__link:hover {
+  text-decoration: underline;
+}
