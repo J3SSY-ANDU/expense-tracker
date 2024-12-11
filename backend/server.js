@@ -6,8 +6,9 @@ const path = require('path');
 const generateCSV = require('./generateCSV');
 dotenv.config();
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 const {createAccount, authenticateAccount, getAccountById, updateAccount, deleteAccount} = require('./database/accounts');
+const {data, title} = require('./database/users');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -25,38 +26,11 @@ app.use(session({
 
 app.use('/reports', express.static(path.join(__dirname, 'reports')));
 
-app.get('/', (req, res) => {
+app.get('/session-id-exists', (req, res) => {
     if (!req.session.accountId) {
-        console.log('Redirecting to login screen...');
-        return res.redirect('/login');
+        return res.status(401).send('Please login or sign up!');
     }
-    res.setHeader('Content-Type', 'text/HTML');
-    res.write(`
-        <h1>Welcome to my Data File Generator!</h1>
-        <form method="get" action="/generate-csv">
-            <button type="submit">Generate File</button>
-        </form>
-        `)
-    res.end();
-})
-
-app.get('/signup', (req, res) => {
-    if (req.session.accountId) {
-        return res.redirect('/')
-    }
-    res.setHeader('Content-Type', 'text/HTML');
-    res.write(`
-        <h1>Signup</h1>
-        <form method="post" action="/process-signup">
-            <input type="text" name="firstname" placeholder="Firstname" /> <br>
-            <input type="text" name="lastname" placeholder="Lastname" /> <br>
-            <input type="email" name="email" placeholder="Email" /> <br>
-            <input type="password" name="password" placeholder="Password" /> <br>
-            <input type="password" name="password-confirmation" placeholder="Confirm password" /> <br>
-            <button type="submit">Signup</button>
-        </form>
-        `)
-    res.end();
+    res.status(200).send('Welcome to the home page!');
 })
 
 app.post('/process-signup', async (req, res) => {
@@ -64,42 +38,25 @@ app.post('/process-signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const account = createAccount(firstname, lastname, email, hashedPassword);
     if (!account) {
-        return res.redirect('/signup');
+        return res.status(401).send('Account creation failed!');
     }
     req.session.accountId = account.id;
-    res.redirect('/');
-})
-
-app.get('/login', (req, res) => {
-    if (req.session.accountId) {
-        return res.redirect('/');
-    }
-    res.setHeader('Content-Type', 'text/HTML');
-    res.write(`
-        <h1>Login</h1>
-        <form method="post" action="/process-login">
-            <input type="email" name="email" placeholder="Email" /> <br>
-            <input type="password" name="password" placeholder="Password" /> <br>
-            <button type="submit">Login</button>
-        </form>
-    `);
-    res.end();
+    res.status(200).send('Account created successfully!');
 })
 
 app.post('/process-login', async (req, res) => {
     const {email, password} = req.body;
     const account = await authenticateAccount(email, password);
-    if (account) {
-        req.session.accountId = account.id;
-        res.redirect('/');
-    } else {
-        res.redirect('/login');
+    if (!account) {
+        return res.status(401).send('Login failed!');
     }
+    req.session.accountId = account.id;
+    res.status(200).send('Login successful!');
 })
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
-        res.redirect('/login');
+        res.status(200).send('Logged out successfully!');
     });
 })
 
@@ -108,6 +65,15 @@ app.get('/generate-csv', async (req, res) => {
     const accountData = getAccountById(id);
     const filePath = await generateCSV(accountData);
     res.download(filePath);
+})
+
+app.get('/data', (req, res) => {
+    if (!data) {
+        return res.status(401).send('Error getting data...');
+    }
+    console.log("Data fetch successfully!");
+    res.status(200).send(data);
+    res.end();
 })
 
 app.listen(port, () => {
