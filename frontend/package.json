@@ -3,14 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.13.5",
-    "@emotion/styled": "^11.13.5",
-    "@mui/material": "^6.1.10",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.2.0",
+    "@mui/material": "^6.2.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
     "cra-template": "1.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.0.2",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "typescript": "^5.7.2"
   },
   "scripts": {
     "start": "react-scripts start",

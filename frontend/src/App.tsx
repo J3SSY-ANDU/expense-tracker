@@ -3,19 +3,20 @@ import React, { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BasicTable from "./Table";
+import { Button, Box, Typography, TextField } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
-function App() {
+export default function App() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const logout = async (e) => {
+  const logout = async (): Promise<void> => {
     try {
-      e.preventDefault();
-      const res = await fetch("/logout", {
+      const res: Response = await fetch("/logout", {
         method: "GET",
       });
       if (res.status === 200) {
-        console.log('Logged out successfully!');
+        console.log("Logged out successfully!");
         navigate("/login");
       }
     } catch (err) {
@@ -38,7 +39,7 @@ function App() {
         }
         setTimeout(() => {
           setLoading(false);
-        }, 1000);
+        }, 300);
       } catch (err) {
         console.error(`Error fetching the API: ${err}`);
       }
@@ -46,38 +47,24 @@ function App() {
     fetchData();
   }, [navigate]);
 
-  const handleGenerateFile = async (e) => {
-    try {
-      e.preventDefault();
-      const res = await fetch("/generate-csv", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (res.status === 200) {
-        console.log("File generated successfully!");
-      }
-    } catch (err) {
-      console.error(`Error fetching the API: ${err}`);
-    }
-  };
-
   if (loading) {
     return <div>Loading...</div>;
   }
+
   return (
-    <div className="App" style={{margin: "2rem 0"}}>
-      <h1>Welcome to my Data File Generator!</h1>
+    <Box className="App" sx={{ margin: "2rem 0" }}>
+      <Typography fontSize={32} fontWeight={"bold"} marginBottom={"2rem"}>
+        Welcome to my Data File Generator!
+      </Typography>
+      <TextField label={"Search"} variant="filled" />
+      <Button
+        sx={{ marginBottom: "2rem" }}
+        variant="contained"
+        onClick={logout}
+      >
+        Logout
+      </Button>
       <BasicTable />
-      {/* <form onSubmit={handleGenerateFile}>
-        <button type="submit">Generate File</button>
-      </form>
-      <form onSubmit={logout}>
-        <button type="submit">Logout</button>
-      </form> */}
-    </div>
+    </Box>
   );
 }
-
-export default App;

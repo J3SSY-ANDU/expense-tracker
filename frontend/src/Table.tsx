@@ -1,3 +1,5 @@
+// src/components/BasicTable.tsx
+
 import {
   Table,
   TableCell,
@@ -7,11 +9,24 @@ import {
   Box,
   TableContainer,
 } from "@mui/material";
+import React from "react";
 import { useState, useEffect } from "react";
 
+// Define the structure of the data
+interface Client {
+  id: number;
+  name: string;
+  address: string;
+  phone: number;
+  email: string;
+  accountNumber: string;
+  balance: string;
+}
+
 export default function BasicTable() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<Client[] | null>(null); // State for fetched data
+  const [loading, setLoading] = useState<boolean>(true); // State for loading
+
   useEffect(() => {
     (async () => {
       try {
@@ -21,12 +36,12 @@ export default function BasicTable() {
             "Content-Type": "application/json",
           },
         });
-        const users = await res.json();
+        const users: Client[] = await res.json(); // Ensure data matches the User interface
         if (users) {
           setData(users);
           setTimeout(() => {
             setLoading(false);
-          }, 2000)
+          }, 2000);
         }
       } catch (err) {
         console.error(`Error getting data: ${err}`);
@@ -37,6 +52,7 @@ export default function BasicTable() {
   if (loading) {
     return <div>Loading...</div>;
   }
+
   return (
     <TableContainer
       component={Box}
@@ -50,23 +66,21 @@ export default function BasicTable() {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
-            <TableCell>USERNAME</TableCell>
+            <TableCell>NAME</TableCell>
+            <TableCell>ACCOUNT-NUMBER</TableCell>
             <TableCell>EMAIL</TableCell>
-            <TableCell>PASSWORD</TableCell>
+            <TableCell>BALANCE</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row) => {
-            return (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.username}</TableCell>
-                <TableCell>{row.email}</TableCell>
-                <TableCell>{row.password}</TableCell>
-              </TableRow>
-            );
-          })}
+          {data?.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell>{row.name}</TableCell>
+              <TableCell>{row.accountNumber}</TableCell>
+              <TableCell>{row.email}</TableCell>
+              <TableCell>{row.balance}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </TableContainer>

@@ -1,0 +1,12 @@
+{
+  "name": "data-file-generator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/J3SSY-ANDU/data-file-generator.git",
+  "author": "J3SSY-ANDU <jessy.andujar@upr.edu>",
+  "license": "MIT",
+  "scripts": {
+    "frontend": "cd frontend && yarn start",
+    "backend": "cd backend && yarn server"
+  }
+}
