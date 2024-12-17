@@ -1,7 +1,7 @@
 const fs = require('node:fs/promises');
 const cs = require('node:console');
 const path = require('node:path');
-const {data, title} = require('./database/users');
+// const {clients, title} = require('./database/');
 
 module.exports = async (account) => {
     cs.time('create/read');
@@ -34,9 +34,9 @@ module.exports = async (account) => {
         await fs.writeFile(filePath, `${dateStr}\n`);
         console.log('File created successfully!');
 
-        await fs.appendFile(filePath, 'id,username,email,password\n');
-        for (let user of data) {
-            let line = `${user.id},${user.username},${user.email},${user.password}\n`;
+        await fs.appendFile(filePath, 'id,name,address,phone,email,accountNumber,balance\n');
+        for (let client of clients) {
+            let line = `${client.id},${client.name},${client.address},${client.phone},${client.email},${client.accountNumber},${client.balance}\n`;
             await fs.appendFile(filePath, line);
         }
         console.log('Data appended successfully!\n');

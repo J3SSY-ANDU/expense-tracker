@@ -3,12 +3,14 @@ const session = require('express-session');
 const dotenv = require('dotenv');
 const bcrypt = require('bcrypt');
 const path = require('path');
-const generateCSV = require('./generateCSV');
+// const generateCSV = require('./generateCSV');
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 4000;
-const {createAccount, authenticateAccount, getAccountById, updateAccount, deleteAccount} = require('./database/accounts');
-const {data, title} = require('./database/users');
+const {createUser, authenticateUser} = require('./database/users');
+const { getExpensesByUser, createExpense } = require('./database/expenses');
+const { createCategory, getCategoriesByUser } = require('./database/categories');
+const { categoriesData } = require('./database/categoriesData');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -24,10 +26,8 @@ app.use(session({
     saveUninitialized: false
 }))
 
-app.use('/reports', express.static(path.join(__dirname, 'reports')));
-
 app.get('/session-id-exists', (req, res) => {
-    if (!req.session.accountId) {
+    if (!req.session.userId) {
         return res.status(401).send('Please login or sign up!');
     }
     res.status(200).send('Welcome to the home page!');
@@ -36,21 +36,21 @@ app.get('/session-id-exists', (req, res) => {
 app.post('/process-signup', async (req, res) => {
     const {firstname, lastname, email, password} = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const account = createAccount(firstname, lastname, email, hashedPassword);
-    if (!account) {
-        return res.status(401).send('Account creation failed!');
+    const user = await createUser(firstname, lastname, email, hashedPassword);
+    if (!user) {
+        return res.status(401).send('User creation failed!');
     }
-    req.session.accountId = account.id;
-    res.status(200).send('Account created successfully!');
+    req.session.userId = user.id;
+    res.status(200).send('User created successfully!');
 })
 
 app.post('/process-login', async (req, res) => {
     const {email, password} = req.body;
-    const account = await authenticateAccount(email, password);
-    if (!account) {
+    const user = await authenticateUser(email, password);
+    if (!user) {
         return res.status(401).send('Login failed!');
     }
-    req.session.accountId = account.id;
+    req.session.userId = user.id;
     res.status(200).send('Login successful!');
 })
 
@@ -60,20 +60,44 @@ app.get('/logout', (req, res) => {
     });
 })
 
-app.get('/generate-csv', async (req, res) => {
-    const id = req.session.accountId;
-    const accountData = getAccountById(id);
-    const filePath = await generateCSV(accountData);
-    res.download(filePath);
+// app.get('/generate-csv', async (req, res) => {
+//     const id = req.session.userId;
+//     const userData = getUserById(id);
+//     const filePath = await generateCSV(userData);
+//     res.download(filePath);
+// })
+
+app.get('/all-categories', async (req, res) => {
+    const id = req.session.userId;
+    if (!id) {
+        console.log('User id not found.');
+        return;
+    }
+    for (let category of categoriesData) {
+        await createCategory(category.name, id, category.total_expenses, category.description);
+    }
+    const categories = await getCategoriesByUser(id);
+    res.status(200).send(categories);
+    res.end();
 })
 
-app.get('/data', (req, res) => {
-    if (!data) {
-        return res.status(401).send('Error getting data...');
+app.get('/all-expenses', async (req, res) => {
+    const id = req.session.userId;
+    const expenses = await getExpensesByUser(id);
+    if (!expenses) {
+        return res.status(401).send('Data fetch failed!');
     }
     console.log("Data fetch successfully!");
-    res.status(200).send(data);
-    res.end();
+    return res.status(200).send(expenses);
+})
+
+app.post('/create-expense', async (req, res) => {
+    const {name, user_id, amount, category_id, date, notes} = req.body;
+    const expense = await createExpense(name, user_id, amount, category_id, date, notes);
+    if (!expense) {
+        return res.status(401).send('Expense creation failed!');
+    }
+    res.status(200).send('Expense created successfully!');
 })
 
 app.listen(port, () => {
