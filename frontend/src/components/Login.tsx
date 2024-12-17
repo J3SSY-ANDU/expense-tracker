@@ -12,7 +12,7 @@ import {
   Button,
   Paper,
 } from "@mui/material";
-import "./login.css";
+import "../styles/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");

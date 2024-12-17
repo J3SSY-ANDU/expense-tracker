@@ -12,7 +12,7 @@ import {
   Button,
   Paper,
 } from "@mui/material";
-import "./signup.css";
+import "../styles/signup.css";
 
 export default function Signup() {
   const [firstname, setFirstname] = useState("");

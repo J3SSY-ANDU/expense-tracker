@@ -2,46 +2,15 @@ import "./App.css";
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import BasicTable from "./Table";
-import { Button, Box, Typography, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-
-interface Category {
-  id: string;
-  user_id: string;
-  name: string;
-  total_expenses: number;
-  description: string;
-}
-
-interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-  category_id: string;
-  date: Date;
-  notes: string;
-}
+import BasicTable from "./components/Table";
+import { Box, Typography } from "@mui/material";
+import { Category, Expense } from "./types";
 
 export default function App() {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const logout = async (): Promise<void> => {
-    try {
-      const res: Response = await fetch("/logout", {
-        method: "GET",
-      });
-      if (res.status === 200) {
-        console.log("Logged out successfully!");
-        navigate("/login");
-      }
-    } catch (err) {
-      console.error(`Error fetching the API: ${err}`);
-    }
-  };
 
   useEffect(() => {
     (async () => {
