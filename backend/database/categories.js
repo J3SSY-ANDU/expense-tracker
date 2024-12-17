@@ -1,4 +1,4 @@
-const connectionPool = require("./db");
+const { connectionPool } = require("./db");
 const dotenv = require("dotenv").config();
 const { v4: uuidv4 } = require("uuid");
 
@@ -52,7 +52,7 @@ const getCategoriesByUser = async (user_id) => {
     console.error(`Error getting categories: ${err}`);
     return null;
   }
-}
+};
 
 const getCategoryById = async (id, user_id) => {
   try {
@@ -90,11 +90,10 @@ const getCategoryByName = async (user_id, name) => {
 
 const updateCategoryName = async (id, user_id, name) => {
   try {
-    await connectionPool.query(`UPDATE categories SET name = ? WHERE id = ? AND user_id = ?`, [
-      name,
-      id,
-      user_id
-    ]);
+    await connectionPool.query(
+      `UPDATE categories SET name = ? WHERE id = ? AND user_id = ?`,
+      [name, id, user_id]
+    );
     const updatedCategory = await getCategoryById(id, user_id);
     if (updatedCategory.name !== name) {
       console.log(`Failed. Try again.`);
@@ -150,20 +149,14 @@ const updateCategoryTotalExpenses = async (id, user_id, amount) => {
 
 const deleteCategory = async (id, user_id) => {
   try {
-    await connectionPool.query(`DELETE FROM categories WHERE id = ? AND user_id = ?`, [id, user_id]);
+    await connectionPool.query(
+      `DELETE FROM categories WHERE id = ? AND user_id = ?`,
+      [id, user_id]
+    );
     console.log("Category deleted successfully!");
   } catch (err) {
     console.error(`Error deleting category: ${err}`);
     return null;
-  }
-};
-
-const closeConnection = async () => {
-  try {
-    await connectionPool.end();
-    console.log("Connection closed successfully!");
-  } catch (err) {
-    console.error(`Error closing connection: ${err}`);
   }
 };
 
@@ -176,5 +169,4 @@ module.exports = {
   updateCategoryDescription,
   updateCategoryTotalExpenses,
   deleteCategory,
-  closeConnection,
 };

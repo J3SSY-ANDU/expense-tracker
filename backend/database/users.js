@@ -1,4 +1,4 @@
-const connectionPool = require('./db');
+const { connectionPool } = require("./db");
 const dotenv = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
@@ -45,9 +45,10 @@ const createUser = async (firstname, lastname, email, password) => {
 
 const getUserById = async (id) => {
   try {
-    const [user] = await connectionPool.query(`SELECT * FROM users WHERE id = ?`, [
-      id,
-    ]);
+    const [user] = await connectionPool.query(
+      `SELECT * FROM users WHERE id = ?`,
+      [id]
+    );
     if (!user) return null;
     return user[0];
   } catch (err) {
@@ -57,9 +58,10 @@ const getUserById = async (id) => {
 
 const getUserByEmail = async (email) => {
   try {
-    const [user] = await connectionPool.query(`SELECT * FROM users WHERE email = ?`, [
-      email,
-    ]);
+    const [user] = await connectionPool.query(
+      `SELECT * FROM users WHERE email = ?`,
+      [email]
+    );
     if (!user) return null;
     return user[0];
   } catch (err) {
@@ -104,11 +106,17 @@ const updateUser = async (id, columnName, value) => {
     if (!allowedColumnNames.includes(columnName)) {
       throw new Error(`Invalid parameter: ${columnName}`);
     }
-    await connectionPool.query(`UPDATE users SET ${columnName} = ? WHERE id = ?`, [value, id]);
+    await connectionPool.query(
+      `UPDATE users SET ${columnName} = ? WHERE id = ?`,
+      [value, id]
+    );
     if (columnName === "firstname" || columnName === "lastname") {
       const user = await getUserById(id);
       const fullname = `${user[0].firstname} ${user[0].lastname}`;
-      await connectionPool.query(`UPDATE users SET fullname = ? WHERE id = ?`, [fullname, id]);
+      await connectionPool.query(`UPDATE users SET fullname = ? WHERE id = ?`, [
+        fullname,
+        id,
+      ]);
     }
     console.log(`User updated successfully!`);
   } catch (err) {
@@ -116,13 +124,11 @@ const updateUser = async (id, columnName, value) => {
   }
 };
 
-const closeConnection = async () => {
-  try {
-    await connectionPool.end();
-    console.log("Connection closed.");
-  } catch (err) {
-    console.error(`Error closing connection: ${err}`);
-  }
+module.exports = {
+  createUser,
+  getUserById,
+  getUserByEmail,
+  authenticateUser,
+  deleteUser,
+  updateUser,
 };
-
-module.exports = { createUser, authenticateUser, closeConnection };
