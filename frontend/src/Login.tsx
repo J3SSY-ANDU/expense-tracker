@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -45,7 +46,7 @@ export default function Login() {
     return isValid;
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     function emptyFields() {
       setEmail("");
       setPassword("");
@@ -201,7 +202,10 @@ export default function Login() {
             </AlertTitle>
           </Alert>
         )}
-        <Link to={'/signup'} className={"login__link login__link--forgot-password"}>
+        <Link
+          to={"/signup"}
+          className={"login__link login__link--forgot-password"}
+        >
           Forgot password?
         </Link>
         <Button
@@ -211,10 +215,16 @@ export default function Login() {
             fontSize: "0.8rem",
           }}
         >
-          {loading ? <CircularProgress color="#fff" size={14} /> : "Log in"}
+          {loading ? (
+            <CircularProgress sx={{ color: "#fff" }} size={14} />
+          ) : (
+            "Log in"
+          )}
         </Button>
-        <Box sx={{display: "flex", alignItems: "center", gap: '0.2rem'}}>
-          <Typography sx={{fontSize: '0.8rem'}} className="login__p">Don't have an account?</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+          <Typography sx={{ fontSize: "0.8rem" }} className="login__p">
+            Don't have an account?
+          </Typography>
           <Link to="/signup" className="login__link">
             Sign up
           </Link>

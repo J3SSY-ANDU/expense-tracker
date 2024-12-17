@@ -1,0 +1,180 @@
+const connectionPool = require("./db");
+const dotenv = require("dotenv").config();
+const { v4: uuidv4 } = require("uuid");
+
+(async () => {
+  await connectionPool.query(`
+        CREATE TABLE IF NOT EXISTS categories (
+            id VARCHAR(100) PRIMARY KEY NOT NULL,
+            user_id VARCHAR(100) NOT NULL,
+            name VARCHAR(50) NOT NULL,
+            total_expenses DECIMAL(10,2) NOT NULL,
+            description TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE (user_id, name)
+        );
+    `);
+  console.log("Table created successfully!");
+})();
+
+const createCategory = async (name, user_id, total_expenses, description) => {
+  try {
+    if (await getCategoryByName(user_id, name)) {
+      console.log(`Category already exists.`);
+      return null;
+    }
+    const id = uuidv4();
+    await connectionPool.query(
+      `INSERT INTO categories (id, user_id, name, total_expenses, description) VALUES (?, ?, ?, ?, ?)`,
+      [id, user_id, name, total_expenses, description]
+    );
+    const category = await getCategoryById(id, user_id);
+    if (!category) {
+      console.log(`Failed. Try again.`);
+      return null;
+    }
+    console.log("Category created successfully!");
+    return category;
+  } catch (err) {
+    console.error(`Error creating category: ${err}`);
+    return null;
+  }
+};
+
+const getCategoriesByUser = async (user_id) => {
+  try {
+    const [categories] = await connectionPool.query(
+      `SELECT * FROM categories WHERE user_id = ?`,
+      [user_id]
+    );
+    return categories;
+  } catch (err) {
+    console.error(`Error getting categories: ${err}`);
+    return null;
+  }
+}
+
+const getCategoryById = async (id, user_id) => {
+  try {
+    const [category] = await connectionPool.query(
+      `SELECT * FROM categories WHERE id = ? AND user_id = ?`,
+      [id, user_id]
+    );
+    if (!category) {
+      console.log(`Category not found.`);
+      return null;
+    }
+    return category[0];
+  } catch (err) {
+    console.error(`Error getting category: ${err}`);
+    return null;
+  }
+};
+
+const getCategoryByName = async (user_id, name) => {
+  try {
+    const [category] = await connectionPool.query(
+      `SELECT * FROM categories WHERE name = ? AND user_id = ?`,
+      [name, user_id]
+    );
+    if (!category) {
+      console.log(`Category not found.`);
+      return null;
+    }
+    return category[0];
+  } catch (err) {
+    console.error(`Error getting category: ${err}`);
+    return null;
+  }
+};
+
+const updateCategoryName = async (id, user_id, name) => {
+  try {
+    await connectionPool.query(`UPDATE categories SET name = ? WHERE id = ? AND user_id = ?`, [
+      name,
+      id,
+      user_id
+    ]);
+    const updatedCategory = await getCategoryById(id, user_id);
+    if (updatedCategory.name !== name) {
+      console.log(`Failed. Try again.`);
+      return null;
+    }
+    console.log("Category updated successfully!");
+    return updatedCategory;
+  } catch (err) {
+    console.error(`Error updating category: ${err}`);
+    return null;
+  }
+};
+
+const updateCategoryDescription = async (id, user_id, description) => {
+  try {
+    await connectionPool.query(
+      `UPDATE categories SET description = ? WHERE id = ? AND user_id = ?`,
+      [description, id, user_id]
+    );
+    const updatedCategory = await getCategoryById(id, user_id);
+    if (updatedCategory.description !== description) {
+      console.log(`Failed. Try again.`);
+      return null;
+    }
+    console.log("Category updated successfully!");
+    return updatedCategory;
+  } catch (err) {
+    console.error(`Error updating category: ${err}`);
+    return null;
+  }
+};
+
+const updateCategoryTotalExpenses = async (id, user_id, amount) => {
+  try {
+    const category = await getCategoryById(id, user_id);
+    const newAmount = parseFloat(category.total_expenses) + parseFloat(amount);
+    await connectionPool.query(
+      `UPDATE categories SET total_expenses = ? WHERE id = ? AND user_id = ?`,
+      [newAmount, id, user_id]
+    );
+    const updatedCategory = await getCategoryById(id, user_id);
+    if (parseFloat(updatedCategory.total_expenses) !== newAmount) {
+      console.log(`Failed. Try again.`);
+      return null;
+    }
+    console.log("Category updated successfully!");
+    return updatedCategory;
+  } catch (err) {
+    console.error(`Error updating category: ${err}`);
+    return null;
+  }
+};
+
+const deleteCategory = async (id, user_id) => {
+  try {
+    await connectionPool.query(`DELETE FROM categories WHERE id = ? AND user_id = ?`, [id, user_id]);
+    console.log("Category deleted successfully!");
+  } catch (err) {
+    console.error(`Error deleting category: ${err}`);
+    return null;
+  }
+};
+
+const closeConnection = async () => {
+  try {
+    await connectionPool.end();
+    console.log("Connection closed successfully!");
+  } catch (err) {
+    console.error(`Error closing connection: ${err}`);
+  }
+};
+
+module.exports = {
+  createCategory,
+  getCategoryById,
+  getCategoryByName,
+  getCategoriesByUser,
+  updateCategoryName,
+  updateCategoryDescription,
+  updateCategoryTotalExpenses,
+  deleteCategory,
+  closeConnection,
+};

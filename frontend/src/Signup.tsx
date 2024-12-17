@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -11,7 +12,7 @@ import {
   Button,
   Paper,
 } from "@mui/material";
-import './signup.css';
+import "./signup.css";
 
 export default function Signup() {
   const [firstname, setFirstname] = useState("");
@@ -78,7 +79,7 @@ export default function Signup() {
     return isValid;
   };
 
-  const handleCallApi = async (e) => {
+  const handleCallApi = async (e: React.FormEvent<HTMLFormElement>) => {
     function emptyFields() {
       setFirstname("");
       setLastname("");
@@ -92,7 +93,6 @@ export default function Signup() {
       setLoading(true);
       if (!verifyInputs()) {
         setLoading(false);
-
         return;
       }
 
@@ -103,7 +103,7 @@ export default function Signup() {
         },
         body: JSON.stringify({ firstname, lastname, email, password }),
       });
-      if (res.ok) {
+      if (res.status === 200) {
         console.log("Signup successful!");
         setLoading(false);
         emptyFields();
@@ -372,7 +372,11 @@ export default function Signup() {
             fontSize: "0.8rem",
           }}
         >
-          {loading ? <CircularProgress color="#fff" size={14} /> : "Sign up"}
+          {loading ? (
+            <CircularProgress sx={{ color: "#fff" }} size={14} />
+          ) : (
+            "Sign up"
+          )}
         </Button>
         <Box
           sx={{
@@ -385,10 +389,7 @@ export default function Signup() {
           <Typography sx={{ fontSize: "0.8rem" }}>
             Already have an account?
           </Typography>
-          <Link
-            to="/login"
-            className="signup__link"
-          >
+          <Link to="/login" className="signup__link">
             Log in
           </Link>
         </Box>
