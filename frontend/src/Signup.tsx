@@ -79,7 +79,7 @@ export default function Signup() {
     return isValid;
   };
 
-  const handleCallApi = async () => {
+  const handleCallApi = async (e: React.FormEvent<HTMLFormElement>) => {
     function emptyFields() {
       setFirstname("");
       setLastname("");
@@ -89,6 +89,7 @@ export default function Signup() {
     }
 
     try {
+      e.preventDefault();
       setLoading(true);
       if (!verifyInputs()) {
         setLoading(false);
@@ -102,7 +103,7 @@ export default function Signup() {
         },
         body: JSON.stringify({ firstname, lastname, email, password }),
       });
-      if (res.ok) {
+      if (res.status === 200) {
         console.log("Signup successful!");
         setLoading(false);
         emptyFields();

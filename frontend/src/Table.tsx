@@ -1,5 +1,3 @@
-// src/components/BasicTable.tsx
-
 import {
   Table,
   TableCell,
@@ -9,45 +7,53 @@ import {
   Box,
   TableContainer,
 } from "@mui/material";
-import React from "react";
 import { useState, useEffect } from "react";
 
-// Define the structure of the data
-interface Client {
-  id: number;
+interface Expense {
+  id: string;
   name: string;
-  address: string;
-  phone: number;
-  email: string;
-  accountNumber: string;
-  balance: string;
+  amount: number;
+  category_id: string;
+  date: Date;
+  notes: string;
 }
 
-export default function BasicTable() {
-  const [data, setData] = useState<Client[] | null>(null); // State for fetched data
+interface Category {
+  id: string;
+  user_id: string;
+  name: string;
+  total_expenses: number;
+  description: string;
+}
+
+export default function BasicTable({
+  expenses,
+  categories,
+}: {
+  expenses: Expense[] | null;
+  categories: Category[] | null;
+}) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
+  const [categoriesNames, setCategoriesNames] = useState<{
+    [key: string]: string;
+  }>({});
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/data", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const users: Client[] = await res.json(); // Ensure data matches the User interface
-        if (users) {
-          setData(users);
-          setTimeout(() => {
-            setLoading(false);
-          }, 2000);
+    if (categories && expenses) {
+      for (const expense of expenses) {
+        const category = categories.find(
+          (category) => category.id === expense.category_id
+        );
+        if (category) {
+          setCategoriesNames((prev) => ({
+            ...prev,
+            [expense.category_id]: category.name,
+          }));
         }
-      } catch (err) {
-        console.error(`Error getting data: ${err}`);
       }
-    })();
-  }, []);
+      setLoading(false);
+    }
+  }, [categories, expenses]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -58,27 +64,31 @@ export default function BasicTable() {
       component={Box}
       sx={{
         margin: "auto",
-        width: "60%",
-        border: "1px solid #d3d3d3",
+        width: "70%",
         borderRadius: "4px",
+        minWidth: "700px",
       }}
     >
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>NAME</TableCell>
-            <TableCell>ACCOUNT-NUMBER</TableCell>
-            <TableCell>EMAIL</TableCell>
-            <TableCell>BALANCE</TableCell>
+            <TableCell>AMOUNT</TableCell>
+            <TableCell>CATEGORY</TableCell>
+            <TableCell>DATE</TableCell>
+            <TableCell>NOTES</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {data?.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.accountNumber}</TableCell>
-              <TableCell>{row.email}</TableCell>
-              <TableCell>{row.balance}</TableCell>
+          {expenses?.map((expense) => (
+            <TableRow key={expense.id}>
+              <TableCell>{expense.name}</TableCell>
+              <TableCell>${expense.amount}</TableCell>
+              <TableCell>{categoriesNames[expense.category_id]}</TableCell>
+              <TableCell>
+                {new Date(expense.date).toLocaleDateString()}
+              </TableCell>
+              <TableCell>{expense.notes}</TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -1,8 +1,8 @@
 {
-  "name": "data-file-generator",
+  "name": "budget-app",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/J3SSY-ANDU/data-file-generator.git",
+  "repository": "https://github.com/J3SSY-ANDU/budget-app.git",
   "author": "J3SSY-ANDU <jessy.andujar@upr.edu>",
   "license": "MIT",
   "scripts": {

@@ -6,7 +6,26 @@ import BasicTable from "./Table";
 import { Button, Box, Typography, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
+interface Category {
+  id: string;
+  user_id: string;
+  name: string;
+  total_expenses: number;
+  description: string;
+}
+
+interface Expense {
+  id: string;
+  name: string;
+  amount: number;
+  category_id: string;
+  date: Date;
+  notes: string;
+}
+
 export default function App() {
+  const [categories, setCategories] = useState<Category[] | null>(null);
+  const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -25,7 +44,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    async function fetchData() {
+    (async () => {
       try {
         const res = await fetch("/session-id-exists", {
           method: "GET",
@@ -35,16 +54,49 @@ export default function App() {
         });
         if (!res.ok) {
           navigate("/login");
-          return;
-        }
-        setTimeout(() => {
+        } else {
+          fetchCategoriesData();
           setLoading(false);
-        }, 300);
+        }
       } catch (err) {
         console.error(`Error fetching the API: ${err}`);
       }
+    })();
+
+    async function fetchCategoriesData() {
+      try {
+        const res = await fetch("/all-categories", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (res.status === 200) {
+          const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
+          setCategories(categoriesData);
+          fetchExpensesData();
+        }
+      } catch (err) {
+        console.error(`Error fetching categories data ${err}`);
+      }
     }
-    fetchData();
+
+    async function fetchExpensesData() {
+      try {
+        const res = await fetch("/all-expenses", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (res.status === 200) {
+          const expensesData: Expense[] = await res.json(); // Make sure that the response is of type Expense[]
+          setExpenses(expensesData);
+        }
+      } catch (err) {
+        console.error(`Error fetching expenses data ${err}`);
+      }
+    }
   }, [navigate]);
 
   if (loading) {
@@ -56,15 +108,15 @@ export default function App() {
       <Typography fontSize={32} fontWeight={"bold"} marginBottom={"2rem"}>
         Welcome to my Data File Generator!
       </Typography>
-      <TextField label={"Search"} variant="filled" />
-      <Button
+      {/* <TextField label={"Search"} variant="filled" /> */}
+      {/* <Button
         sx={{ marginBottom: "2rem" }}
         variant="contained"
         onClick={logout}
       >
         Logout
-      </Button>
-      <BasicTable />
+      </Button> */}
+      <BasicTable expenses={expenses} categories={categories} />
     </Box>
   );
 }
