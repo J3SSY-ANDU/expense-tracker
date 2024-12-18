@@ -12,7 +12,7 @@ const {
   authenticateUser,
   getUserById,
 } = require("./database/users");
-const { getExpensesByUser, createExpense } = require("./database/expenses");
+const { getExpensesByUser, createExpense, deleteExpense } = require("./database/expenses");
 const {
   createCategory,
   getCategoriesByUser,
@@ -74,19 +74,8 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// app.get('/generate-csv', async (req, res) => {
-//     const id = req.session.userId;
-//     const userData = getUserById(id);
-//     const filePath = await generateCSV(userData);
-//     res.download(filePath);
-// })
-
 app.get("/all-categories", async (req, res) => {
   const id = req.session.userId;
-  if (!id) {
-    console.log("User id not found.");
-    return;
-  }
   for (let category of categoriesData) {
     await createCategory(
       category.name,
@@ -125,6 +114,12 @@ app.post("/create-expense", async (req, res) => {
   }
   res.status(200).send("Expense created successfully!");
 });
+
+app.post("/delete-expense", async (req, res) => {
+  const { expense_id } = req.body;
+  await deleteExpense(expense_id);
+  res.status(200).send("Expense deleted successfully!");
+})
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}...`);

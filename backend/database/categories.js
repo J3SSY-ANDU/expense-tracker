@@ -28,7 +28,7 @@ const createCategory = async (name, user_id, total_expenses, description) => {
       `INSERT INTO categories (id, user_id, name, total_expenses, description) VALUES (?, ?, ?, ?, ?)`,
       [id, user_id, name, total_expenses, description]
     );
-    const category = await getCategoryById(id, user_id);
+    const category = await getCategoryById(id);
     if (!category) {
       console.log(`Failed. Try again.`);
       return null;
@@ -54,11 +54,11 @@ const getCategoriesByUser = async (user_id) => {
   }
 };
 
-const getCategoryById = async (id, user_id) => {
+const getCategoryById = async (id) => {
   try {
     const [category] = await connectionPool.query(
-      `SELECT * FROM categories WHERE id = ? AND user_id = ?`,
-      [id, user_id]
+      `SELECT * FROM categories WHERE id = ?`,
+      [id]
     );
     if (!category) {
       console.log(`Category not found.`);
@@ -88,13 +88,13 @@ const getCategoryByName = async (user_id, name) => {
   }
 };
 
-const updateCategoryName = async (id, user_id, name) => {
+const updateCategoryName = async (id, name) => {
   try {
     await connectionPool.query(
-      `UPDATE categories SET name = ? WHERE id = ? AND user_id = ?`,
-      [name, id, user_id]
+      `UPDATE categories SET name = ? WHERE id = ?`,
+      [name, id]
     );
-    const updatedCategory = await getCategoryById(id, user_id);
+    const updatedCategory = await getCategoryById(id);
     if (updatedCategory.name !== name) {
       console.log(`Failed. Try again.`);
       return null;
@@ -107,13 +107,13 @@ const updateCategoryName = async (id, user_id, name) => {
   }
 };
 
-const updateCategoryDescription = async (id, user_id, description) => {
+const updateCategoryDescription = async (id, description) => {
   try {
     await connectionPool.query(
-      `UPDATE categories SET description = ? WHERE id = ? AND user_id = ?`,
-      [description, id, user_id]
+      `UPDATE categories SET description = ? WHERE id = ?`,
+      [description, id]
     );
-    const updatedCategory = await getCategoryById(id, user_id);
+    const updatedCategory = await getCategoryById(id);
     if (updatedCategory.description !== description) {
       console.log(`Failed. Try again.`);
       return null;
@@ -126,15 +126,15 @@ const updateCategoryDescription = async (id, user_id, description) => {
   }
 };
 
-const updateCategoryTotalExpenses = async (id, user_id, amount) => {
+const updateCategoryTotalExpenses = async (id, amount) => {
   try {
-    const category = await getCategoryById(id, user_id);
+    const category = await getCategoryById(id);
     const newAmount = parseFloat(category.total_expenses) + parseFloat(amount);
     await connectionPool.query(
-      `UPDATE categories SET total_expenses = ? WHERE id = ? AND user_id = ?`,
-      [newAmount, id, user_id]
+      `UPDATE categories SET total_expenses = ? WHERE id = ?`,
+      [newAmount, id]
     );
-    const updatedCategory = await getCategoryById(id, user_id);
+    const updatedCategory = await getCategoryById(id);
     if (parseFloat(updatedCategory.total_expenses) !== newAmount) {
       console.log(`Failed. Try again.`);
       return null;
@@ -147,11 +147,11 @@ const updateCategoryTotalExpenses = async (id, user_id, amount) => {
   }
 };
 
-const deleteCategory = async (id, user_id) => {
+const deleteCategory = async (id) => {
   try {
     await connectionPool.query(
-      `DELETE FROM categories WHERE id = ? AND user_id = ?`,
-      [id, user_id]
+      `DELETE FROM categories WHERE id = ?`,
+      [id]
     );
     console.log("Category deleted successfully!");
   } catch (err) {

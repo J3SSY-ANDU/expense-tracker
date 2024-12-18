@@ -1,11 +1,12 @@
 import "./App.css";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
 import BasicTable from "./components/Table";
 import { Box, Typography } from "@mui/material";
 import { Category, Expense, User } from "./types";
 import { useNavigate } from "react-router-dom";
 import { fetchCategoriesData, fetchExpensesData, fetchUserData } from "./api";
+import Categories from "./components/Categories";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -38,14 +39,27 @@ export default function App() {
   }
 
   return (
-    <Box className="App" sx={{ margin: "2rem 0" }}>
-      <Typography fontSize={20} fontWeight={"light"} marginBottom={"1rem"}>
+    <Box
+      className="App"
+      sx={{
+        padding: "2rem 10rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "2rem",
+      }}
+    >
+      {/* <Typography fontSize={20} fontWeight={"light"} marginBottom={"1rem"}>
         Hi {user?.firstname}!
-      </Typography>
-      <Typography fontSize={32} fontWeight={"bold"} marginBottom={"2rem"}>
+      </Typography> */}
+      <Typography fontSize={32} fontWeight={"bold"}>
         Expense Tracker
       </Typography>
-      <BasicTable expenses={expenses} categories={categories} />
+      <Categories categories={categories} />
+      <BasicTable
+        expenses={expenses}
+        categories={categories}
+        title={"Monthly Expenses"}
+      />
     </Box>
   );
 }
