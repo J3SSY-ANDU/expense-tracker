@@ -3,8 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
+import { Signup, Login } from "./components";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

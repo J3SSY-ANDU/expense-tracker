@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { Category, Expense } from "../types";
 
-export default function BasicTable({
+export function ExpensesTable({
   expenses,
   categories,
   title,

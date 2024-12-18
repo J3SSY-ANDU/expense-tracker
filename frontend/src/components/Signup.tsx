@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import "../styles/signup.css";
 
-export default function Signup() {
+export function Signup() {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");

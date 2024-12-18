@@ -1,12 +1,12 @@
 import "./App.css";
 import { useState } from "react";
 import { useEffect } from "react";
-import BasicTable from "./components/Table";
 import { Box, Typography } from "@mui/material";
 import { Category, Expense, User } from "./types";
 import { useNavigate } from "react-router-dom";
 import { fetchCategoriesData, fetchExpensesData, fetchUserData } from "./api";
-import Categories from "./components/Categories";
+import { Categories, ExpensesTable } from "./components";
+import expense_tracker from "./expense-tracker.svg";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -45,17 +45,41 @@ export default function App() {
         padding: "2rem 10rem",
         display: "flex",
         flexDirection: "column",
-        gap: "2rem",
+        gap: "3rem",
       }}
     >
-      {/* <Typography fontSize={20} fontWeight={"light"} marginBottom={"1rem"}>
-        Hi {user?.firstname}!
-      </Typography> */}
-      <Typography fontSize={32} fontWeight={"bold"}>
-        Expense Tracker
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+          alignItems: "center",
+        }}
+      >
+        <Typography fontSize={24}>Hi {user?.firstname},</Typography>
+        <Typography fontSize={24}>
+          Welcome to my Expense Tracker Project!
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
+        <img
+          src={expense_tracker}
+          alt="Expense tracker icon"
+          width={43}
+          height={31}
+        />
+        <Typography fontSize={32} fontWeight={"bold"}>
+          Expense Tracker
+        </Typography>
+      </Box>
       <Categories categories={categories} />
-      <BasicTable
+      <ExpensesTable
         expenses={expenses}
         categories={categories}
         title={"Monthly Expenses"}

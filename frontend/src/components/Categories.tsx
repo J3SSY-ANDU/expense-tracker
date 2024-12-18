@@ -1,18 +1,7 @@
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid2,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Card, CardContent, Grid2 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Category } from "../types";
-export default function Categories({
-  categories,
-}: {
-  categories: Category[] | null;
-}) {
+export function Categories({ categories }: { categories: Category[] | null }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   useEffect(() => {
     if (categories) {
@@ -32,7 +21,7 @@ export default function Categories({
           {categories?.map((category) => {
             return (
               <Grid2 key={category.id} size={3}>
-                <Card>
+                <Card sx={{ background: "#f5f5f5" }}>
                   <CardContent>
                     <Typography
                       fontSize={16}
@@ -49,20 +38,6 @@ export default function Categories({
               </Grid2>
             );
           })}
-          <Grid2 size={3}>
-            <Button
-              variant="outlined"
-              sx={{
-                padding: "0.5rem",
-                border: "1px solid #d3d3d3",
-                borderRadius: "10px",
-                color: "#d5d5d5",
-                width: "100%",
-              }}
-            >
-              New Category
-            </Button>
-          </Grid2>
         </Grid2>
       </Box>
     </Box>

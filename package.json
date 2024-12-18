@@ -1,8 +1,8 @@
 {
-  "name": "budget-app",
+  "name": "expense-tracker",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "https://github.com/J3SSY-ANDU/budget-app.git",
+  "repository": "https://github.com/J3SSY-ANDU/expense-tracker.git",
   "author": "J3SSY-ANDU <jessy.andujar@upr.edu>",
   "license": "MIT",
   "scripts": {
