@@ -1,10 +1,15 @@
 import "./App.css";
 import { useState } from "react";
 import { useEffect } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { Category, Expense, User } from "./types";
 import { useNavigate } from "react-router-dom";
-import { fetchCategoriesData, fetchExpensesData, fetchUserData } from "./api";
+import {
+  FetchCategoriesData,
+  FetchExpensesData,
+  FetchUserData,
+  Logout,
+} from "./api";
 import { Categories, ExpensesTable } from "./components";
 import expense_tracker from "./expense-tracker.svg";
 
@@ -17,7 +22,7 @@ export default function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await fetchUserData();
+      const userData = await FetchUserData();
       if (!userData) {
         navigate("/login");
         return;
@@ -25,10 +30,10 @@ export default function App() {
       setUser(userData);
       setLoading(false);
 
-      const categoriesData = await fetchCategoriesData();
+      const categoriesData = await FetchCategoriesData();
       setCategories(categoriesData);
 
-      const expensesData = await fetchExpensesData();
+      const expensesData = await FetchExpensesData();
       setExpenses(expensesData);
     };
     fetchData();
@@ -48,6 +53,14 @@ export default function App() {
         gap: "3rem",
       }}
     >
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={Logout}
+        sx={{ alignSelf: "flex-end" }}
+      >
+        Logout
+      </Button>
       <Box
         sx={{
           display: "flex",

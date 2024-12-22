@@ -1,5 +1,5 @@
 import { Category } from "../types";
-export async function fetchCategoriesData(): Promise<Category[] | null> {
+export async function FetchCategoriesData(): Promise<Category[] | null> {
     try {
       const res = await fetch("/all-categories", {
         method: "GET",

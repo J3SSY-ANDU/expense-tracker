@@ -1,6 +1,6 @@
 import { Expense } from "../types/Expense";
 
-export async function fetchExpensesData(): Promise<Expense[] | null> {
+export async function FetchExpensesData(): Promise<Expense[] | null> {
     try {
       const res = await fetch("/all-expenses", {
         method: "GET",

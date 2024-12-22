@@ -1,6 +1,6 @@
 import { User } from "../types";
 
-export async function fetchUserData(): Promise<User | null> {
+export async function FetchUserData(): Promise<User | null> {
   try {
     const res = await fetch("/user-data", {
       method: "GET",

@@ -13,8 +13,9 @@ import {
   Paper,
 } from "@mui/material";
 import "../styles/signup.css";
+import { Signup } from "../api";
 
-export function Signup() {
+export function SignupForm() {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
@@ -79,7 +80,7 @@ export function Signup() {
     return isValid;
   };
 
-  const handleCallApi = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     function emptyFields() {
       setFirstname("");
       setLastname("");
@@ -96,20 +97,13 @@ export function Signup() {
         return;
       }
 
-      const res = await fetch("/process-signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ firstname, lastname, email, password }),
-      });
-      if (res.status === 200) {
-        console.log("Signup successful!");
+      const signup = await Signup(firstname, lastname, email, password);
+
+      if (signup) {
         setLoading(false);
         emptyFields();
-        navigate("/");
+        navigate("/verify-email");
       } else {
-        console.error("Signup failed!");
         setLoading(false);
         emptyFields();
       }
@@ -139,7 +133,7 @@ export function Signup() {
       </Typography>
       <Paper
         component="form"
-        onSubmit={handleCallApi}
+        onSubmit={handleSignup}
         sx={{
           display: "flex",
           flexDirection: "column",

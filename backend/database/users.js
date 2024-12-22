@@ -11,7 +11,8 @@ const { v4: uuidv4 } = require("uuid");
             lastname VARCHAR(25) NOT NULL,
             fullname VARCHAR(50) NOT NULL,
             email VARCHAR(50) NOT NULL UNIQUE,
-            password VARCHAR(255) NOT NULL    
+            password VARCHAR(255) NOT NULL,
+            is_verified INT NOT NULL DEFAULT 0
         );
     `);
   console.log("Table created successfully!");
@@ -79,7 +80,6 @@ const authenticateUser = async (email, password) => {
     }
     const match = await bcrypt.compare(password, user.password);
     if (match) {
-      console.log("Authentication successful!");
       return user;
     } else {
       console.log("Invalid credentials.");
@@ -109,7 +109,7 @@ const updateUser = async (id, columnName, value) => {
     await connectionPool.query(
       `UPDATE users SET ${columnName} = ? WHERE id = ?`,
       [value, id]
-    );
+    );  
     if (columnName === "firstname" || columnName === "lastname") {
       const user = await getUserById(id);
       const fullname = `${user[0].firstname} ${user[0].lastname}`;
@@ -124,11 +124,41 @@ const updateUser = async (id, columnName, value) => {
   }
 };
 
+const userIsVerified = async (id) => {
+  try {
+    const [user] = await connectionPool.query(`
+      SELECT is_verified FROM users WHERE id = ?`, 
+      [id]
+    )
+    if (!user[0].is_verified) {
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(`Error checking if user is verified: ${err}`);
+    return false;
+  }
+}
+
+const verifyUser = async (id) => {
+  try {
+    await connectionPool.query(`
+      UPDATE users SET is_verified = 1 WHERE id = ?`,
+       [id]
+      )
+    console.log(`User verified successfully!`);
+  } catch (err) {
+    console.error(`Error verifying user: ${err}`);
+  }
+}
+
 module.exports = {
   createUser,
   getUserById,
   getUserByEmail,
   authenticateUser,
+  verifyUser,
+  userIsVerified,
   deleteUser,
   updateUser,
 };

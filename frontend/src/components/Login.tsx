@@ -203,7 +203,7 @@ export function Login() {
           </Alert>
         )}
         <Link
-          to={"/signup"}
+          to={"/forgot-password"}
           className={"login__link login__link--forgot-password"}
         >
           Forgot password?
