@@ -13,4 +13,13 @@ const connectionPool = mysql.createPool({
 
 console.log("Connection pool created!");
 
-module.exports = connectionPool;
+const closeConnection = async () => {
+  try {
+    await connectionPool.end();
+    console.log("Connection closed.");
+  } catch (err) {
+    console.error(`Error closing connection: ${err}`);
+  }
+};
+
+module.exports = { connectionPool, closeConnection };

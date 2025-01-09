@@ -12,9 +12,9 @@ import {
   Button,
   Paper,
 } from "@mui/material";
-import "./login.css";
+import "../styles/login.css";
 
-export default function Login() {
+export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState({
@@ -203,7 +203,7 @@ export default function Login() {
           </Alert>
         )}
         <Link
-          to={"/signup"}
+          to={"/forgot-password"}
           className={"login__link login__link--forgot-password"}
         >
           Forgot password?

@@ -1,102 +1,42 @@
 import "./App.css";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useEffect } from "react";
+import { Box, Typography, Button } from "@mui/material";
+import { Category, Expense, User } from "./types";
 import { useNavigate } from "react-router-dom";
-import BasicTable from "./Table";
-import { Button, Box, Typography, TextField } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-
-interface Category {
-  id: string;
-  user_id: string;
-  name: string;
-  total_expenses: number;
-  description: string;
-}
-
-interface Expense {
-  id: string;
-  name: string;
-  amount: number;
-  category_id: string;
-  date: Date;
-  notes: string;
-}
+import {
+  FetchCategoriesData,
+  FetchExpensesData,
+  FetchUserData,
+  Logout,
+} from "./api";
+import { Categories, ExpensesTable, Account } from "./components";
+import expense_tracker from "./expense-tracker.svg";
 
 export default function App() {
+  const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const logout = async (): Promise<void> => {
-    try {
-      const res: Response = await fetch("/logout", {
-        method: "GET",
-      });
-      if (res.status === 200) {
-        console.log("Logged out successfully!");
-        navigate("/login");
-      }
-    } catch (err) {
-      console.error(`Error fetching the API: ${err}`);
-    }
-  };
-
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/session-id-exists", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (!res.ok) {
-          navigate("/login");
-        } else {
-          fetchCategoriesData();
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error(`Error fetching the API: ${err}`);
+    const fetchData = async () => {
+      const userData = await FetchUserData();
+      if (!userData) {
+        navigate("/login");
+        return;
       }
-    })();
+      setUser(userData);
+      setLoading(false);
 
-    async function fetchCategoriesData() {
-      try {
-        const res = await fetch("/all-categories", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (res.status === 200) {
-          const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
-          setCategories(categoriesData);
-          fetchExpensesData();
-        }
-      } catch (err) {
-        console.error(`Error fetching categories data ${err}`);
-      }
-    }
+      const categoriesData = await FetchCategoriesData();
+      setCategories(categoriesData);
 
-    async function fetchExpensesData() {
-      try {
-        const res = await fetch("/all-expenses", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (res.status === 200) {
-          const expensesData: Expense[] = await res.json(); // Make sure that the response is of type Expense[]
-          setExpenses(expensesData);
-        }
-      } catch (err) {
-        console.error(`Error fetching expenses data ${err}`);
-      }
-    }
+      const expensesData = await FetchExpensesData();
+      setExpenses(expensesData);
+    };
+    fetchData();
   }, [navigate]);
 
   if (loading) {
@@ -104,19 +44,61 @@ export default function App() {
   }
 
   return (
-    <Box className="App" sx={{ margin: "2rem 0" }}>
-      <Typography fontSize={32} fontWeight={"bold"} marginBottom={"2rem"}>
-        Welcome to my Data File Generator!
-      </Typography>
-      {/* <TextField label={"Search"} variant="filled" /> */}
-      {/* <Button
-        sx={{ marginBottom: "2rem" }}
-        variant="contained"
-        onClick={logout}
+    <Box
+      className="App"
+      sx={{
+        padding: "2rem 10rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "3rem",
+      }}
+    >
+      <Account user={user} setUser={setUser} />
+      {/* <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
+          alignItems: "center",
+        }}
       >
-        Logout
-      </Button> */}
-      <BasicTable expenses={expenses} categories={categories} />
+        <Typography fontSize={24}>Hi {user?.firstname},</Typography>
+        <Typography fontSize={24}>
+          Welcome to my Expense Tracker Project!
+        </Typography>
+      </Box> */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
+        <img
+          src={expense_tracker}
+          alt="Expense tracker icon"
+          width={43}
+          height={31}
+        />
+        <Typography fontSize={32} fontWeight={"bold"}>
+          Expense Tracker
+        </Typography>
+      </Box>
+      <Categories
+        user={user}
+        categories={categories}
+        setCategories={setCategories}
+        expenses={expenses}
+        setExpenses={setExpenses}
+      />
+      <ExpensesTable
+        user={user}
+        expenses={expenses}
+        setExpenses={setExpenses}
+        categories={categories}
+        setCategories={setCategories}
+        title={"Monthly Expenses"}
+      />
     </Box>
   );
 }
