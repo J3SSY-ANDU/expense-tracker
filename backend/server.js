@@ -333,15 +333,18 @@ app.post("/change-password", async (req, res) => {
   const id = req.session.userId;
   const user = await getUserById(id);
   if (!user) {
+    console.log("User not found!");
     return res.status(401).send("User not found!");
   }
   const match = await bcrypt.compare(oldPassword, user.password);
   if (!match) {
+    console.log("Invalid credentials!");
     return res.status(401).send("Invalid credentials!");
   }
   const new_password_hash = await bcrypt.hash(newPassword, 10);
   const updated = await updatePassword(id, new_password_hash);
   if (!updated) {
+    console.log("Password change failed!");
     return res.status(401).send("Password change failed!");
   }
   res.status(200).send("Password changed successfully!");

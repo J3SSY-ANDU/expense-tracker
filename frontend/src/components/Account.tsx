@@ -37,14 +37,23 @@ export function Account({
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
       alert("Passwords do not match");
+      setNewPassword("");
+      setOldPassword("");
+      setConfirmPassword("");
       return;
     }
     const success = await ChangePassword(oldPassword, newPassword);
     if (success) {
       alert("Password changed successfully");
       setEditPassword(false);
+      setNewPassword("");
+      setOldPassword("");
+      setConfirmPassword("");
     } else {
       alert("Error changing password");
+      setNewPassword("");
+      setOldPassword("");
+      setConfirmPassword("");
     }
   };
 
