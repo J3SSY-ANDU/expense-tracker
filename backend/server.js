@@ -13,16 +13,27 @@ const {
   getUserById,
   verifyUser,
   userIsVerified,
-  getUserByEmail
+  getUserByEmail,
+  deleteUser,
+  updateName, 
+  updatePassword
 } = require("./database/users");
 const {
   getExpensesByUser,
   createExpense,
   deleteExpense,
+  updateExpenseName,
+  updateExpenseAmount,
+  updateExpenseCategory,
+  updateExpenseDate,
+  updateExpenseNotes,
 } = require("./database/expenses");
 const {
   createCategory,
   getCategoriesByUser,
+  deleteCategory,
+  updateCategoryDescription,
+  updateCategoryName
 } = require("./database/categories");
 const { categoriesData } = require("./database/categoriesData");
 const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmation } = require("./database/emailConfirmation");
@@ -143,6 +154,12 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/all-categories", async (req, res) => {
+  const user_id = req.session.userId;
+  const categories = await getCategoriesByUser(user_id);
+  res.status(200).send(categories);
+})
+
+app.get("/generate-default-categories", async (req, res) => {
   const id = req.session.userId;
   for (let category of categoriesData) {
     await createCategory(
@@ -152,10 +169,44 @@ app.get("/all-categories", async (req, res) => {
       category.description
     );
   }
-  const categories = await getCategoriesByUser(id);
-  res.status(200).send(categories);
-  res.end();
+  res.status(200).send("Default categories created!");
 });
+
+app.post("/update-category-name", async (req, res) => {
+  const { category_id, name } = req.body;
+  const updatedCategory = await updateCategoryName(category_id, name);
+  if (!updatedCategory) {
+    return res.status(401).send("Category name update failed!");
+  }
+  res.status(200).send(updatedCategory);
+})
+
+app.post("/update-category-description", async (req, res) => {
+  const { category_id, description } = req.body;
+  const updatedCategory = await updateCategoryDescription(category_id, description);
+  if (!updatedCategory) {
+    return res.status(401).send("Category description update failed!");
+  }
+  res.status(200).send(updatedCategory);
+})
+
+app.post("/add-category", async (req, res) => {
+  const { name, user_id, total_expenses, description } = req.body;
+  const category = await createCategory(name, user_id, total_expenses, description);
+  if (!category) {
+    return res.status(401).send("Category creation failed!");
+  }
+  res.status(201).send(category);
+})
+
+app.post("/delete-category", async (req, res) => {
+  const { category_id } = req.body;
+  const deleted = await deleteCategory(category_id);
+  if (!deleted) {
+    return res.status(401).send("Category deletion failed!");
+  }
+  res.status(200).send("Category deleted successfully!");
+})
 
 app.get("/all-expenses", async (req, res) => {
   const id = req.session.userId;
@@ -180,15 +231,128 @@ app.post("/create-expense", async (req, res) => {
   if (!expense) {
     return res.status(401).send("Expense creation failed!");
   }
-  res.status(200).send("Expense created successfully!");
+  res.status(201).send(expense);
+});
+
+app.post("/update-expense-name", async (req, res) => {
+  const { expense_id, name } = req.body;
+  const updatedExpense = await updateExpenseName(
+    expense_id,
+    name
+  );
+  if (!updatedExpense) {
+    return res.status(401).send("Expense update failed!");
+  }
+  res.status(200).send(updatedExpense);
+});
+
+app.post("/update-expense-amount", async (req, res) => {
+  const { expense_id, amount } = req.body;
+  const updatedExpense = await updateExpenseAmount(
+    expense_id,
+    amount
+  );
+  if (!updatedExpense) {
+    return res.status(401).send("Expense update failed!");
+  }
+  res.status(200).send(updatedExpense);
+});
+
+app.post("/update-expense-category", async (req, res) => {
+  const { expense_id, category_id } = req.body;
+  const updatedExpense = await updateExpenseCategory(
+    expense_id,
+    category_id
+  );
+  if (!updatedExpense) {
+    return res.status(401).send("Expense update failed!");
+  }
+  res.status(200).send(updatedExpense);
+});
+
+app.post("/update-expense-date", async (req, res) => {
+  const { expense_id, date } = req.body;
+  const updatedExpense = await updateExpenseDate(
+    expense_id,
+    date
+  );
+  if (!updatedExpense) {
+    return res.status(401).send("Expense update failed!");
+  }
+  res.status(200).send(updatedExpense);
+});
+
+app.post("/update-expense-notes", async (req, res) => {
+  const { expense_id, notes } = req.body;
+  const updatedExpense = await updateExpenseNotes(
+    expense_id,
+    notes
+  );
+  if (!updatedExpense) {
+    return res.status(401).send("Expense update failed!");
+  }
+  res.status(200).send(updatedExpense);
 });
 
 app.post("/delete-expense", async (req, res) => {
   const { expense_id } = req.body;
-  await deleteExpense(expense_id);
+  const deleted = await deleteExpense(expense_id);
+  if (!deleted) {
+    return res.status(401).send("Expense deletion failed!");
+  }
   res.status(200).send("Expense deleted successfully!");
 });
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}...`);
 });
+
+app.post("/delete-user", async (req, res) => {
+  const id = req.session.userId;
+  const expenses = await getExpensesByUser(id);
+  if (expenses) {
+    for (let expense of expenses) {
+      await deleteExpense(expense.id);
+    }
+  }
+  const categories = await getCategoriesByUser(id);
+  if (categories) {
+    for (let category of categories) {
+      await deleteCategory(category.id);
+    }
+  }
+  const deleted = await deleteUser(id);
+  if (!deleted) {
+    return res.status(401).send("Account deletion failed!");
+  }
+  res.status(200).send("Account deleted successfully!");
+})
+
+app.post("/change-password", async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const id = req.session.userId;
+  const user = await getUserById(id);
+  if (!user) {
+    return res.status(401).send("User not found!");
+  }
+  const match = await bcrypt.compare(oldPassword, user.password);
+  if (!match) {
+    return res.status(401).send("Invalid credentials!");
+  }
+  const new_password_hash = await bcrypt.hash(newPassword, 10);
+  const updated = await updatePassword(id, new_password_hash);
+  if (!updated) {
+    return res.status(401).send("Password change failed!");
+  }
+  res.status(200).send("Password changed successfully!");
+})
+
+app.post("/change-name", async (req, res) => {
+  const { new_firstname, new_lastname } = req.body;
+  const id = req.session.userId;
+  const updated = await updateName(id, new_firstname, new_lastname);
+  if (!updated) {
+    return res.status(401).send("Name change failed!");
+  }
+  res.status(200).send("Name changed successfully!");
+})

@@ -8,5 +8,6 @@
   "scripts": {
     "frontend": "cd frontend && yarn start",
     "backend": "cd backend && yarn server"
-  }
+  },
+  "dependencies": {}
 }

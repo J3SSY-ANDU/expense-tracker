@@ -13,7 +13,7 @@ import {
   Paper,
 } from "@mui/material";
 import "../styles/signup.css";
-import { Signup } from "../api";
+import { Signup, GenerateCategoryData } from "../api";
 
 export function SignupForm() {
   const [firstname, setFirstname] = useState("");
@@ -100,6 +100,7 @@ export function SignupForm() {
       const signup = await Signup(firstname, lastname, email, password);
 
       if (signup) {
+        await GenerateCategoryData();
         setLoading(false);
         emptyFields();
         navigate("/verify-email");

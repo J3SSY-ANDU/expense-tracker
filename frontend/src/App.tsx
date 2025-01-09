@@ -10,7 +10,7 @@ import {
   FetchUserData,
   Logout,
 } from "./api";
-import { Categories, ExpensesTable } from "./components";
+import { Categories, ExpensesTable, Account } from "./components";
 import expense_tracker from "./expense-tracker.svg";
 
 export default function App() {
@@ -53,15 +53,8 @@ export default function App() {
         gap: "3rem",
       }}
     >
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={Logout}
-        sx={{ alignSelf: "flex-end" }}
-      >
-        Logout
-      </Button>
-      <Box
+      <Account user={user} setUser={setUser} />
+      {/* <Box
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -73,7 +66,7 @@ export default function App() {
         <Typography fontSize={24}>
           Welcome to my Expense Tracker Project!
         </Typography>
-      </Box>
+      </Box> */}
       <Box
         sx={{
           display: "flex",
@@ -91,10 +84,19 @@ export default function App() {
           Expense Tracker
         </Typography>
       </Box>
-      <Categories categories={categories} />
-      <ExpensesTable
-        expenses={expenses}
+      <Categories
+        user={user}
         categories={categories}
+        setCategories={setCategories}
+        expenses={expenses}
+        setExpenses={setExpenses}
+      />
+      <ExpensesTable
+        user={user}
+        expenses={expenses}
+        setExpenses={setExpenses}
+        categories={categories}
+        setCategories={setCategories}
         title={"Monthly Expenses"}
       />
     </Box>

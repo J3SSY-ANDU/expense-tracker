@@ -154,9 +154,10 @@ const deleteCategory = async (id) => {
       [id]
     );
     console.log("Category deleted successfully!");
+    return true;
   } catch (err) {
     console.error(`Error deleting category: ${err}`);
-    return null;
+    return false;
   }
 };
 

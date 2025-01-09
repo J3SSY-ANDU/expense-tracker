@@ -1,3 +1,3 @@
 export * from "./Category";
-export * from "./Expense";
+export { Expense, NewExpense } from "./Expense";
 export * from "./User";
