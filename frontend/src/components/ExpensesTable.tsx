@@ -131,7 +131,7 @@ export function ExpensesTable({
         return;
       }
       setExpenses((prev) =>
-        prev ? [...prev, createdExpense] : [createdExpense]
+        prev ? [createdExpense, ...prev] : [createdExpense]
       );
       setCategories((prev) => {
         if (!prev) return prev;

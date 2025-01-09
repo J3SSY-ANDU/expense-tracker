@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require("uuid");
             name VARCHAR(50) NOT NULL,
             total_expenses DECIMAL(10,2) NOT NULL,
             description TEXT,
+            \`order\` INT AUTO_INCREMENT UNIQUE NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id),
             UNIQUE (user_id, name)
         );
@@ -54,6 +55,19 @@ const getCategoriesByUser = async (user_id) => {
   }
 };
 
+const getOrderedCategories = async (userId) => {
+  try {
+    const [rows] = await connectionPool.query(
+      `SELECT * FROM categories WHERE user_id = ? ORDER BY \`order\` ASC`,
+      [userId]
+    );
+    return rows;
+  } catch (err) {
+    console.error(`Error fetching ordered categories: ${err}`);
+    return [];
+  }
+};
+
 const getCategoryById = async (id) => {
   try {
     const [category] = await connectionPool.query(
@@ -90,10 +104,10 @@ const getCategoryByName = async (user_id, name) => {
 
 const updateCategoryName = async (id, name) => {
   try {
-    await connectionPool.query(
-      `UPDATE categories SET name = ? WHERE id = ?`,
-      [name, id]
-    );
+    await connectionPool.query(`UPDATE categories SET name = ? WHERE id = ?`, [
+      name,
+      id,
+    ]);
     const updatedCategory = await getCategoryById(id);
     if (updatedCategory.name !== name) {
       console.log(`Failed. Try again.`);
@@ -149,10 +163,7 @@ const updateCategoryTotalExpenses = async (id, amount) => {
 
 const deleteCategory = async (id) => {
   try {
-    await connectionPool.query(
-      `DELETE FROM categories WHERE id = ?`,
-      [id]
-    );
+    await connectionPool.query(`DELETE FROM categories WHERE id = ?`, [id]);
     console.log("Category deleted successfully!");
     return true;
   } catch (err) {
@@ -170,4 +181,5 @@ module.exports = {
   updateCategoryDescription,
   updateCategoryTotalExpenses,
   deleteCategory,
+  getOrderedCategories,
 };

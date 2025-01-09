@@ -14,7 +14,7 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Category, NewCategory, User, Expense } from "../types";
 import {
   AddCategory,
@@ -48,6 +48,33 @@ export function Categories({
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
   const [description, setDescription] = useState<string>(""); // State for category description
 
+  const handleSaveCategory = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+    const newCategoryData: NewCategory = {
+      name: newCategoryName,
+      user_id: user.id,
+      total_expenses: 0,
+      description: "",
+    };
+    if (newCategoryName) {
+      // Save category
+
+      const createdCategory: Category | null = await AddCategory(
+        newCategoryData
+      );
+      if (!createdCategory) {
+        return;
+      }
+      setCategories((prev) => {
+        return prev ? [...prev, createdCategory] : [createdCategory];
+      });
+      setNewCategory(false);
+      setNewCategoryName("");
+    }
+  }, [newCategoryName, user, setCategories]);
+
   useEffect(() => {
     if (categories) {
       setLoading(false);
@@ -78,34 +105,7 @@ export function Categories({
       document.removeEventListener("mousedown", handleOutsideClick);
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [categories, newCategory]);
-
-  const handleSaveCategory = async () => {
-    if (!user) {
-      return;
-    }
-    const newCategoryData: NewCategory = {
-      name: newCategoryName,
-      user_id: user.id,
-      total_expenses: 0,
-      description: "",
-    };
-    if (newCategoryName) {
-      // Save category
-
-      const createdCategory: Category | null = await AddCategory(
-        newCategoryData
-      );
-      if (!createdCategory) {
-        return;
-      }
-      setCategories((prev) => {
-        return prev ? [...prev, createdCategory] : [createdCategory];
-      });
-      setNewCategory(false);
-      setNewCategoryName("");
-    }
-  };
+  }, [categories, newCategory, handleSaveCategory]);
 
   const handleChangeName = async () => {
     if (!selectedCategory) return;
@@ -275,11 +275,6 @@ export function Categories({
                     type="text"
                     placeholder="Enter category name"
                     onChange={(e) => setNewCategoryName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSaveCategory();
-                      }
-                    }}
                     autoFocus
                     style={{
                       background: "transparent",

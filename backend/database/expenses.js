@@ -13,6 +13,7 @@ const { get } = require("http");
             name VARCHAR(50) NOT NULL,
             amount DECIMAL(10,2) NOT NULL,
             category_id VARCHAR(100) NOT NULL,
+            created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             date DATE NOT NULL,
             notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id),
@@ -63,6 +64,24 @@ const getExpensesByUser = async (user_id) => {
   }
 };
 
+const getOrganizedExpenses = async (user_id) => {
+  try {
+    const [rows] = await connectionPool.query(
+      `
+      SELECT * 
+      FROM expenses
+      WHERE user_id = ?
+      ORDER BY created_date DESC;
+    `,
+      [user_id]
+    );
+    return rows;
+  } catch (err) {
+    console.error(`Error fetching organized expenses: ${err}`);
+    return [];
+  }
+};
+
 const getExpensesByCategory = async (user_id, category_id) => {
   try {
     const [expenses] = await connectionPool.query(
@@ -108,10 +127,10 @@ const getExpenseById = async (id) => {
 
 const updateExpenseName = async (id, name) => {
   try {
-    await connectionPool.query(
-      `UPDATE expenses SET name = ? WHERE id = ?`,
-      [name, id]
-    );
+    await connectionPool.query(`UPDATE expenses SET name = ? WHERE id = ?`, [
+      name,
+      id,
+    ]);
     const expense = await getExpenseById(id);
     if (expense.name !== name) {
       console.log(`Failed. Try again.`);
@@ -123,14 +142,14 @@ const updateExpenseName = async (id, name) => {
     console.error(`Error updating expense name: ${err}`);
     return null;
   }
-}
+};
 
 const updateExpenseAmount = async (id, amount) => {
   try {
-    await connectionPool.query(
-      `UPDATE expenses SET amount = ? WHERE id = ?`,
-      [amount, id]
-    );
+    await connectionPool.query(`UPDATE expenses SET amount = ? WHERE id = ?`, [
+      amount,
+      id,
+    ]);
     const expense = await getExpenseById(id);
     console.log("Expense amount updated successfully!");
     return expense;
@@ -138,15 +157,12 @@ const updateExpenseAmount = async (id, amount) => {
     console.error(`Error updating expense amount: ${err}`);
     return null;
   }
-}
+};
 
 const updateExpenseCategory = async (id, category_id) => {
   try {
     const expense = await getExpenseById(id);
-    await updateCategoryTotalExpenses(
-      expense.category_id,
-      -expense.amount
-    );
+    await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
     await connectionPool.query(
       `UPDATE expenses SET category_id = ? WHERE id = ?`,
       [category_id, id]
@@ -163,14 +179,14 @@ const updateExpenseCategory = async (id, category_id) => {
     console.error(`Error updating expense category: ${err}`);
     return null;
   }
-}
+};
 
 const updateExpenseDate = async (id, date) => {
   try {
-    await connectionPool.query(
-      `UPDATE expenses SET date = ? WHERE id = ?`,
-      [date, id]
-    );
+    await connectionPool.query(`UPDATE expenses SET date = ? WHERE id = ?`, [
+      date,
+      id,
+    ]);
     const expense = await getExpenseById(id);
     console.log("Expense date updated successfully!");
     return expense;
@@ -178,14 +194,14 @@ const updateExpenseDate = async (id, date) => {
     console.error(`Error updating expense date: ${err}`);
     return null;
   }
-}
+};
 
 const updateExpenseNotes = async (id, notes) => {
   try {
-    await connectionPool.query(
-      `UPDATE expenses SET notes = ? WHERE id = ?`,
-      [notes, id]
-    );
+    await connectionPool.query(`UPDATE expenses SET notes = ? WHERE id = ?`, [
+      notes,
+      id,
+    ]);
     const expense = await getExpenseById(id);
     if (expense.notes !== notes) {
       console.log(`Failed. Try again.`);
@@ -197,7 +213,7 @@ const updateExpenseNotes = async (id, notes) => {
     console.error(`Error updating expense notes: ${err}`);
     return null;
   }
-}
+};
 
 const deleteExpense = async (id) => {
   try {
@@ -206,14 +222,8 @@ const deleteExpense = async (id) => {
       console.log(`Expense not found.`);
       return;
     }
-    await connectionPool.query(
-      `DELETE FROM expenses WHERE id = ?`,
-      [id]
-    );
-    await updateCategoryTotalExpenses(
-      expense.category_id,
-      -expense.amount
-    );
+    await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
+    await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
     console.log("Expense deleted successfully!");
     return true;
   } catch (err) {
@@ -246,4 +256,5 @@ module.exports = {
   updateExpenseNotes,
   deleteExpense,
   deleteAllExpenses,
+  getOrganizedExpenses,
 };

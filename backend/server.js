@@ -27,13 +27,15 @@ const {
   updateExpenseCategory,
   updateExpenseDate,
   updateExpenseNotes,
+  getOrganizedExpenses,
 } = require("./database/expenses");
 const {
   createCategory,
   getCategoriesByUser,
   deleteCategory,
   updateCategoryDescription,
-  updateCategoryName
+  updateCategoryName,
+  getOrderedCategories,
 } = require("./database/categories");
 const { categoriesData } = require("./database/categoriesData");
 const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmation } = require("./database/emailConfirmation");
@@ -155,7 +157,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/all-categories", async (req, res) => {
   const user_id = req.session.userId;
-  const categories = await getCategoriesByUser(user_id);
+  const categories = await getOrderedCategories(user_id);
   res.status(200).send(categories);
 })
 
@@ -210,7 +212,7 @@ app.post("/delete-category", async (req, res) => {
 
 app.get("/all-expenses", async (req, res) => {
   const id = req.session.userId;
-  const expenses = await getExpensesByUser(id);
+  const expenses = await getOrganizedExpenses(id);
   if (!expenses) {
     return res.status(401).send("Data fetch failed!");
   }
