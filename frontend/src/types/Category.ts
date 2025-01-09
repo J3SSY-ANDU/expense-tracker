@@ -4,6 +4,7 @@ export interface Category {
     name: string;
     total_expenses: number | string;
     description: string;
+    order: number;
   }
 
 export interface NewCategory {

@@ -33,7 +33,8 @@ const {
   getCategoriesByUser,
   deleteCategory,
   updateCategoryDescription,
-  updateCategoryName
+  updateCategoryName,
+  getOrderedCategories,
 } = require("./database/categories");
 const { categoriesData } = require("./database/categoriesData");
 const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmation } = require("./database/emailConfirmation");
@@ -155,7 +156,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/all-categories", async (req, res) => {
   const user_id = req.session.userId;
-  const categories = await getCategoriesByUser(user_id);
+  const categories = await getOrderedCategories(user_id);
   res.status(200).send(categories);
 })
 
