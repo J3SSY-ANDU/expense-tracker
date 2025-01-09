@@ -27,6 +27,7 @@ const {
   updateExpenseCategory,
   updateExpenseDate,
   updateExpenseNotes,
+  getOrganizedExpenses,
 } = require("./database/expenses");
 const {
   createCategory,
@@ -211,7 +212,7 @@ app.post("/delete-category", async (req, res) => {
 
 app.get("/all-expenses", async (req, res) => {
   const id = req.session.userId;
-  const expenses = await getExpensesByUser(id);
+  const expenses = await getOrganizedExpenses(id);
   if (!expenses) {
     return res.status(401).send("Data fetch failed!");
   }
