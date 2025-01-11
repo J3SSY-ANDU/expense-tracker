@@ -2,7 +2,7 @@ import "./App.css";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
-import { Category, Expense, User } from "./types";
+import { Category, Expense, User, History as MonthlyHistory } from "./types";
 import { useNavigate } from "react-router-dom";
 import {
   FetchCategoriesData,
@@ -10,13 +10,14 @@ import {
   FetchUserData,
   Logout,
 } from "./api";
-import { Categories, ExpensesTable, Account } from "./components";
+import { Categories, ExpensesTable, Account, History } from "./components";
 import expense_tracker from "./expense-tracker.svg";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
+  const [history, setHistory] = useState<MonthlyHistory[] | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -99,6 +100,7 @@ export default function App() {
         setCategories={setCategories}
         title={"Monthly Expenses"}
       />
+      <History history={history} setHistory={setHistory} />
     </Box>
   );
 }

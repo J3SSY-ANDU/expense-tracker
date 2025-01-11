@@ -6,5 +6,6 @@ import { VerifyEmail } from "./VerifyEmail";
 import { ForgotPasswordForm } from "./ForgotPassword";
 import { ResetForgotPasswordForm } from "./ResetForgotPassword";
 import { Account } from "./Account";
+import { History } from "./History";
 
-export { Categories, ExpensesTable, Login, SignupForm, VerifyEmail, ForgotPasswordForm, ResetForgotPasswordForm, Account };
+export { Categories, ExpensesTable, Login, SignupForm, VerifyEmail, ForgotPasswordForm, ResetForgotPasswordForm, Account, History };
