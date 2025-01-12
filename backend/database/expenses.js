@@ -1,9 +1,12 @@
 const { connectionPool } = require("./db");
 const dotenv = require("dotenv").config();
 const { v4: uuidv4 } = require("uuid");
-const { expensesData } = require("./expensesData");
 const { updateCategoryTotalExpenses } = require("./categories");
-const { get } = require("http");
+const {
+  createMonth,
+  updateMonth,
+  getHistoryByMonthYear,
+} = require("./history");
 
 (async () => {
   await connectionPool.query(`
@@ -15,9 +18,11 @@ const { get } = require("http");
             category_id VARCHAR(100) NOT NULL,
             created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             date DATE NOT NULL,
+            history_id VARCHAR(100) NOT NULL,
             notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id),
-            FOREIGN KEY (category_id) REFERENCES categories(id)
+            FOREIGN KEY (category_id) REFERENCES categories(id),
+            FOREIGN KEY (history_id) REFERENCES history(id)
         );
     `);
   console.log("Table created successfully!");
@@ -33,9 +38,29 @@ const createExpense = async (
 ) => {
   try {
     const id = uuidv4();
+    let historyMonth = await getHistoryByMonthYear(
+      user_id,
+      new Date(date).getMonth() + 1,
+      new Date(date).getFullYear()
+    );
+    if (!historyMonth) {
+      historyMonth = await createMonth(
+        user_id,
+        new Date(date).getMonth() + 1,
+        new Date(date).getFullYear(),
+        amount
+      );
+    } else {
+      await updateMonth(
+        user_id,
+        new Date(date).getMonth() + 1,
+        new Date(date).getFullYear(),
+        amount
+      );
+    }
     await connectionPool.query(
-      `INSERT INTO expenses (id, user_id, name, amount, category_id, date, notes) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, user_id, name, amount, category_id, date, notes]
+      `INSERT INTO expenses (id, user_id, name, amount, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, user_id, name, amount, category_id, date, historyMonth.id, notes]
     );
     const expense = await getExpenseById(id);
     if (!expense) {
@@ -146,11 +171,19 @@ const updateExpenseName = async (id, name) => {
 
 const updateExpenseAmount = async (id, amount) => {
   try {
+    const expense = await getExpenseById(id);
+    const amountDiff = parseFloat(amount) - parseFloat(expense.amount);
     await connectionPool.query(`UPDATE expenses SET amount = ? WHERE id = ?`, [
       amount,
       id,
     ]);
-    const expense = await getExpenseById(id);
+    await updateCategoryTotalExpenses(expense.category_id, amountDiff);
+    await updateMonth(
+      expense.user_id,
+      new Date(expense.date).getMonth() + 1,
+      new Date(expense.date).getFullYear(),
+      amountDiff
+    );
     console.log("Expense amount updated successfully!");
     return expense;
   } catch (err) {
@@ -183,11 +216,47 @@ const updateExpenseCategory = async (id, category_id) => {
 
 const updateExpenseDate = async (id, date) => {
   try {
-    await connectionPool.query(`UPDATE expenses SET date = ? WHERE id = ?`, [
-      date,
-      id,
-    ]);
     const expense = await getExpenseById(id);
+    let historyMonthExists = true;
+    let historyMonth = await getHistoryByMonthYear(
+      expense.user_id,
+      new Date(date).getMonth() + 1,
+      new Date(date).getFullYear()
+    );
+    if (!historyMonth) {
+      historyMonth = await createMonth(
+        expense.user_id,
+        new Date(date).getMonth() + 1,
+        new Date(date).getFullYear(),
+        expense.amount
+      );
+      historyMonthExists = false;
+    }
+    await connectionPool.query(
+      `UPDATE expenses SET date = ?, history_id = ? WHERE id = ?`,
+      [date, historyMonth.id, id]
+    );
+    if (!historyMonthExists) {
+      await updateMonth(
+        expense.user_id,
+        new Date(expense.date).getMonth() + 1,
+        new Date(expense.date).getFullYear(),
+        -expense.amount
+      );
+    } else {
+      await updateMonth(
+        expense.user_id,
+        new Date(date).getMonth() + 1,
+        new Date(date).getFullYear(),
+        expense.amount
+      );
+      await updateMonth(
+        expense.user_id,
+        new Date(expense.date).getMonth() + 1,
+        new Date(expense.date).getFullYear(),
+        -expense.amount
+      );
+    }
     console.log("Expense date updated successfully!");
     return expense;
   } catch (err) {
@@ -224,6 +293,12 @@ const deleteExpense = async (id) => {
     }
     await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
     await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
+    await updateMonth(
+      expense.user_id,
+      new Date(expense.date).getMonth() + 1,
+      new Date(expense.date).getFullYear(),
+      -expense.amount
+    );
     console.log("Expense deleted successfully!");
     return true;
   } catch (err) {

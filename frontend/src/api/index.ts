@@ -23,6 +23,7 @@ import { VerifyEmail } from "./verifyEmailApi";
 import { ResendVerificationEmail } from "./resendVerificationEmailApi";
 import { ForgotPassword } from "./forgotPasswordApi";
 import { ResetForgotPassword } from "./resetForgotPassword";
+import { FetchHistoryData } from "./historyApi";
 
 export {
   FetchCategoriesData,
@@ -48,5 +49,6 @@ export {
   UpdateExpenseNotes,
   DeleteUser, 
   ChangePassword,
-  ChangeName
+  ChangeName,
+  FetchHistoryData,
 };

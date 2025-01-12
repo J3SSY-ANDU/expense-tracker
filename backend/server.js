@@ -41,7 +41,7 @@ const { categoriesData } = require("./database/categoriesData");
 const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmation } = require("./database/emailConfirmation");
 const { sendEmail, forgotPasswordEmail } = require("./emails");
 const { createForgotPassword, changeForgotPassword } = require("./database/forgotPassword");
-const { createMonth, getHistoryByUser } = require("./database/history");
+const { getHistoryByUser } = require("./database/history");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -363,12 +363,12 @@ app.post("/change-name", async (req, res) => {
   res.status(200).send("Name changed successfully!");
 })
 
-app.get("/all-months", async (req, res) => {
+app.get("/history", async (req, res) => {
   const id = req.session.userId;
-  const months = await getMonthsByUser(id);
-  if (!months) {
+  const history = await getHistoryByUser(id);
+  if (!history) {
     return res.status(401).send("Data fetch failed!");
   }
   console.log("Data fetch successfully!");
-  return res.status(200).send(months);
+  return res.status(200).send(history);
 });

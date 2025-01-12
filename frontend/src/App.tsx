@@ -8,6 +8,7 @@ import {
   FetchCategoriesData,
   FetchExpensesData,
   FetchUserData,
+  FetchHistoryData,
   Logout,
 } from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
@@ -36,6 +37,9 @@ export default function App() {
 
       const expensesData = await FetchExpensesData();
       setExpenses(expensesData);
+
+      const historyData = await FetchHistoryData();
+      setHistory(historyData);
     };
     fetchData();
   }, [navigate]);
