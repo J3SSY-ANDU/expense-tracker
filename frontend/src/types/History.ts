@@ -1,7 +1,7 @@
 export interface History {
-    id: number;
+    id: string;
     user_id: string;
-    month: string;
+    month: number;
     year: number;
     total_expenses: number;
 }

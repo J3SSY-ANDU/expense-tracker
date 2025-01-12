@@ -1,12 +1,14 @@
 const { connectionPool } = require("./db");
 const dotenv = require("dotenv").config();
+const { v4: uuidv4 } = require("uuid");
 
 (async () => {
   await connectionPool.query(`
-            CREATE TABLE IF NOT EXISTS months (
-                id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+            CREATE TABLE IF NOT EXISTS history (
+                id VARCHAR(100) PRIMARY KEY NOT NULL,
+                name VARCHAR(50) NOT NULL,
                 user_id VARCHAR(100) NOT NULL,
-                month VARCHAR(50) NOT NULL,
+                month INT NOT NULL,
                 year INT NOT NULL,
                 total_expenses DECIMAL(10,2) NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id),
@@ -16,53 +18,105 @@ const dotenv = require("dotenv").config();
   console.log("Table created successfully!");
 })();
 
-const createMonth = async (user_id, month, year, total_expenses) => {
+const createMonth = async (user_id, month, year, amount) => {
+  try {
+    const id = uuidv4();
+    await connectionPool.query(
+      `INSERT INTO history (id, user_id, month, year, total_expenses) VALUES (?, ?, ?, ?, ?)`,
+      [id, user_id, month, year, amount]
+    );
+    const newMonth = await getHistoryByMonthYear(user_id, month, year);
+    if (!newMonth) {
+      console.log(`Failed. Try again.`);
+      return null;
+    }
+    console.log("Month created successfully!");
+    return newMonth;
+  } catch (err) {
+    console.error(`Error creating month: ${err}`);
+    return null;
+  }
+};
+
+const getHistoryById = async (id) => {
     try {
-        if (await getHistoryByMonthYear(user_id, month, year)) {
-            console.log(`Month already exists.`);
-            return null;
-        }
-        await connectionPool.query(
-        `INSERT INTO months (user_id, month, year, total_expenses) VALUES (?, ?, ?, ?)`,
-        [user_id, month, year, total_expenses]
+        const [history] = await connectionPool.query(
+        `SELECT * FROM history WHERE id = ?`,
+        [id]
         );
-        const month = await getHistoryByMonthYear(user_id, month, year);
-        if (!month) {
-            console.log(`Failed. Try again.`);
-            return null;
-        }
-        console.log("Month created successfully!");
-        return month;
+        return history[0];
     } catch (err) {
-        console.error(`Error creating month: ${err}`);
+        console.error(`Error getting history: ${err}`);
         return null;
     }
-    }
+}
 
 const getHistoryByUser = async (user_id) => {
-    try {
-        const [months] = await connectionPool.query(
-        `SELECT * FROM months WHERE user_id = ?`,
-        [user_id]
-        );
-        return months;
-    } catch (err) {
-        console.error(`Error getting months: ${err}`);
-        return null;
-    }
-}
+  try {
+    const [history] = await connectionPool.query(
+      `SELECT * FROM history WHERE user_id = ? AND (month <> MONTH(CURDATE()) OR year <> YEAR(CURDATE()))`,
+      [user_id]
+    );
+    return history;
+  } catch (err) {
+    console.error(`Error getting history: ${err}`);
+    return null;
+  }
+};
 
 const getHistoryByMonthYear = async (user_id, month, year) => {
-    try {
-        const [month] = await connectionPool.query(
-        `SELECT * FROM months WHERE user_id = ? AND month = ? AND year = ?`,
-        [user_id, month, year]
-        );
-        return month[0];
-    } catch (err) {
-        console.error(`Error getting month: ${err}`);
+  try {
+    const [history] = await connectionPool.query(
+      `SELECT * FROM history WHERE user_id = ? AND month = ? AND year = ?`,
+      [user_id, month, year]
+    );
+    return history[0];
+  } catch (err) {
+    console.error(`Error getting month: ${err}`);
+    return null;
+  }
+};
+
+const updateMonth = async (user_id, month, year, amount) => {
+  try {
+    const monthlyHistory = await getHistoryByMonthYear(user_id, month, year);
+    const newAmount = parseFloat(amount) + parseFloat(monthlyHistory.total_expenses);
+    if (newAmount <= 0) {
+        await deleteMonth(monthlyHistory.id);
         return null;
+    }
+    await connectionPool.query(
+      `UPDATE history SET total_expenses = ? WHERE user_id = ? AND month = ? AND year = ?`,
+      [newAmount, user_id, month, year]
+    );
+    const updatedMonth = await getHistoryByMonthYear(user_id, month, year);
+    if (
+        parseFloat(updatedMonth.total_expenses) !== parseFloat(newAmount)
+    ) {
+      console.log(`Failed. Try again.`);
+      return null;
+    }
+    console.log("Month updated successfully!");
+    return updatedMonth;
+  } catch (err) {
+    console.error(`Error updating month: ${err}`);
+    return null;
+  }
+};
+
+const deleteMonth = async (id) => {
+    try {
+        await connectionPool.query(`DELETE FROM history WHERE id = ?`, [id]);
+        console.log("Month deleted successfully!");
+    } catch (err) {
+        console.error(`Error deleting month: ${err}`);
     }
 }
 
-module.exports = {getHistoryByMonthYear, getHistoryByUser, createMonth};
+module.exports = {
+  getHistoryByMonthYear,
+  getHistoryByUser,
+  createMonth,
+  updateMonth,
+  getHistoryById,
+};
