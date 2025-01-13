@@ -24,7 +24,13 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useState, useEffect } from "react";
-import { Category, Expense, User, NewExpense } from "../types";
+import {
+  Category,
+  Expense,
+  User,
+  NewExpense,
+  History as MonthlyHistory,
+} from "../types";
 import { Dayjs } from "dayjs";
 import {
   CreateExpense,
@@ -34,6 +40,7 @@ import {
   UpdateExpenseCategory,
   UpdateExpenseDate,
   UpdateExpenseNotes,
+  FetchHistoryData,
 } from "../api";
 
 export function ExpensesTable({
@@ -121,6 +128,7 @@ export function ExpensesTable({
         : formatDateToYYYYMMDD(new Date()),
       notes: newExpenseNotes,
     };
+
     try {
       const createdExpense = await CreateExpense(newExpenseData);
       console.log("Created Expense:", createdExpense);
@@ -128,6 +136,19 @@ export function ExpensesTable({
       if (!createdExpense) {
         console.error("Error creating expense");
         setCreatingExpense(false);
+        return;
+      }
+
+      const month = new Date(createdExpense.date).getMonth() + 1;
+      const year = new Date(createdExpense.date).getFullYear();
+      if (
+        month !== new Date().getMonth() + 1 ||
+        year !== new Date().getFullYear()
+      ) {
+        setExpenses((prev) => (prev ? prev : []));
+        setCategories((prev) => (prev ? prev : []));
+        setCreatingExpense(false);
+        setNewExpense(false);
         return;
       }
       setExpenses((prev) =>
@@ -144,6 +165,7 @@ export function ExpensesTable({
         ).toFixed(2);
         return prev;
       });
+
       setCreatingExpense(false);
       setNewExpense(false);
     } catch (err) {

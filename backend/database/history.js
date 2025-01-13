@@ -18,12 +18,12 @@ const { v4: uuidv4 } = require("uuid");
   console.log("Table created successfully!");
 })();
 
-const createMonth = async (user_id, month, year, amount) => {
+const createMonth = async (name, user_id, month, year, amount) => {
   try {
     const id = uuidv4();
     await connectionPool.query(
-      `INSERT INTO history (id, user_id, month, year, total_expenses) VALUES (?, ?, ?, ?, ?)`,
-      [id, user_id, month, year, amount]
+      `INSERT INTO history (id, name, user_id, month, year, total_expenses) VALUES (?, ?, ?, ?, ?, ?)`,
+      [id, name, user_id, month, year, amount]
     );
     const newMonth = await getHistoryByMonthYear(user_id, month, year);
     if (!newMonth) {
@@ -77,7 +77,7 @@ const getHistoryByMonthYear = async (user_id, month, year) => {
   }
 };
 
-const updateMonth = async (user_id, month, year, amount) => {
+const updateMonth = async ( user_id, month, year, amount) => {
   try {
     const monthlyHistory = await getHistoryByMonthYear(user_id, month, year);
     const newAmount = parseFloat(amount) + parseFloat(monthlyHistory.total_expenses);

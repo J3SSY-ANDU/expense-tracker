@@ -38,23 +38,31 @@ const createExpense = async (
 ) => {
   try {
     const id = uuidv4();
+    const monthDate = new Date(date);
+    const month = new Date(date).getUTCMonth() + 1;
+    const year = new Date(date).getFullYear();
+    if (monthDate.getUTCDate() === 1) {
+      monthDate.setUTCDate(monthDate.getUTCDate() + 1);
+    }
+    const monthName = `${monthDate.toLocaleString("default", { month: "long" })}`;
     let historyMonth = await getHistoryByMonthYear(
       user_id,
-      new Date(date).getMonth() + 1,
-      new Date(date).getFullYear()
+      month,
+      year
     );
     if (!historyMonth) {
       historyMonth = await createMonth(
+        monthName,
         user_id,
-        new Date(date).getMonth() + 1,
-        new Date(date).getFullYear(),
+        month,
+        year,
         amount
       );
     } else {
       await updateMonth(
         user_id,
-        new Date(date).getMonth() + 1,
-        new Date(date).getFullYear(),
+        month,
+        year,
         amount
       );
     }
@@ -67,7 +75,7 @@ const createExpense = async (
       console.log(`Failed. Try again.`);
       return null;
     }
-    await updateCategoryTotalExpenses(category_id, amount);
+    await updateCategoryTotalExpenses(category_id, amount, expense.date);
     console.log("Expense created successfully!");
     return expense;
   } catch (err) {
@@ -133,6 +141,20 @@ const getExpensesByDate = async (user_id, date) => {
   }
 };
 
+const getExpensesByMonth = async (user_id, month, year) => {
+  try {
+    const [expenses] = await connectionPool.query(
+      `SELECT * FROM expenses WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ? ORDER BY created_date DESC;
+`,
+      [user_id, month, year]
+    );
+    return expenses;
+  } catch (err) {
+    console.error(`Error getting expenses by month: ${err}`);
+    return null;
+  }
+}
+
 const getExpenseById = async (id) => {
   try {
     const [expense] = await connectionPool.query(
@@ -177,7 +199,7 @@ const updateExpenseAmount = async (id, amount) => {
       amount,
       id,
     ]);
-    await updateCategoryTotalExpenses(expense.category_id, amountDiff);
+    await updateCategoryTotalExpenses(expense.category_id, amountDiff, expense.date);
     await updateMonth(
       expense.user_id,
       new Date(expense.date).getMonth() + 1,
@@ -195,12 +217,12 @@ const updateExpenseAmount = async (id, amount) => {
 const updateExpenseCategory = async (id, category_id) => {
   try {
     const expense = await getExpenseById(id);
-    await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
+    await updateCategoryTotalExpenses(expense.category_id, -expense.amount, expense.date);
     await connectionPool.query(
       `UPDATE expenses SET category_id = ? WHERE id = ?`,
       [category_id, id]
     );
-    await updateCategoryTotalExpenses(category_id, expense.amount);
+    await updateCategoryTotalExpenses(category_id, expense.amount, expense.date);
     const updatedExpense = await getExpenseById(id);
     if (updatedExpense.category_id !== category_id) {
       console.log(`Failed. Try again.`);
@@ -292,7 +314,7 @@ const deleteExpense = async (id) => {
       return;
     }
     await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
-    await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
+    await updateCategoryTotalExpenses(expense.category_id, -expense.amount, expense.date);
     await updateMonth(
       expense.user_id,
       new Date(expense.date).getMonth() + 1,
@@ -332,4 +354,5 @@ module.exports = {
   deleteExpense,
   deleteAllExpenses,
   getOrganizedExpenses,
+  getExpensesByMonth,
 };

@@ -28,6 +28,7 @@ const {
   updateExpenseDate,
   updateExpenseNotes,
   getOrganizedExpenses,
+  getExpensesByMonth,
 } = require("./database/expenses");
 const {
   createCategory,
@@ -221,6 +222,19 @@ app.get("/all-expenses", async (req, res) => {
   return res.status(200).send(expenses);
 });
 
+app.get("/all-monthly-expenses", async (req, res) => {
+  const id = req.session.userId;
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const expenses = await getExpensesByMonth(id, month, year);
+  if (!expenses) {
+    return res.status(401).send("Data fetch failed!");
+  }
+  console.log("Data fetch successfully!");
+  return res.status(200).send(expenses);
+})
+
 app.post("/create-expense", async (req, res) => {
   const { name, user_id, amount, category_id, date, notes } = req.body;
   const expense = await createExpense(
@@ -372,3 +386,20 @@ app.get("/history", async (req, res) => {
   console.log("Data fetch successfully!");
   return res.status(200).send(history);
 });
+
+app.get("/monthly-history", async (req, res) => {
+  const id = req.session.userId;
+  const month = parseInt(req.query.month);
+  const year = parseInt(req.query.year);
+
+  if (isNaN(month) || isNaN(year)) {
+    return res.status(400).send("Invalid month or year!");
+  }
+  
+  const history = await getExpensesByMonth(id, month, year);
+  if (!history) {
+    return res.status(401).send("Data fetch failed!");
+  }
+  console.log("Data fetch successfully!");
+  return res.status(200).send(history);
+})
