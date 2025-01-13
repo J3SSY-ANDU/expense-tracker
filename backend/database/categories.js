@@ -140,8 +140,14 @@ const updateCategoryDescription = async (id, description) => {
   }
 };
 
-const updateCategoryTotalExpenses = async (id, amount) => {
+const updateCategoryTotalExpenses = async (id, amount, date) => {
   try {
+    const month = new Date(date).getMonth() + 1;
+    const year = new Date(date).getFullYear();
+    if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
+      console.log(`Cannot update category total expenses for past months.`);
+      return null;
+    }
     const category = await getCategoryById(id);
     const newAmount = parseFloat(category.total_expenses) + parseFloat(amount);
     await connectionPool.query(

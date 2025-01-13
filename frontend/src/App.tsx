@@ -104,7 +104,12 @@ export default function App() {
         setCategories={setCategories}
         title={"Monthly Expenses"}
       />
-      <History history={history} setHistory={setHistory} />
+      <History
+        history={history}
+        setHistory={setHistory}
+        categories={categories}
+        setCategories={setCategories}
+      />
     </Box>
   );
 }
