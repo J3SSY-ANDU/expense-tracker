@@ -1,7 +1,12 @@
 const { connectionPool } = require("./db");
 const dotenv = require("dotenv").config();
 const { v4: uuidv4 } = require("uuid");
-const { updateCategoryTotalExpenses } = require("./categories");
+const {
+  updateCategoryTotalExpenses,
+  createCategory,
+  getCategoryById,
+  getCategoryByMonthYear,
+} = require("./categories");
 const {
   createMonth,
   updateMonth,
@@ -44,27 +49,41 @@ const createExpense = async (
     if (monthDate.getUTCDate() === 1) {
       monthDate.setUTCDate(monthDate.getUTCDate() + 1);
     }
-    const monthName = `${monthDate.toLocaleString("default", { month: "long" })}`;
-    let historyMonth = await getHistoryByMonthYear(
-      user_id,
-      month,
-      year
-    );
+    const monthName = `${monthDate.toLocaleString("default", {
+      month: "long",
+    })}`;
+    let historyMonth = await getHistoryByMonthYear(user_id, month, year);
     if (!historyMonth) {
-      historyMonth = await createMonth(
-        monthName,
-        user_id,
-        month,
-        year,
-        amount
-      );
+      historyMonth = await createMonth(monthName, user_id, month, year, amount);
     } else {
-      await updateMonth(
-        user_id,
-        month,
-        year,
-        amount
-      );
+      await updateMonth(user_id, month, year, amount);
+    }
+
+    const thisMonth = new Date().getUTCMonth() + 1;
+    const thisYear = new Date().getFullYear();
+    if (
+      month !== thisMonth ||
+      year !== thisYear
+    ) {
+      const categoryById = await getCategoryById(category_id);
+      const categoryByMonthYear = await getCategoryByMonthYear(categoryById.name, categoryById.user_id, month, year);
+      if (!categoryByMonthYear) {
+        const newCategory = await createCategory(
+          categoryById.name,
+          categoryById.user_id,
+          month,
+          year,
+          amount,
+          categoryById.description
+        );
+        category_id = newCategory.id;
+      } else {
+        await updateCategoryTotalExpenses(
+          categoryByMonthYear.id,
+          amount,
+        );
+        category_id = categoryByMonthYear.id;
+      }
     }
     await connectionPool.query(
       `INSERT INTO expenses (id, user_id, name, amount, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -75,7 +94,9 @@ const createExpense = async (
       console.log(`Failed. Try again.`);
       return null;
     }
-    await updateCategoryTotalExpenses(category_id, amount, expense.date);
+    if (month === thisMonth && year === thisYear) {
+      await updateCategoryTotalExpenses(category_id, amount);
+    }
     console.log("Expense created successfully!");
     return expense;
   } catch (err) {
@@ -153,7 +174,7 @@ const getExpensesByMonth = async (user_id, month, year) => {
     console.error(`Error getting expenses by month: ${err}`);
     return null;
   }
-}
+};
 
 const getExpenseById = async (id) => {
   try {
@@ -199,15 +220,20 @@ const updateExpenseAmount = async (id, amount) => {
       amount,
       id,
     ]);
-    await updateCategoryTotalExpenses(expense.category_id, amountDiff, expense.date);
+    await updateCategoryTotalExpenses(
+      expense.category_id,
+      amountDiff,
+    );
     await updateMonth(
       expense.user_id,
       new Date(expense.date).getMonth() + 1,
       new Date(expense.date).getFullYear(),
       amountDiff
     );
+
+    const updatedExpense = await getExpenseById(id);
     console.log("Expense amount updated successfully!");
-    return expense;
+    return updatedExpense;
   } catch (err) {
     console.error(`Error updating expense amount: ${err}`);
     return null;
@@ -217,12 +243,18 @@ const updateExpenseAmount = async (id, amount) => {
 const updateExpenseCategory = async (id, category_id) => {
   try {
     const expense = await getExpenseById(id);
-    await updateCategoryTotalExpenses(expense.category_id, -expense.amount, expense.date);
+    await updateCategoryTotalExpenses(
+      expense.category_id,
+      -expense.amount,
+    );
     await connectionPool.query(
       `UPDATE expenses SET category_id = ? WHERE id = ?`,
       [category_id, id]
     );
-    await updateCategoryTotalExpenses(category_id, expense.amount, expense.date);
+    await updateCategoryTotalExpenses(
+      category_id,
+      expense.amount,
+    );
     const updatedExpense = await getExpenseById(id);
     if (updatedExpense.category_id !== category_id) {
       console.log(`Failed. Try again.`);
@@ -314,7 +346,10 @@ const deleteExpense = async (id) => {
       return;
     }
     await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
-    await updateCategoryTotalExpenses(expense.category_id, -expense.amount, expense.date);
+    await updateCategoryTotalExpenses(
+      expense.category_id,
+      -expense.amount,
+    );
     await updateMonth(
       expense.user_id,
       new Date(expense.date).getMonth() + 1,

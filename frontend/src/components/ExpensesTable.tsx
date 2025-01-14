@@ -49,6 +49,7 @@ export function ExpensesTable({
   setExpenses,
   categories,
   setCategories,
+  setHistory,
   title,
 }: {
   user: User | null;
@@ -56,6 +57,7 @@ export function ExpensesTable({
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
   categories: Category[] | null;
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
+  setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
   title: string;
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
@@ -141,14 +143,22 @@ export function ExpensesTable({
 
       const month = new Date(createdExpense.date).getMonth() + 1;
       const year = new Date(createdExpense.date).getFullYear();
+
       if (
         month !== new Date().getMonth() + 1 ||
         year !== new Date().getFullYear()
       ) {
-        setExpenses((prev) => (prev ? prev : []));
-        setCategories((prev) => (prev ? prev : []));
-        setCreatingExpense(false);
-        setNewExpense(false);
+        FetchHistoryData()
+          .then((data) => {
+            setHistory(data);
+            setExpenses((prev) => (prev ? prev : []));
+            setCategories((prev) => (prev ? prev : []));
+            setCreatingExpense(false);
+            setNewExpense(false);
+          })
+          .catch(() => {
+            setCreatingExpense(false);
+          });
         return;
       }
       setExpenses((prev) =>
@@ -231,6 +241,20 @@ export function ExpensesTable({
               expense.id === selectedExpense.id ? updatedExpense : expense
             )
           : null;
+      });
+
+      setCategories((prev) => {
+        if (!prev) return prev;
+        const category = prev.find(
+          (category) => category.id === selectedExpense.category_id
+        );
+        if (!category) return prev;
+        category.total_expenses = (
+          Number(category.total_expenses) -
+          Number(currentExpense?.amount) +
+          Number(updatedExpense.amount)
+        ).toFixed(2);
+        return prev;
       });
 
       const activeElement = document.activeElement as HTMLElement;

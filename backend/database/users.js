@@ -102,20 +102,6 @@ const deleteUser = async (id) => {
   }
 };
 
-const getUserPassword = async (id) => {
-  try {
-    const [user] = await connectionPool.query(
-      `SELECT password FROM users WHERE id = ?`,
-      [id]
-    );
-    if (!user) return null;
-    return user[0].password;
-  } catch (err) {
-    console.error(`Error getting user password: ${err}`);
-    return null;
-  }
-}
-
 const updatePassword = async (id, newPassword) => {
   try {
     await connectionPool.query(`UPDATE users SET password = ? WHERE id = ?`, [

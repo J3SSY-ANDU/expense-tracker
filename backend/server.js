@@ -165,12 +165,17 @@ app.get("/all-categories", async (req, res) => {
 
 app.get("/generate-default-categories", async (req, res) => {
   const id = req.session.userId;
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
   for (let category of categoriesData) {
     await createCategory(
       category.name,
       id,
+      month,
+      year,
       category.total_expenses,
-      category.description
+      category.description,
     );
   }
   res.status(200).send("Default categories created!");

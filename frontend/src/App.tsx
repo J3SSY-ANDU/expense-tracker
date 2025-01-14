@@ -102,6 +102,7 @@ export default function App() {
         setExpenses={setExpenses}
         categories={categories}
         setCategories={setCategories}
+        setHistory={setHistory}
         title={"Monthly Expenses"}
       />
       <History
