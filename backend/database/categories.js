@@ -8,26 +8,28 @@ const { v4: uuidv4 } = require("uuid");
             id VARCHAR(100) PRIMARY KEY NOT NULL,
             user_id VARCHAR(100) NOT NULL,
             name VARCHAR(50) NOT NULL,
+            month INT NOT NULL,
+            year INT NOT NULL,
             total_expenses DECIMAL(10,2) NOT NULL,
             description TEXT,
             \`order\` INT AUTO_INCREMENT UNIQUE NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id),
-            UNIQUE (user_id, name)
+            UNIQUE (user_id, name, month, year)
         );
     `);
   console.log("Table created successfully!");
 })();
 
-const createCategory = async (name, user_id, total_expenses, description) => {
+const createCategory = async (name, user_id, month, year, total_expenses, description) => {
   try {
-    if (await getCategoryByName(user_id, name)) {
+    if (await getCategoryByMonthYear(name, user_id, month, year)) {
       console.log(`Category already exists.`);
       return null;
     }
     const id = uuidv4();
     await connectionPool.query(
-      `INSERT INTO categories (id, user_id, name, total_expenses, description) VALUES (?, ?, ?, ?, ?)`,
-      [id, user_id, name, total_expenses, description]
+      `INSERT INTO categories (id, user_id, name, month, year, total_expenses, description) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id, user_id, name, month, year, total_expenses, description]
     );
     const category = await getCategoryById(id);
     if (!category) {
@@ -55,11 +57,31 @@ const getCategoriesByUser = async (user_id) => {
   }
 };
 
+const getCategoryByMonthYear = async (name, user_id, month, year) => {
+  try {
+    const [categories] = await connectionPool.query(
+      `SELECT * FROM categories WHERE name = ? AND user_id = ? AND month = ? AND year = ?`,
+      [name, user_id, month, year]
+    );
+    if (!categories[0]) {
+      console.log(`Category not found.`);
+      return null;
+    }
+    return categories[0];
+  } catch (err) {
+    console.error(`Error getting categories: ${err}`);
+    return null;
+  }
+}
+
 const getOrderedCategories = async (userId) => {
   try {
+    const date = new Date();
+    const month = date.getUTCMonth() + 1;
+    const year = date.getFullYear();
     const [rows] = await connectionPool.query(
-      `SELECT * FROM categories WHERE user_id = ? ORDER BY \`order\` ASC`,
-      [userId]
+      `SELECT * FROM categories WHERE user_id = ? AND month = ? AND year = ? ORDER BY \`order\` ASC`,
+      [userId, month, year]
     );
     return rows;
   } catch (err) {
@@ -140,14 +162,8 @@ const updateCategoryDescription = async (id, description) => {
   }
 };
 
-const updateCategoryTotalExpenses = async (id, amount, date) => {
+const updateCategoryTotalExpenses = async (id, amount) => {
   try {
-    const month = new Date(date).getMonth() + 1;
-    const year = new Date(date).getFullYear();
-    if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
-      console.log(`Cannot update category total expenses for past months.`);
-      return null;
-    }
     const category = await getCategoryById(id);
     const newAmount = parseFloat(category.total_expenses) + parseFloat(amount);
     await connectionPool.query(
@@ -188,4 +204,5 @@ module.exports = {
   updateCategoryTotalExpenses,
   deleteCategory,
   getOrderedCategories,
+  getCategoryByMonthYear,
 };
