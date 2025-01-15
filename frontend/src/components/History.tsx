@@ -3,20 +3,17 @@ import { Category, Expense, History as MonthlyHistory } from "../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
 import { HistoryTable } from "./HistoryTable";
-import { FetchHistoryExpensesByMonthYear } from "../api";
+import { FetchHistoryExpensesByMonthYear, GetCategory } from "../api";
 
 export function History({
   history,
   setHistory,
-  categories,
-  setCategories,
 }: {
   history: MonthlyHistory[] | null;
   setHistory: (history: MonthlyHistory[]) => void;
-  categories: Category[] | null;
-  setCategories: (categories: Category[]) => void;
 }) {
   const [expenses, setExpenses] = useState<Expense[] | null>(null);
+  const [categories, setCategories] = useState<Category[] | null>(null);
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(
     null
   );
@@ -41,6 +38,20 @@ export function History({
           year
         );
         setExpenses(expensesByMonthYear);
+        if (expensesByMonthYear && expensesByMonthYear[0]) {
+          const categoryIds = expensesByMonthYear.map(
+            (expense) => expense.category_id
+          );
+          const categoriesData = await Promise.all(
+            categoryIds.map((categoryId) => GetCategory(categoryId))
+          );
+          setCategories(
+            () =>
+              categoriesData.filter(
+                (category) => category !== null
+              ) as Category[]
+          );
+        }
       } catch (err) {
         console.error(`Error fetching history data: ${err}`);
       }

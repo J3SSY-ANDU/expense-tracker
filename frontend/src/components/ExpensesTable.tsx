@@ -346,6 +346,39 @@ export function ExpensesTable({
       formatedDate
     );
     if (updatedExpense) {
+      if (
+        new Date(updatedExpense.date).getMonth() + 1 !==
+          new Date().getMonth() + 1 &&
+        new Date(updatedExpense.date).getFullYear() !== new Date().getFullYear()
+      ) {
+        FetchHistoryData()
+          .then((data) => {
+            setHistory(data);
+            setExpenses((prev) =>
+              prev
+                ? prev.filter((expense) => expense.id !== updatedExpense.id)
+                : null
+            );
+            setCategories((prev) => {
+              if (!prev) return prev;
+              const category = prev.find(
+                (category) => category.id === updatedExpense.category_id
+              );
+              if (!category) return prev;
+              category.total_expenses = (
+                Number(category.total_expenses) - Number(updatedExpense?.amount)
+              ).toFixed(2);
+              return prev;
+            });
+            setCreatingExpense(false);
+            setNewExpense(false);
+          })
+          .catch(() => {
+            setCreatingExpense(false);
+          });
+        return;
+      }
+
       setExpenses((prev) => {
         return prev
           ? prev.map((expense) =>

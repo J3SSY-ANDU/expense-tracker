@@ -5,6 +5,7 @@ import {
   GenerateCategoryData,
   UpdateCategoryDescription,
   UpdateCategoryName,
+  GetCategory,
 } from "./categoryApi";
 import {
   FetchExpensesData,
@@ -52,4 +53,5 @@ export {
   ChangeName,
   FetchHistoryData,
   FetchHistoryExpensesByMonthYear,
+  GetCategory,
 };

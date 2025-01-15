@@ -46,7 +46,6 @@ export function Categories({
     null
   ); // State for selected category
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
-  const [description, setDescription] = useState<string>(""); // State for category description
 
   const handleSaveCategory = useCallback(async () => {
     if (!user) {
@@ -55,6 +54,8 @@ export function Categories({
     const newCategoryData: NewCategory = {
       name: newCategoryName,
       user_id: user.id,
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
       total_expenses: 0,
       description: "",
     };
@@ -374,8 +375,8 @@ export function Categories({
             <DialogTitle id="alert-dialog-title">Delete Category</DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                Are you sure you want to delete this category? This action will
-                delete all expenses associated with this category.
+                This action will delete all expenses associated with this
+                category. Are you sure you want to delete this category?
               </DialogContentText>
             </DialogContent>
             <DialogActions>

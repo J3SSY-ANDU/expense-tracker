@@ -35,6 +35,24 @@ export async function GenerateCategoryData(): Promise<Category[] | null> {
   return null;
 }
 
+export async function GetCategory(category_id: string): Promise<Category | null> {
+  try {
+    const res = await fetch(`/get-category?category_id=${category_id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.status === 200) {
+      const categoryData: Category = await res.json(); // Make sure that the response is of type Category
+      return categoryData;
+    }
+  } catch (err) {
+    console.error(`Error fetching category data ${err}`);
+  }
+  return null;
+}
+
 export async function AddCategory(
   category: NewCategory
 ): Promise<Category | null> {

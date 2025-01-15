@@ -5,10 +5,14 @@ import {
   MenuList,
   Paper,
   Typography,
-  Menu,
   Button,
   Backdrop,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { User } from "../types";
 import { Logout, DeleteUser, ChangePassword } from "../api";
@@ -26,6 +30,7 @@ export function Account({
   const [oldPassword, setOldPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showDialog, setShowDialog] = useState<boolean>(false);
   const handleLogout = async () => {
     await Logout();
   };
@@ -136,7 +141,7 @@ export function Account({
             </MenuItem>
             <MenuItem
               onClick={() => {
-                handleDeleteUser();
+                setShowDialog(true);
               }}
             >
               Delete Account
@@ -190,6 +195,32 @@ export function Account({
             Send
           </Button>
         </Paper>
+      </Backdrop>
+      <Backdrop open={showDialog} onClick={() => setShowDialog(false)}>
+        <Dialog
+          open={showDialog}
+          onClose={() => setShowDialog(false)}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DialogTitle id="alert-dialog-title">Delete Account</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              This action will delete all your data and cannot be recovered. Are
+              you sure you want to continue?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                handleDeleteUser();
+              }}
+              autoFocus
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Backdrop>
     </Box>
   );
