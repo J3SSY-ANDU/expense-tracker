@@ -37,6 +37,7 @@ const {
   updateCategoryDescription,
   updateCategoryName,
   getOrderedCategories,
+  getCategoryById,
 } = require("./database/categories");
 const { categoriesData } = require("./database/categoriesData");
 const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmation } = require("./database/emailConfirmation");
@@ -181,6 +182,15 @@ app.get("/generate-default-categories", async (req, res) => {
   res.status(200).send("Default categories created!");
 });
 
+app.get("/get-category", async (req, res) => {
+  const { category_id } = req.query;
+  const category = await getCategoryById(category_id);
+  if (!category) {
+    return res.status(401).send("Category not found!");
+  }
+  res.status(200).send(category);
+});
+
 app.post("/update-category-name", async (req, res) => {
   const { category_id, name } = req.body;
   const updatedCategory = await updateCategoryName(category_id, name);
@@ -200,8 +210,8 @@ app.post("/update-category-description", async (req, res) => {
 })
 
 app.post("/add-category", async (req, res) => {
-  const { name, user_id, total_expenses, description } = req.body;
-  const category = await createCategory(name, user_id, total_expenses, description);
+  const { name, user_id, month, year, total_expenses, description } = req.body;
+  const category = await createCategory(name, user_id, month, year, total_expenses, description);
   if (!category) {
     return res.status(401).send("Category creation failed!");
   }

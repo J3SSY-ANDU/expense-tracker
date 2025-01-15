@@ -311,8 +311,9 @@ const updateExpenseDate = async (id, date) => {
         -expense.amount
       );
     }
+    const updatedExpense = await getExpenseById(id);
     console.log("Expense date updated successfully!");
-    return expense;
+    return updatedExpense;
   } catch (err) {
     console.error(`Error updating expense date: ${err}`);
     return null;

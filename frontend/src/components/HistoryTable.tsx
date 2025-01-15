@@ -28,6 +28,7 @@ export function HistoryTable({
         const category = categories.find(
           (category) => category.id === expense.category_id
         );
+        console.log(category?.name);
         if (category) {
           setCategoriesNames((prev) => ({
             ...prev,

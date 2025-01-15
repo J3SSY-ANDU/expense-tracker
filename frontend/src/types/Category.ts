@@ -10,6 +10,8 @@ export interface Category {
 export interface NewCategory {
     name: string;
     user_id: string;
+    month: number;
+    year: number;
     total_expenses: number;
     description: string;
 }
