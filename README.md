@@ -10,6 +10,7 @@
 - [Deployment Status](#deployment-status)
 - [Future Enhancements](#future-enhancements)
 - [License](#license)
+- [Contributions](#contributions)
 
 ---
 
@@ -95,19 +96,19 @@ Follow these steps to set up the project locally:
   
 ## API Endpoints
 ### User Endpoints
-  - POST /process-signup: Create a new user.
-  - POST /process-login: Log in to the system.
-  - POST /logout: Log out of the current session.
+  - POST `/process-signup`: Create a new user.
+  - POST `/process-login`: Log in to the system.
+  - POST `/logout`: Log out of the current session.
 ### Expense Endpoints
-  - GET /all-expenses: Fetch all expenses for a user.
-  - POST /create-expense: Add a new expense.
-  - POST /update-expense-name: Update the name of an expense.
-  - POST /delete-expense: Remove an expense.
+  - GET `/all-expenses`: Fetch all expenses for a user.
+  - POST `/create-expense`: Add a new expense.
+  - POST `/update-expense-name`: Update the name of an expense.
+  - POST `/delete-expense`: Remove an expense.
 ### Category Endpoints
-  - GET /all-categories: Fetch all categories for a user.
-  - POST /add-category: Create a new category.
+  - GET `/all-categories`: Fetch all categories for a user.
+  - POST `/add-category`: Create a new category.
 ### History Endpoints
-  - GET /history: Fetch the history of expenses by month.
+  - GET `/history`: Fetch the history of expenses by month.
 
 ## Deployment Status
 ### Local Deployment
@@ -118,5 +119,8 @@ The AWS deployment is currently in progress. The backend will be hosted using AW
 ## Future Enhancements
   - Complete AWS deployment for global accessibility.
 
+## License
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/J3SSY-ANDU/expense-tracker?tab=MIT-1-ov-file) file for details.
+
 ## Contributions
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page or submit a pull request.   
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/J3SSY-ANDU/expense-tracker/issues) or submit a pull request.   
