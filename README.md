@@ -7,7 +7,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
-- [Deployment](#deployment)
+- [Deployment Status](#deployment-status)
 - [Future Enhancements](#future-enhancements)
 - [License](#license)
 
@@ -27,7 +27,6 @@ Expense Tracker is a **full-stack web application** designed to help users manag
 - **Category Management**: Organize spending into custom categories.
 - **Monthly History**: View expenses grouped by month for detailed analysis.
 - **Responsive Design**: Works seamlessly on desktops and mobile devices.
-- **Scalable Backend**: Deployed using AWS Elastic Beanstalk for robust performance.
 
 ---
 
@@ -35,20 +34,14 @@ Expense Tracker is a **full-stack web application** designed to help users manag
 ### Frontend
 - **React**: For building a responsive and dynamic user interface.
 - **MUI (Material-UI)**: For styled components and consistent design.
-
+  
 ### Backend
 - **Node.js**: Server runtime environment.
 - **Express.js**: Web framework for API routing.
 - **MySQL**: Relational database for storing user and expense data.
+- **jsonwebtoken**: For secure user authentication and session management.
 - **bcrypt**: For password hashing.
-- 
 - **dotenv**: For environment variable management.
-
-### Deployment
-- **AWS Elastic Beanstalk**: Hosting the backend.
-- **Amazon RDS**: Hosting the MySQL database.
-- **AWS S3**: Storing application files.
-- **AWS CloudFront**: Content delivery for static assets.
 
 ---
 
@@ -64,3 +57,66 @@ Follow these steps to set up the project locally:
    ```bash
    git clone https://github.com/your-username/expense-tracker.git
    cd expense-tracker
+   ```
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+3. **Set up environment variables: Create a .env file in the root directory with the following**:
+   ```env
+   DB_HOST=your-db-host
+   DB_USER=your-db-username
+   DB_PASSWORD=your-db-password
+   DB_NAME=your-database-name
+   SESSION_SECRET=your-session-secret
+   ```
+4. **Run the application locally**:
+   - **Backend**:
+   ```bash
+   node server.js
+   ```
+   - **Frontend**:
+   ```bash
+   npm start
+   ```
+5. **Access the app: Visit http://localhost:4000 (or the port configured in .env).**
+
+## Usage
+1. **Sign Up**:
+   - Register a new account with email verification.
+2. **Log In**:
+   - Access your dashboard to manage expenses.
+3. **Manage Expenses**:
+   - Add, edit, or delete expenses by category.
+4. **View History**:
+   - Explore monthly transaction summaries.
+5. **Track Categories**:
+   - Organize and monitor total spending by category.
+  
+## API Endpoints
+### User Endpoints
+  - POST /process-signup: Create a new user.
+  - POST /process-login: Log in to the system.
+  - POST /logout: Log out of the current session.
+### Expense Endpoints
+  - GET /all-expenses: Fetch all expenses for a user.
+  - POST /create-expense: Add a new expense.
+  - POST /update-expense-name: Update the name of an expense.
+  - POST /delete-expense: Remove an expense.
+### Category Endpoints
+  - GET /all-categories: Fetch all categories for a user.
+  - POST /add-category: Create a new category.
+### History Endpoints
+  - GET /history: Fetch the history of expenses by month.
+
+## Deployment Status
+### Local Deployment
+The application is fully functional locally. It uses Node.js for the backend, MySQL as the database, and React for the frontend.
+### AWS Deployment
+The AWS deployment is currently in progress. The backend will be hosted using AWS Elastic Beanstalk, and the MySQL database will be set up on Amazon RDS. Static assets may also be delivered through AWS S3 and CloudFront.
+
+## Future Enhancements
+  - Complete AWS deployment for global accessibility.
+
+## Contributions
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page or submit a pull request.   
