@@ -36,7 +36,7 @@ export function VerifyEmail() {
         alignItems: "center",
         gap: "0.8rem",
         width: "20%",
-        minWidth: "500px",
+        minWidth: "360px",
         padding: "1.5rem 1rem",
         background: "#fff",
         border: "1px solid #d3d3d3",
@@ -50,10 +50,13 @@ export function VerifyEmail() {
         height: "fit-content",
       }}
     >
-      <Typography variant="h4" sx={{ fontWeight: "600", fontSize: "2rem" }}>
+      <Typography variant="h4" sx={{ fontWeight: "600", fontSize: "1.5rem" }}>
         Verify your email
       </Typography>
-      <Typography variant="body1" sx={{ fontSize: "1rem", fontWeight: "400" }}>
+      <Typography
+        variant="body1"
+        sx={{ fontSize: "0.8rem", fontWeight: "400" }}
+      >
         We have sent you an email with a verification link. Please click on the
         link to verify your email.
       </Typography>
@@ -61,6 +64,7 @@ export function VerifyEmail() {
         variant="contained"
         color="primary"
         onClick={() => ResendVerificationEmail(token!)}
+        sx={{ fontSize: "0.8rem", width: "100%" }}
       >
         Resend email
       </Button>
