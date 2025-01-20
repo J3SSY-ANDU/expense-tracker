@@ -28,8 +28,9 @@ export function ResetForgotPasswordForm() {
       return;
     }
     setToken(tokenParam);
+    console.log(tokenParam, password);
     try {
-      if (!token || !password) {
+      if (!tokenParam || !password) {
         console.error("Token or password not found");
         return;
       }
@@ -65,7 +66,7 @@ export function ResetForgotPasswordForm() {
       }}
     >
       <Typography variant="h4" sx={{ fontSize: "1.5rem", fontWeight: "600" }}>
-        Reset Forgot Password
+        Reset Password
       </Typography>
       <form
         onSubmit={handleSubmit}
@@ -83,15 +84,15 @@ export function ResetForgotPasswordForm() {
           name="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          size="small"
           sx={{
-            width: "100%",
+            width: "90%",
+            alignSelf: "center",
             "& .MuiInputBase-input": {
               fontSize: "0.8rem", // Font size for the input text
-              paddingY: "0.8rem",
             },
             "& .MuiInputLabel-root": {
               fontSize: "0.8rem", // Font size for the label text
-              lineHeight: "1em",
             },
           }}
         />
@@ -102,15 +103,15 @@ export function ResetForgotPasswordForm() {
           label="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          size="small"
           sx={{
-            width: "100%",
+            width: "90%",
+            alignSelf: "center",
             "& .MuiInputBase-input": {
               fontSize: "0.8rem", // Font size for the input text
-              paddingY: "0.8rem",
             },
             "& .MuiInputLabel-root": {
               fontSize: "0.8rem", // Font size for the label text
-              lineHeight: "1em",
             },
           }}
         />
@@ -119,7 +120,11 @@ export function ResetForgotPasswordForm() {
           variant="contained"
           sx={{ width: "30%", alignSelf: "center", fontSize: "0.8rem" }}
         >
-          {loading ? <CircularProgress size={24} /> : "Submit"}
+          {loading ? (
+            <CircularProgress size={20} sx={{ color: "#fff" }} />
+          ) : (
+            "Submit"
+          )}
         </Button>
       </form>
     </Paper>

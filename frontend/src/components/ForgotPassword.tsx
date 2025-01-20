@@ -64,25 +64,29 @@ export function ForgotPasswordForm() {
           name="email"
           label="Email"
           value={email}
+          size="small"
           onChange={(e) => setEmail(e.target.value)}
           sx={{
-            width: "100%",
+            width: "90%",
+            alignSelf: "center",
             "& .MuiInputBase-input": {
               fontSize: "0.8rem", // Font size for the input text
-              paddingY: "0.8rem",
             },
             "& .MuiInputLabel-root": {
               fontSize: "0.8rem", // Font size for the label text
-              lineHeight: "1em",
             },
           }}
         />
         <Button
           type="submit"
           variant="contained"
-          sx={{ width: "30%", fontSize: "0.8rem", alignSelf: "center" }}
+          sx={{ width: "40%", fontSize: "0.8rem", alignSelf: "center" }}
         >
-          {loading ? <CircularProgress size={24} /> : "Send Email"}
+          {loading ? (
+            <CircularProgress size={20} sx={{ color: "#fff" }} />
+          ) : (
+            "Send Email"
+          )}
         </Button>
       </form>
     </Paper>

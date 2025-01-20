@@ -1,4 +1,10 @@
-import { Box, Button, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import { VerifyEmail as VerifyEmailApi, ResendVerificationEmail } from "../api";
 
@@ -22,10 +28,6 @@ export function VerifyEmail() {
 
     verifyEmail();
   }, [token]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <Paper
@@ -63,10 +65,19 @@ export function VerifyEmail() {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => ResendVerificationEmail(token!)}
-        sx={{ fontSize: "0.8rem", width: "100%" }}
+        onClick={() => {
+          setLoading(true);
+          ResendVerificationEmail(token!).then(() => {
+            setLoading(false);
+          });
+        }}
+        sx={{ fontSize: "0.8rem", width: "50%" }}
       >
-        Resend email
+        {loading ? (
+          <CircularProgress size={20} sx={{ color: "#fff" }} />
+        ) : (
+          "Resend email"
+        )}
       </Button>
     </Paper>
   );
