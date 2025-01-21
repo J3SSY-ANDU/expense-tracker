@@ -6,11 +6,14 @@ import {
   TextField,
   Typography,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSnackbar, setShowSnackbar] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
@@ -18,6 +21,7 @@ export function ForgotPasswordForm() {
     try {
       await ForgotPassword(email);
       setLoading(false);
+      setShowSnackbar(true);
       setEmail("");
     } catch (err) {
       console.error(`Error sending email ${err}`);
@@ -89,6 +93,20 @@ export function ForgotPasswordForm() {
           )}
         </Button>
       </form>
+      <Snackbar
+        open={showSnackbar}
+        autoHideDuration={5000}
+        onClose={() => setShowSnackbar(false)}
+      >
+        <Alert
+          onClose={() => setShowSnackbar(false)}
+          severity="success"
+          variant="standard"
+          sx={{ width: "100%" }}
+        >
+          Email sent successfully
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 }

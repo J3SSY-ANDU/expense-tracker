@@ -139,7 +139,6 @@ app.post('/reset-forgot-password', async (req, res) => {
     return res.status(401).send("Password reset failed!");
   }
   const new_password_hash = await bcrypt.hash(new_password, 10);
-  console.log('changing password');
   const new_user = await changeForgotPassword(token, new_password_hash);
   if (!new_user) {
     return res.status(401).send("Password reset failed!");
