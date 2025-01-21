@@ -1,8 +1,10 @@
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
   Paper,
+  Snackbar,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -11,6 +13,7 @@ import { VerifyEmail as VerifyEmailApi, ResendVerificationEmail } from "../api";
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSnackbar, setShowSnackbar] = useState(false);
 
   useEffect(() => {
     async function verifyEmail() {
@@ -69,6 +72,7 @@ export function VerifyEmail() {
           setLoading(true);
           ResendVerificationEmail(token!).then(() => {
             setLoading(false);
+            setShowSnackbar(true);
           });
         }}
         sx={{ fontSize: "0.8rem", width: "50%" }}
@@ -79,6 +83,20 @@ export function VerifyEmail() {
           "Resend email"
         )}
       </Button>
+      <Snackbar
+        open={showSnackbar}
+        onClose={() => setShowSnackbar(false)}
+        autoHideDuration={5000}
+      >
+        <Alert
+          onClose={() => setShowSnackbar(false)}
+          severity="success"
+          variant="standard"
+          sx={{ width: "100%" }}
+        >
+          Email sent successfully
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 }

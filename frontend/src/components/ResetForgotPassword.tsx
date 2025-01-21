@@ -11,7 +11,6 @@ import {
 export function ResetForgotPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -27,14 +26,12 @@ export function ResetForgotPasswordForm() {
       console.error("Token not found");
       return;
     }
-    setToken(tokenParam);
-    console.log(tokenParam, password);
     try {
       if (!tokenParam || !password) {
         console.error("Token or password not found");
         return;
       }
-      await ResetForgotPassword(token, password);
+      await ResetForgotPassword(tokenParam, password);
       setLoading(false);
       setPassword("");
       setConfirmPassword("");

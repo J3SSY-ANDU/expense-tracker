@@ -2,7 +2,7 @@ const { decode } = require("punycode");
 const { connectionPool } = require("./db");
 const dotenv = require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const { updateUser, getUserByEmail } = require("./users");
+const { updatePassword, getUserByEmail } = require("./users");
 
 (async () => {
   await connectionPool.query(`
@@ -73,11 +73,11 @@ const changeForgotPassword = async (token, new_password) => {
     }
     const user = await getUserByEmail(email);
     if (!user) {
+      console.log("User not found!");
       return null;
     }
-    await updateUser(user.id, "password", new_password);
+    await updatePassword(user.id, new_password);
     await deleteForgotPassword(email);
-    console.log("Password changed successfully!");
     return user;
   } catch (err) {
     console.error(`Error changing forgot password: ${err}`);
