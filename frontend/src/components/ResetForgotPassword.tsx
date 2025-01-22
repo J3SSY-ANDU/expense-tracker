@@ -32,9 +32,9 @@ export function ResetForgotPasswordForm() {
         return;
       }
       await ResetForgotPassword(tokenParam, password);
-      setLoading(false);
-      setPassword("");
-      setConfirmPassword("");
+      // setLoading(false);
+      // setPassword("");
+      // setConfirmPassword("");
     } catch (err) {
       console.error(`Error resetting password ${err}`);
     }

@@ -14,6 +14,7 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Category, NewCategory, User, Expense } from "../types";
 import {
@@ -310,30 +311,25 @@ export function Categories({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <CardContent>
-              <input
-                type="text"
-                title="name"
-                name="name"
-                value={selectedCategory?.name}
-                onChange={(e) =>
-                  setSelectedCategory((prev) => {
-                    if (prev) {
-                      return { ...prev, name: e.target.value };
-                    }
-                    return prev;
-                  })
-                }
-                onKeyDown={async (e) => {
-                  if (e.key === "Enter") {
-                    await handleChangeName();
-                  }
-                }}
-              />
+            <CardContent
+              sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography fontSize={24} fontWeight={"600"}>
+                  {selectedCategory?.name}
+                </Typography>
+                <DeleteIcon
+                  onClick={() => setShowDeleteDialog(true)}
+                  color="action"
+                  sx={{ cursor: "pointer" }}
+                />
+              </Box>
               <Typography fontSize={16} fontWeight={"400"}>
                 Total expenses: ${selectedCategory?.total_expenses}
               </Typography>
-              <Box sx={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <Box
+                sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+              >
                 <Typography>Description: </Typography>
                 <input
                   type="text"
@@ -353,18 +349,15 @@ export function Categories({
                       await handleChangeDescription();
                     }
                   }}
+                  style={{
+                    all: "unset",
+                    width: "100%",
+                    backgroundColor: "#d3d3d3",
+                    padding: "0.3rem",
+                    borderRadius: "3px",
+                  }}
                 />
               </Box>
-              <Button
-                variant={"contained"}
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                {selectedCategory ? (
-                  "Delete"
-                ) : (
-                  <CircularProgress size={20} sx={{ color: "#ffffff" }} />
-                )}
-              </Button>
             </CardContent>
           </Card>
           <Dialog
