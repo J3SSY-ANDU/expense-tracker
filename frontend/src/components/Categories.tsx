@@ -314,7 +314,13 @@ export function Categories({
             <CardContent
               sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography fontSize={24} fontWeight={"600"}>
                   {selectedCategory?.name}
                 </Typography>

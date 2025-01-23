@@ -19,7 +19,13 @@ import {
   FilledInput,
   InputAdornment,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -73,6 +79,7 @@ export function ExpensesTable({
   const [newExpenseNotes, setNewExpenseNotes] = useState<string>("");
   const [openExpense, setOpenExpense] = useState<boolean>(false); // State for backdrop
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null); // State for selected expense
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
 
   useEffect(() => {
     if (categories && expenses) {
@@ -616,45 +623,54 @@ export function ExpensesTable({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <CardContent>
-            <input
-              type="text"
-              title="name"
-              value={selectedExpense?.name}
-              onChange={(e) =>
-                setSelectedExpense((prev) => {
-                  if (prev) {
-                    return { ...prev, name: e.target.value };
-                  } else {
-                    return null;
+          <CardContent
+            sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography fontSize={24} fontWeight={"600"}>
+                {selectedExpense?.name}
+              </Typography>
+              <DeleteIcon
+                onClick={() => setShowDeleteDialog(true)}
+                color="action"
+                sx={{ cursor: "pointer" }}
+              />
+            </Box>
+            <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <Typography>Amount: </Typography>
+              <input
+                type="text"
+                title="amount"
+                value={selectedExpense?.amount}
+                onChange={(e) => {
+                  setSelectedExpense((prev) => {
+                    if (prev) {
+                      return { ...prev, amount: e.target.value };
+                    } else {
+                      return null;
+                    }
+                  });
+                }}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    await handleExpenseAmountChange();
                   }
-                })
-              }
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await handleChangeExpenseName();
-                }
-              }}
-            />
-            <input
-              type="text"
-              title="amount"
-              value={selectedExpense?.amount}
-              onChange={(e) => {
-                setSelectedExpense((prev) => {
-                  if (prev) {
-                    return { ...prev, amount: e.target.value };
-                  } else {
-                    return null;
-                  }
-                });
-              }}
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await handleExpenseAmountChange();
-                }
-              }}
-            />
+                }}
+                style={{
+                  all: "unset",
+                  width: "100%",
+                  backgroundColor: "#d3d3d3",
+                  padding: "0.3rem",
+                  borderRadius: "3px",
+                }}
+              />
+            </Box>
             <FormControl fullWidth>
               <InputLabel id="new-category">Select Category</InputLabel>
               <Select
@@ -709,15 +725,33 @@ export function ExpensesTable({
                 }
               }}
             />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleDeleteExpense}
-            >
-              Delete
-            </Button>
           </CardContent>
         </Card>
+        <Dialog
+          open={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DialogTitle id="alert-dialog-title">Delete Category</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              This action will delete all expenses associated with this
+              category. Are you sure you want to delete this category?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                setShowDeleteDialog(false);
+                handleDeleteExpense();
+              }}
+              autoFocus
+            >
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Backdrop>
     </Box>
   );
