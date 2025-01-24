@@ -624,7 +624,7 @@ export function ExpensesTable({
           onClick={(e) => e.stopPropagation()}
         >
           <CardContent
-            sx={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+            sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             <Box
               sx={{
@@ -663,7 +663,8 @@ export function ExpensesTable({
                   }
                 }}
                 style={{
-                  all: "unset",
+                  border: "none",
+                  outline: "none",
                   width: "100%",
                   backgroundColor: "#d3d3d3",
                   padding: "0.3rem",
@@ -706,25 +707,38 @@ export function ExpensesTable({
                 slotProps={{ textField: { fullWidth: true } }}
               />
             </LocalizationProvider>
-            <input
-              type="text"
-              title="notes"
-              value={selectedExpense?.notes}
-              onChange={(e) =>
-                setSelectedExpense((prev) => {
-                  if (prev) {
-                    return { ...prev, notes: e.target.value };
-                  } else {
-                    return null;
-                  }
-                })
-              }
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await handleChangeNotes();
+            <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <Typography fontSize={16} fontWeight={"400"}>
+                Notes:
+              </Typography>
+              <input
+                type="text"
+                title="notes"
+                value={selectedExpense?.notes}
+                style={{
+                  border: "none",
+                  outline: "none",
+                  width: "100%",
+                  backgroundColor: "#d3d3d3",
+                  padding: "0.3rem",
+                  borderRadius: "3px",
+                }}
+                onChange={(e) =>
+                  setSelectedExpense((prev) => {
+                    if (prev) {
+                      return { ...prev, notes: e.target.value };
+                    } else {
+                      return null;
+                    }
+                  })
                 }
-              }}
-            />
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    await handleChangeNotes();
+                  }
+                }}
+              />
+            </Box>
           </CardContent>
         </Card>
         <Dialog
