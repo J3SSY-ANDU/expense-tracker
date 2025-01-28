@@ -535,11 +535,7 @@ export function ExpensesTable({
           </TableBody>
         </Table>
       </TableContainer>
-      <Backdrop
-        open={newExpense}
-        onClick={() => setNewExpense(false)}
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
+      <Backdrop open={newExpense} onClick={() => setNewExpense(false)}>
         <Card
           sx={{
             width: "400px",
@@ -617,11 +613,7 @@ export function ExpensesTable({
           </CardContent>
         </Card>
       </Backdrop>
-      <Backdrop
-        open={openExpense}
-        onClick={() => setOpenExpense(false)}
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      >
+      <Backdrop open={openExpense} onClick={() => setOpenExpense(false)}>
         <Card
           sx={{
             width: "400px",

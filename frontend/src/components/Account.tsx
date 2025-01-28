@@ -141,6 +141,7 @@ export function Account({
             </MenuItem>
             <MenuItem
               onClick={() => {
+                setOpen(false);
                 setShowDialog(true);
               }}
             >
@@ -156,7 +157,11 @@ export function Account({
           </MenuList>
         </Paper>
       </Box>
-      <Backdrop open={editPassword} onClick={() => setEditPassword(false)}>
+      <Backdrop
+        open={editPassword}
+        onClick={() => setEditPassword(false)}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Paper
           onClick={(e) => e.stopPropagation()}
           sx={{
@@ -196,7 +201,11 @@ export function Account({
           </Button>
         </Paper>
       </Backdrop>
-      <Backdrop open={showDialog} onClick={() => setShowDialog(false)}>
+      <Backdrop
+        open={showDialog}
+        onClick={() => setShowDialog(false)}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
         <Dialog
           open={showDialog}
           onClose={() => setShowDialog(false)}
