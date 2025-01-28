@@ -737,6 +737,7 @@ export function ExpensesTable({
                     await handleChangeNotes();
                   }
                 }}
+                placeholder="Add notes..."
               />
             </Box>
           </CardContent>

@@ -27,6 +27,7 @@ export function SignupForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    failed: "",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export function SignupForm() {
       email: "",
       password: "",
       confirmPassword: "",
+      failed: "",
     };
     let isValid = true;
     if (!firstname) {
@@ -105,6 +107,7 @@ export function SignupForm() {
         emptyFields();
         navigate("/verify-email");
       } else {
+        setError({ ...error, failed: "Failed to sign up." });
         setLoading(false);
         emptyFields();
       }
@@ -158,7 +161,7 @@ export function SignupForm() {
           onChange={(e) =>
             setFirstname(() => {
               const value = e.target.value;
-              setError({ ...error, firstname: "" });
+              setError({ ...error, firstname: "", failed: "" });
               return value.charAt(0).toUpperCase() + value.slice(1);
             })
           }
@@ -202,7 +205,7 @@ export function SignupForm() {
           onChange={(e) =>
             setLastname(() => {
               const value = e.target.value;
-              setError({ ...error, lastname: "" });
+              setError({ ...error, lastname: "", failed: "" });
               return value.charAt(0).toUpperCase() + value.slice(1);
             })
           }
@@ -245,7 +248,7 @@ export function SignupForm() {
           size="small"
           onChange={(e) => {
             setEmail(e.target.value);
-            setError({ ...error, email: "" });
+            setError({ ...error, email: "", failed: "" });
           }}
           sx={{
             width: "100%",
@@ -286,7 +289,7 @@ export function SignupForm() {
           size="small"
           onChange={(e) => {
             setPassword(e.target.value);
-            setError({ ...error, password: "" });
+            setError({ ...error, password: "", failed: "" });
           }}
           sx={{
             width: "100%",
@@ -327,7 +330,7 @@ export function SignupForm() {
           size="small"
           onChange={(e) => {
             setConfirmPassword(e.target.value);
-            setError({ ...error, confirmPassword: "" });
+            setError({ ...error, confirmPassword: "", failed: "" });
           }}
           sx={{
             width: "100%",
@@ -357,6 +360,27 @@ export function SignupForm() {
               }}
             >
               {error.confirmPassword}
+            </AlertTitle>
+          </Alert>
+        )}
+        {error.failed && (
+          <Alert
+            severity="error"
+            variant="standard"
+            sx={{
+              width: "100%",
+              boxSizing: "border-box",
+              paddingY: "0",
+              marginTop: "-0.4rem",
+            }}
+          >
+            <AlertTitle
+              fontSize={"0.8rem"}
+              sx={{
+                margin: 0, // Set the margin to 0
+              }}
+            >
+              {error.failed}
             </AlertTitle>
           </Alert>
         )}
