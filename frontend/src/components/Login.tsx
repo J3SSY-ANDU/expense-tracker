@@ -12,6 +12,7 @@ import {
   Button,
   Paper,
 } from "@mui/material";
+import { Login as LoginApi } from "../api";
 import "../styles/login.css";
 
 export function Login() {
@@ -20,6 +21,7 @@ export function Login() {
   const [error, setError] = useState({
     email: "",
     password: "",
+    general: "",
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ export function Login() {
     let error = {
       email: "",
       password: "",
+      general: "",
     };
     let isValid = true;
 
@@ -58,20 +61,15 @@ export function Login() {
         setLoading(false);
         return;
       }
-      const res = await fetch("/process-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      if (res.status === 200) {
+      const res = await LoginApi(email, password);
+      if (res) {
         console.log("Login successful!");
         setLoading(false);
         emptyFields();
         navigate("/");
       } else {
         console.error("Login failed!");
+        setError({ ...error, general: "Invalid email or password." });
         setLoading(false);
         emptyFields();
       }
@@ -128,7 +126,7 @@ export function Login() {
           size="small"
           onChange={(e) => {
             setEmail(e.target.value);
-            setError({ ...error, email: "" });
+            setError({ ...error, email: "", general: "" });
           }}
           sx={{
             width: "100%",
@@ -169,7 +167,7 @@ export function Login() {
           size="small"
           onChange={(e) => {
             setPassword(e.target.value);
-            setError({ ...error, password: "" });
+            setError({ ...error, password: "", general: "" });
           }}
           sx={{
             width: "100%",
@@ -199,6 +197,27 @@ export function Login() {
               }}
             >
               {error.password}
+            </AlertTitle>
+          </Alert>
+        )}
+        {error.general && (
+          <Alert
+            severity="error"
+            variant="standard"
+            sx={{
+              width: "100%",
+              boxSizing: "border-box",
+              paddingY: "0",
+              marginTop: "-0.4rem",
+            }}
+          >
+            <AlertTitle
+              fontSize={"0.8rem"}
+              sx={{
+                margin: 0, // Set the margin to 0
+              }}
+            >
+              {error.general}
             </AlertTitle>
           </Alert>
         )}

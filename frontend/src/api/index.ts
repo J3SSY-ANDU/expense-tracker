@@ -25,6 +25,7 @@ import { ResendVerificationEmail } from "./resendVerificationEmailApi";
 import { ForgotPassword } from "./forgotPasswordApi";
 import { ResetForgotPassword } from "./resetForgotPassword";
 import { FetchHistoryData, FetchHistoryExpensesByMonthYear } from "./historyApi";
+import { Login } from "./loginApi";
 
 export {
   FetchCategoriesData,
@@ -54,4 +55,5 @@ export {
   FetchHistoryData,
   FetchHistoryExpensesByMonthYear,
   GetCategory,
+  Login
 };
