@@ -95,6 +95,7 @@ export default function App() {
         setCategories={setCategories}
         expenses={expenses}
         setExpenses={setExpenses}
+        setHistory={setHistory}
       />
       <ExpensesTable
         user={user}
@@ -103,9 +104,10 @@ export default function App() {
         categories={categories}
         setCategories={setCategories}
         setHistory={setHistory}
+        mode="monthly"
         title={"Monthly Expenses"}
       />
-      <History history={history} setHistory={setHistory} />
+      <History history={history} setHistory={setHistory} user={user} />
     </Box>
   );
 }
