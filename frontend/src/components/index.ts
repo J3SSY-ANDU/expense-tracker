@@ -7,6 +7,7 @@ import { ForgotPasswordForm } from "./ForgotPassword";
 import { ResetForgotPasswordForm } from "./ResetForgotPassword";
 import { Account } from "./Account";
 import { History } from "./History";
-import { HistoryTable } from "./HistoryTable";
+import { ExpenseCard } from "./ExpenseCard";
+import { NewExpenseCard } from "./NewExpenseCard";
 
-export { Categories, ExpensesTable, Login, SignupForm, VerifyEmail, ForgotPasswordForm, ResetForgotPasswordForm, Account, History, HistoryTable };
+export { Categories, ExpensesTable, Login, SignupForm, VerifyEmail, ForgotPasswordForm, ResetForgotPasswordForm, Account, History, ExpenseCard, NewExpenseCard };

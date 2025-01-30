@@ -16,7 +16,13 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Category, NewCategory, User, Expense } from "../types";
+import {
+  Category,
+  NewCategory,
+  User,
+  Expense,
+  History as MonthlyHistory,
+} from "../types";
 import {
   AddCategory,
   DeleteCategory,
@@ -24,6 +30,7 @@ import {
   UpdateCategoryDescription,
   UpdateCategoryName,
 } from "../api";
+import { ExpensesTable } from "./ExpensesTable";
 
 export function Categories({
   user,
@@ -31,13 +38,18 @@ export function Categories({
   setCategories,
   expenses,
   setExpenses,
+  setHistory,
 }: {
   user: User | null;
   categories: Category[] | null;
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
   expenses: Expense[] | null;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
+  setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
 }) {
+  const [newExpensesByCategory, setNewExpensesByCategory] = useState<
+    Expense[] | null
+  >(null); // State for new expenses by category
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [newCategory, setNewCategory] = useState<boolean>(false); // State for new category
   const [newCategoryName, setNewCategoryName] = useState<string>(""); // State for category name
@@ -47,6 +59,17 @@ export function Categories({
     null
   ); // State for selected category
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const filteredExpenses =
+        expenses?.filter(
+          (expense) => expense.category_id === selectedCategory.id
+        ) || []; // Ensure it's always an array
+
+      setNewExpensesByCategory(filteredExpenses);
+    }
+  }, [expenses, selectedCategory]);
 
   const handleSaveCategory = useCallback(async () => {
     if (!user) {
@@ -364,6 +387,18 @@ export function Categories({
                   }}
                 />
               </Box>
+              {newExpensesByCategory && newExpensesByCategory.length > 0 && (
+                <ExpensesTable
+                  user={user}
+                  expenses={newExpensesByCategory}
+                  setExpenses={setNewExpensesByCategory}
+                  categories={categories}
+                  setCategories={setCategories}
+                  setHistory={setHistory}
+                  mode="category"
+                  title=""
+                />
+              )}
             </CardContent>
           </Card>
           <Dialog
