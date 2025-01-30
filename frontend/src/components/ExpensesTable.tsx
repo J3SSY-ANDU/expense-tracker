@@ -8,27 +8,7 @@ import {
   TableContainer,
   Typography,
   Button,
-  Card,
-  CardContent,
-  TextField,
-  Backdrop,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  FilledInput,
-  InputAdornment,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useState, useEffect } from "react";
 import {
   Category,
@@ -48,7 +28,10 @@ import {
   UpdateExpenseNotes,
   FetchHistoryData,
 } from "../api";
+import { ExpenseCard } from "./ExpenseCard";
+import { NewExpenseCard } from "./NewExpenseCard";
 
+type ExpenseTableModeValues = "monthly" | "history" | "category";
 export function ExpensesTable({
   user,
   expenses,
@@ -56,6 +39,7 @@ export function ExpensesTable({
   categories,
   setCategories,
   setHistory,
+  mode,
   title,
 }: {
   user: User | null;
@@ -64,6 +48,7 @@ export function ExpensesTable({
   categories: Category[] | null;
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
+  mode: ExpenseTableModeValues;
   title: string;
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
@@ -467,33 +452,28 @@ export function ExpensesTable({
 
   return (
     <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        marginBottom={"1rem"}
-      >
-        <Typography fontSize={20} fontWeight={"600"}>
-          {title}
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          size="small"
-          onClick={() => setNewExpense(true)}
+      {mode === "monthly" && (
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          marginBottom={"1rem"}
         >
-          New Expense
-        </Button>
-      </Box>
-      <TableContainer
-        component={Box}
-        sx={{
-          margin: "auto",
-          width: "100%",
-          minWidth: "700px",
-        }}
-      >
-        <Table>
+          <Typography fontSize={20} fontWeight={"600"}>
+            {title}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => setNewExpense(true)}
+          >
+            New Expense
+          </Button>
+        </Box>
+      )}
+      <TableContainer component={Box}>
+        <Table sx={{ margin: "auto", width: "100%", minWidth: "700px" }}>
           <TableHead>
             <TableRow>
               <TableCell>NAME</TableCell>
@@ -535,239 +515,41 @@ export function ExpensesTable({
           </TableBody>
         </Table>
       </TableContainer>
-      <Backdrop open={newExpense} onClick={() => setNewExpense(false)}>
-        <Card
-          sx={{
-            width: "400px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <CardContent>
-            <TextField
-              label="Name"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={newExpenseName}
-              onChange={(e) => setNewExpenseName(e.target.value)}
-            />
-            <FormControl fullWidth variant="filled">
-              <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
-              <FilledInput
-                value={newExpenseAmount}
-                onChange={handleAmountChange}
-                id="filled-adornment-amount"
-                startAdornment={
-                  <InputAdornment position="start">$</InputAdornment>
-                }
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="category">Select Category</InputLabel>
-              <Select
-                fullWidth
-                labelId="category"
-                id="category"
-                variant="outlined"
-                value={selectedCategory}
-                label="Select Category"
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories?.map((category) => (
-                  <MenuItem
-                    key={category.id}
-                    value={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                  >
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                slotProps={{ textField: { fullWidth: true } }}
-              />
-            </LocalizationProvider>
-            <TextField
-              label="Notes"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={newExpenseNotes}
-              onChange={(e) => setNewExpenseNotes(e.target.value)}
-            />
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              {creatingExpense ? (
-                <CircularProgress size={20} sx={{ color: "white" }} />
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      </Backdrop>
-      <Backdrop open={openExpense} onClick={() => setOpenExpense(false)}>
-        <Card
-          sx={{
-            width: "400px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <CardContent
-            sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Typography fontSize={24} fontWeight={"600"}>
-                {selectedExpense?.name}
-              </Typography>
-              <DeleteIcon
-                onClick={() => setShowDeleteDialog(true)}
-                color="action"
-                sx={{ cursor: "pointer" }}
-              />
-            </Box>
-            <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <Typography>Amount: </Typography>
-              <input
-                type="text"
-                title="amount"
-                value={selectedExpense?.amount}
-                onChange={(e) => {
-                  setSelectedExpense((prev) => {
-                    if (prev) {
-                      return { ...prev, amount: e.target.value };
-                    } else {
-                      return null;
-                    }
-                  });
-                }}
-                onKeyDown={async (e) => {
-                  if (e.key === "Enter") {
-                    await handleExpenseAmountChange();
-                  }
-                }}
-                style={{
-                  border: "none",
-                  outline: "none",
-                  width: "100%",
-                  backgroundColor: "#d3d3d3",
-                  padding: "0.3rem",
-                  borderRadius: "3px",
-                }}
-              />
-            </Box>
-            <FormControl fullWidth>
-              <InputLabel id="new-category">Select Category</InputLabel>
-              <Select
-                fullWidth
-                labelId="new-category"
-                id="new-category"
-                variant="outlined"
-                value={selectedCategory}
-                label="Select Category"
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                {categories?.map((category) => (
-                  <MenuItem
-                    key={category.id}
-                    value={category.id}
-                    onClick={() => {
-                      handleChangeCategory(category.id);
-                    }}
-                  >
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Date"
-                value={selectedDate}
-                onChange={(newValue) => {
-                  setSelectedDate(newValue);
-                  handleChangeDate(newValue);
-                }}
-                slotProps={{ textField: { fullWidth: true } }}
-              />
-            </LocalizationProvider>
-            <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <Typography fontSize={16} fontWeight={"400"}>
-                Notes:
-              </Typography>
-              <input
-                type="text"
-                title="notes"
-                value={selectedExpense?.notes}
-                style={{
-                  border: "none",
-                  outline: "none",
-                  width: "100%",
-                  backgroundColor: "#d3d3d3",
-                  padding: "0.3rem",
-                  borderRadius: "3px",
-                }}
-                onChange={(e) =>
-                  setSelectedExpense((prev) => {
-                    if (prev) {
-                      return { ...prev, notes: e.target.value };
-                    } else {
-                      return null;
-                    }
-                  })
-                }
-                onKeyDown={async (e) => {
-                  if (e.key === "Enter") {
-                    await handleChangeNotes();
-                  }
-                }}
-                placeholder="Add notes..."
-              />
-            </Box>
-          </CardContent>
-        </Card>
-        <Dialog
-          open={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <DialogTitle id="alert-dialog-title">Delete Category</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              This action will delete all expenses associated with this
-              category. Are you sure you want to delete this category?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
-            <Button
-              onClick={() => {
-                setShowDeleteDialog(false);
-                handleDeleteExpense();
-              }}
-              autoFocus
-            >
-              Yes
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Backdrop>
+      <NewExpenseCard
+        newExpense={newExpense}
+        setNewExpense={setNewExpense}
+        newExpenseName={newExpenseName}
+        setNewExpenseName={setNewExpenseName}
+        newExpenseAmount={newExpenseAmount}
+        handleAmountChange={handleAmountChange}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        categories={categories}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        newExpenseNotes={newExpenseNotes}
+        setNewExpenseNotes={setNewExpenseNotes}
+        handleSave={handleSave}
+        creatingExpense={creatingExpense}
+      />
+      <ExpenseCard
+        openExpense={openExpense}
+        setOpenExpense={setOpenExpense}
+        selectedExpense={selectedExpense}
+        setSelectedExpense={setSelectedExpense}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        setShowDeleteDialog={setShowDeleteDialog}
+        categories={categories}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        showDeleteDialog={showDeleteDialog}
+        handleExpenseAmountChange={handleExpenseAmountChange}
+        handleChangeCategory={handleChangeCategory}
+        handleChangeDate={handleChangeDate}
+        handleChangeNotes={handleChangeNotes}
+        handleDeleteExpense={handleDeleteExpense}
+      />
     </Box>
   );
 }
