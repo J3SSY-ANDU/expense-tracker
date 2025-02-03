@@ -197,11 +197,11 @@ export function ExpenseCard({
         onClose={() => setShowDeleteDialog(false)}
         onClick={(e) => e.stopPropagation()}
       >
-        <DialogTitle id="alert-dialog-title">Delete Category</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Delete Expense</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            This action will delete all expenses associated with this category.
-            Are you sure you want to delete this category?
+            This action cannot be undone. Are you sure you want to delete this
+            expense?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
