@@ -549,6 +549,7 @@ export function ExpensesTable({
         handleChangeDate={handleChangeDate}
         handleChangeNotes={handleChangeNotes}
         handleDeleteExpense={handleDeleteExpense}
+        handleChangeExpenseName={handleChangeExpenseName}
       />
     </Box>
   );
