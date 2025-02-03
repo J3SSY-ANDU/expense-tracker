@@ -9,5 +9,6 @@ import { Account } from "./Account";
 import { History } from "./History";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
+import { CategoryCard } from "./CategoryCard";
 
-export { Categories, ExpensesTable, Login, SignupForm, VerifyEmail, ForgotPasswordForm, ResetForgotPasswordForm, Account, History, ExpenseCard, NewExpenseCard };
+export { Categories, ExpensesTable, Login, SignupForm, VerifyEmail, ForgotPasswordForm, ResetForgotPasswordForm, Account, History, ExpenseCard, NewExpenseCard, CategoryCard };
