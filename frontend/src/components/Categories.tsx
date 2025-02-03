@@ -97,6 +97,10 @@ export function Categories({
       });
       setNewCategory(false);
       setNewCategoryName("");
+    } else {
+      console.log("Category name cannot be empty.");
+      setNewCategory(false);
+      setNewCategoryName("");
     }
   }, [newCategoryName, user, setCategories]);
 
@@ -364,6 +368,7 @@ export function Categories({
                   type="text"
                   title="description"
                   name="description"
+                  placeholder="Add description..."
                   value={selectedCategory?.description || ""}
                   onChange={(e) =>
                     setSelectedCategory((prev) => {
