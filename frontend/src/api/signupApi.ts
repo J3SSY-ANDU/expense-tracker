@@ -1,9 +1,11 @@
+import { User } from "../types";
+
 export async function Signup(
   firstname: string,
   lastname: string,
   email: string,
   password: string
-): Promise<boolean> {
+): Promise<User | {}> {
   try {
     const res = await fetch("/process-signup", {
       method: "POST",
@@ -14,13 +16,13 @@ export async function Signup(
     });
     if (res.status === 200) {
       console.log("Signed up successfully");
-      return true;
+      return res.json();
     } else {
       console.log("Failed to sign up");
-      return false;
+      return {};
     }
   } catch (err) {
     console.error(`Error signing up ${err}`);
-    return false;
+    return {};
   }
 }

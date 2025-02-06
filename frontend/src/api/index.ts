@@ -17,7 +17,7 @@ import {
   UpdateExpenseDate,
   UpdateExpenseNotes,
 } from "./expenseApi";
-import { FetchUserData, DeleteUser, ChangePassword, ChangeName } from "./userApi";
+import { FetchUserData, DeleteUser, ChangePassword, ChangeName, GetUserVerificationStatus } from "./userApi";
 import { Logout } from "./logoutApi";
 import { Signup } from "./signupApi";
 import { VerifyEmail } from "./verifyEmailApi";
@@ -55,5 +55,6 @@ export {
   FetchHistoryData,
   FetchHistoryExpensesByMonthYear,
   GetCategory,
-  Login
+  Login, 
+  GetUserVerificationStatus
 };
