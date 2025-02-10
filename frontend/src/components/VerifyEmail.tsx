@@ -36,12 +36,7 @@ export function VerifyEmail() {
         navigate("/signup");
         return;
       } else if (!tokenParam && userIdParam) {
-        const isVerified = await GetUserVerificationStatus(userIdParam);
-        if (isVerified) {
-          navigate("/login");
-        } else {
-          setLoading(false); // Stop loading
-        }
+        await GetUserVerificationStatus(userIdParam);
       } else if (!userIdParam && tokenParam) {
         await VerifyEmailApi(tokenParam);
       }

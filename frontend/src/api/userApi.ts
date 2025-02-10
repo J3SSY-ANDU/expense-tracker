@@ -1,4 +1,5 @@
 import { User } from "../types";
+import {  } from "react-router-dom";
 
 export async function FetchUserData(): Promise<User | null> {
   try {
@@ -18,7 +19,7 @@ export async function FetchUserData(): Promise<User | null> {
   return null;
 }
 
-export async function GetUserVerificationStatus(id: string): Promise<boolean> {
+export async function GetUserVerificationStatus(id: string): Promise<string | null> {
   try {
     const res = await fetch(`/verify-user-creation?id=${id}`, {
       method: "GET",
@@ -28,15 +29,20 @@ export async function GetUserVerificationStatus(id: string): Promise<boolean> {
     });
     if (res.status === 200) {
       console.log("User creation verified");
-      return true;
-    } else {
+      window.location.href = "/login";
+      return 'Verified';
+    } else if (res.status === 401) {
       console.log("User creation not verified");
-      return false;
+      return 'Not Verified';
+    } else if (res.status === 404) {
+      console.log("User not found");
+      window.location.href = "/signup";
+      return 'Not Found';
     }
   } catch (err) {
     console.error(`Error verifying user creation ${err}`);
   }
-  return false;
+  return null;
 }
 
 export async function ChangePassword(
