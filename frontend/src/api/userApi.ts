@@ -18,6 +18,27 @@ export async function FetchUserData(): Promise<User | null> {
   return null;
 }
 
+export async function GetUserVerificationStatus(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(`/verify-user-creation?id=${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (res.status === 200) {
+      console.log("User creation verified");
+      return true;
+    } else {
+      console.log("User creation not verified");
+      return false;
+    }
+  } catch (err) {
+    console.error(`Error verifying user creation ${err}`);
+  }
+  return false;
+}
+
 export async function ChangePassword(
   oldPassword: string,
   newPassword: string

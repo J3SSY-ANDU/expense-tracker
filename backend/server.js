@@ -83,7 +83,7 @@ app.post("/process-signup", async (req, res) => {
   req.session.userId = user.id;
   await createEmailConfirmation(user.id);
   await sendEmail(user.email, user.id);
-  res.status(200).send("User created successfully!");
+  res.status(200).send(user);
 });
 
 app.post("/verify-email", async (req, res) => {
@@ -105,6 +105,15 @@ app.post("/resend-verification-email", async (req, res) => {
   await createEmailConfirmation(id);
   await sendEmail(user.email, id);
   res.status(200).send("Verification email sent!");
+})
+
+app.get("/verify-user-creation", async (req, res) => {
+  const { id } = req.query;
+  const isVerified = await userIsVerified(id);
+  if (!isVerified) {
+    return res.status(401).send("Email not verified!");
+  }
+  res.status(200).send("Email verified!");
 })
 
 app.post("/process-login", async (req, res) => {
