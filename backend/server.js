@@ -109,6 +109,10 @@ app.post("/resend-verification-email", async (req, res) => {
 
 app.get("/verify-user-creation", async (req, res) => {
   const { id } = req.query;
+  const user = await getUserById(id);
+  if (!user) {
+    return res.status(404).send("User not found!");
+  }
   const isVerified = await userIsVerified(id);
   if (!isVerified) {
     return res.status(401).send("Email not verified!");
