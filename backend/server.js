@@ -44,6 +44,7 @@ const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmatio
 const { sendEmail, forgotPasswordEmail } = require("./emails");
 const { createForgotPassword, changeForgotPassword } = require("./database/forgotPassword");
 const { getHistoryByUser } = require("./database/history");
+const { deleteAccountEmail } = require("./emails");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -366,11 +367,18 @@ app.post("/delete-user", async (req, res) => {
       await deleteCategory(category.id);
     }
   }
-  const deleted = await deleteUser(id);
-  if (!deleted) {
-    return res.status(401).send("Account deletion failed!");
+  const user = await getUserById(id);
+  if (!user) {
+    return res.status(401).send("User not found!");
   }
-  res.status(200).send("Account deleted successfully!");
+  else {
+    const deleted = await deleteUser(id);
+    if (!deleted) {
+      return res.status(401).send("Account deletion failed!");
+    }
+    await deleteAccountEmail(user.firstname, user.email);
+    res.status(200).send("Account deleted successfully!");
+  }
 })
 
 app.post("/change-password", async (req, res) => {
