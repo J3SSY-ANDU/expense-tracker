@@ -44,6 +44,7 @@ const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmatio
 const { sendEmail, forgotPasswordEmail } = require("./emails");
 const { createForgotPassword, changeForgotPassword } = require("./database/forgotPassword");
 const { getHistoryByUser } = require("./database/history");
+const { deleteAccountEmail } = require("./emails");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -83,7 +84,7 @@ app.post("/process-signup", async (req, res) => {
   req.session.userId = user.id;
   await createEmailConfirmation(user.id);
   await sendEmail(user.email, user.id);
-  res.status(200).send("User created successfully!");
+  res.status(200).send(user);
 });
 
 app.post("/verify-email", async (req, res) => {
@@ -105,6 +106,19 @@ app.post("/resend-verification-email", async (req, res) => {
   await createEmailConfirmation(id);
   await sendEmail(user.email, id);
   res.status(200).send("Verification email sent!");
+})
+
+app.get("/verify-user-creation", async (req, res) => {
+  const { id } = req.query;
+  const user = await getUserById(id);
+  if (!user) {
+    return res.status(404).send("User not found!");
+  }
+  const isVerified = await userIsVerified(id);
+  if (!isVerified) {
+    return res.status(401).send("Email not verified!");
+  }
+  res.status(200).send("Email verified!");
 })
 
 app.post("/process-login", async (req, res) => {
@@ -353,11 +367,18 @@ app.post("/delete-user", async (req, res) => {
       await deleteCategory(category.id);
     }
   }
-  const deleted = await deleteUser(id);
-  if (!deleted) {
-    return res.status(401).send("Account deletion failed!");
+  const user = await getUserById(id);
+  if (!user) {
+    return res.status(401).send("User not found!");
   }
-  res.status(200).send("Account deleted successfully!");
+  else {
+    const deleted = await deleteUser(id);
+    if (!deleted) {
+      return res.status(401).send("Account deletion failed!");
+    }
+    await deleteAccountEmail(user.firstname, user.email);
+    res.status(200).send("Account deleted successfully!");
+  }
 })
 
 app.post("/change-password", async (req, res) => {

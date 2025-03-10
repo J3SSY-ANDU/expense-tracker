@@ -2,6 +2,7 @@ const nodemailer = require("nodemailer");
 const dotenv = require("dotenv").config();
 const { getEmailConfirmationToken } = require("./database/emailConfirmation");
 const { getForgotPasswordToken } = require("./database/forgotPassword");
+const { getUserById } = require("./database/users");
 
 const transporter = nodemailer.createTransport({
   service: "gmail", // Replace with your email provider
@@ -71,4 +72,33 @@ const forgotPasswordEmail = async (email) => {
     }
 }
 
-module.exports = { sendEmail, forgotPasswordEmail };
+const deleteAccountEmail = async (name, email) => {
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Account Deletion Confirmation",
+            html: `
+                <p>Hey <strong>${name}</strong>,</p>
+                <p>
+                    Just a quick note to let you know that your <strong>Expense Tracker</strong> account has been successfully deleted.
+                </p>
+                <p>Here’s what this means:</p>
+                <ul>
+                    <li>✅ All your expenses and categories have been removed.</li>
+                    <li>✅ You won’t be able to log in anymore.</li>
+                    <li>✅ If you did this by mistake or change your mind, let us know—we’re happy to help!</li>
+                </ul>
+                <p>Thanks for trying <strong>Expense Tracker</strong>! We appreciate you and hope to see you again in the future.</p>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log("Email sent successfully!");
+    } catch (err) {
+        console.error(`Error sending email: ${err}`);
+        return null;
+    }
+}
+
+module.exports = { sendEmail, forgotPasswordEmail, deleteAccountEmail };

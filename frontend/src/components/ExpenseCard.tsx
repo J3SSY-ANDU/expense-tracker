@@ -39,6 +39,7 @@ export function ExpenseCard({
   handleChangeDate,
   handleChangeNotes,
   handleDeleteExpense,
+  handleChangeExpenseName,
 }: {
   openExpense: boolean;
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
@@ -56,6 +57,7 @@ export function ExpenseCard({
   handleChangeDate: (newValue: Dayjs | null) => void;
   handleChangeNotes: () => Promise<void>;
   handleDeleteExpense: () => void;
+  handleChangeExpenseName: () => Promise<void>;
 }) {
   return (
     <Backdrop
@@ -82,9 +84,34 @@ export function ExpenseCard({
               alignItems: "center",
             }}
           >
-            <Typography fontSize={24} fontWeight={"600"}>
-              {selectedExpense?.name}
-            </Typography>
+            <input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSelectedExpense((prev) => {
+                  if (prev) {
+                    return { ...prev, name: e.target.value };
+                  } else {
+                    return null;
+                  }
+                })
+              }
+              onKeyDown={async (e) => {
+                if (e.key === "Enter") {
+                  await handleChangeExpenseName();
+                }
+              }}
+              onBlur={async () => {
+                await handleChangeExpenseName();
+              }}
+              style={{
+                all: "unset",
+                width: "100%",
+                fontSize: "1.5rem",
+                fontWeight: "700",
+              }}
+              value={selectedExpense?.name}
+              title="name"
+              placeholder="Add name..."
+            />
             <DeleteIcon
               onClick={() => setShowDeleteDialog(true)}
               color="action"
@@ -96,6 +123,7 @@ export function ExpenseCard({
             <input
               type="text"
               title="amount"
+              placeholder="Add amount..."
               value={selectedExpense?.amount}
               onChange={(e) => {
                 setSelectedExpense((prev) => {
@@ -165,6 +193,7 @@ export function ExpenseCard({
               type="text"
               title="notes"
               value={selectedExpense?.notes}
+              placeholder="Add notes..."
               style={{
                 border: "none",
                 outline: "none",
@@ -187,7 +216,6 @@ export function ExpenseCard({
                   await handleChangeNotes();
                 }
               }}
-              placeholder="Add notes..."
             />
           </Box>
         </CardContent>
@@ -197,11 +225,11 @@ export function ExpenseCard({
         onClose={() => setShowDeleteDialog(false)}
         onClick={(e) => e.stopPropagation()}
       >
-        <DialogTitle id="alert-dialog-title">Delete Category</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Delete Expense</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            This action will delete all expenses associated with this category.
-            Are you sure you want to delete this category?
+            This action cannot be undone. Are you sure you want to delete this
+            expense?
           </DialogContentText>
         </DialogContent>
         <DialogActions>

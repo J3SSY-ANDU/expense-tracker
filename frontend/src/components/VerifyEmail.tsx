@@ -8,29 +8,42 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { VerifyEmail as VerifyEmailApi, ResendVerificationEmail } from "../api";
+import {
+  VerifyEmail as VerifyEmailApi,
+  ResendVerificationEmail,
+  GetUserVerificationStatus,
+} from "../api";
+import { useNavigate } from "react-router-dom";
 
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resendingEmail, setResendingEmail] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function verifyEmail() {
       const urlParams = new URLSearchParams(window.location.search);
       const tokenParam = urlParams.get("token");
+      const userIdParam = urlParams.get("id");
       setToken(tokenParam);
+      setUserId(userIdParam);
 
-      if (!token) {
-        console.error("Token not found");
-        setLoading(false); // Stop loading
+      if (!tokenParam && !userIdParam) {
+        console.error("Token and User ID not found");
+        navigate("/signup");
         return;
+      } else if (!tokenParam && userIdParam) {
+        await GetUserVerificationStatus(userIdParam);
+      } else if (!userIdParam && tokenParam) {
+        await VerifyEmailApi(tokenParam);
       }
-      await VerifyEmailApi(token);
     }
 
     verifyEmail();
-  }, [token]);
+  });
 
   return (
     <Paper
@@ -71,13 +84,13 @@ export function VerifyEmail() {
         onClick={() => {
           setLoading(true);
           ResendVerificationEmail(token!).then(() => {
-            setLoading(false);
+            setResendingEmail(false);
             setShowSnackbar(true);
           });
         }}
         sx={{ fontSize: "0.8rem", width: "50%" }}
       >
-        {loading ? (
+        {resendingEmail ? (
           <CircularProgress size={20} sx={{ color: "#fff" }} />
         ) : (
           "Resend email"

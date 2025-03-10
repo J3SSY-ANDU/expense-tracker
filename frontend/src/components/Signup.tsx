@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -99,13 +98,13 @@ export function SignupForm() {
         return;
       }
 
-      const signup = await Signup(firstname, lastname, email, password);
+      const user = await Signup(firstname, lastname, email, password);
 
-      if (signup) {
+      if (user && "id" in user) {
         await GenerateCategoryData();
         setLoading(false);
         emptyFields();
-        navigate("/verify-email");
+        navigate("/verify-email?id=" + user.id);
       } else {
         setError({ ...error, failed: "Failed to sign up." });
         setLoading(false);
