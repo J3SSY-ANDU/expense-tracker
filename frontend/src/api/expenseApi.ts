@@ -2,7 +2,7 @@ import { Expense, NewExpense } from "../types/Expense";
 
 export async function FetchExpensesData(): Promise<Expense[] | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/all-monthly-expenses`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/all-monthly-expenses`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -23,7 +23,7 @@ export async function CreateExpense(
   expense: NewExpense
 ): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/create-expense`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/create-expense`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +43,7 @@ export async function CreateExpense(
 
 export async function UpdateExpenseName(expense_id: string, name: string): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/update-expense-name`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-name`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export async function UpdateExpenseName(expense_id: string, name: string): Promi
 
 export async function UpdateExpenseAmount(expense_id: string, amount: number): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/update-expense-amount`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-amount`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export async function UpdateExpenseAmount(expense_id: string, amount: number): P
 
 export async function UpdateExpenseCategory(expense_id: string, category_id: string): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/update-expense-category`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-category`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +103,7 @@ export async function UpdateExpenseCategory(expense_id: string, category_id: str
 
 export async function UpdateExpenseDate(expense_id: string, date: string): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/update-expense-date`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-date`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -123,7 +123,7 @@ export async function UpdateExpenseDate(expense_id: string, date: string): Promi
 
 export async function UpdateExpenseNotes(expense_id: string, notes: string): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/update-expense-notes`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-notes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -143,7 +143,7 @@ export async function UpdateExpenseNotes(expense_id: string, notes: string): Pro
 
 export async function DeleteExpense(expense_id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${process.env.API_URL}/delete-expense`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-expense`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

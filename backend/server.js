@@ -16,7 +16,7 @@ const {
   userIsVerified,
   getUserByEmail,
   deleteUser,
-  updateName, 
+  updateName,
   updatePassword
 } = require("./database/users");
 const {
@@ -57,7 +57,7 @@ app.use(
       "https://expense-tracker-gules-pi.vercel.app",
       "https://expense-tracker-jessys-projects-8b4c4acf.vercel.app",
       "https://expense-tracker-git-main-jessys-projects-8b4c4acf.vercel.app",
-      "https://expense-tracker-fvkn74p8t-jessys-projects-8b4c4acf.vercel.app"     
+      "https://expense-tracker-fvkn74p8t-jessys-projects-8b4c4acf.vercel.app"
     ],
     credentials: true,
   })
@@ -68,7 +68,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,
-      secure: process.env.NODE_ENV == "production",
+      secure: process.env.NODE_ENV === "production" && process.env.CLIENT_URL?.startsWith("https"),
       httpOnly: true,
     },
     resave: true,
@@ -445,7 +445,7 @@ app.get("/monthly-history", async (req, res) => {
   if (isNaN(month) || isNaN(year)) {
     return res.status(400).send("Invalid month or year!");
   }
-  
+
   const history = await getExpensesByMonth(id, month, year);
   if (!history) {
     return res.status(401).send("Data fetch failed!");

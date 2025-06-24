@@ -3,7 +3,7 @@ import { } from "react-router-dom";
 
 export async function FetchUserData(): Promise<User | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/user-data`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/user-data`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -22,7 +22,7 @@ export async function FetchUserData(): Promise<User | null> {
 
 export async function GetUserVerificationStatus(id: string): Promise<string | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/verify-user-creation?id=${id}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-user-creation?id=${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +52,7 @@ export async function ChangePassword(
   newPassword: string
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${process.env.API_URL}/change-password`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/change-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export async function ChangePassword(
 
 export async function ChangeName(newFirstname: string, newLastname: string): Promise<boolean> {
   try {
-    const res = await fetch(`${process.env.API_URL}/change-name`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/change-name`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +90,7 @@ export async function ChangeName(newFirstname: string, newLastname: string): Pro
 
 export async function DeleteUser(): Promise<boolean> {
   try {
-    const res = await fetch(`${process.env.API_URL}/delete-user`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -20,7 +20,7 @@ export async function FetchHistoryData(): Promise<MonthlyHistory[] | null> {
 
 export async function FetchHistoryExpensesByMonthYear(month: number, year: number): Promise<Expense[] | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/monthly-history?month=${month}&year=${year}`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/monthly-history?month=${month}&year=${year}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

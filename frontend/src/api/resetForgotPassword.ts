@@ -1,6 +1,6 @@
 export async function ResetForgotPassword(token: string, new_password: string): Promise<void> {
     try {
-        const res = await fetch(`${process.env.API_URL}/reset-forgot-password`, {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/reset-forgot-password`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
