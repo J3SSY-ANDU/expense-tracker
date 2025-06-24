@@ -1,6 +1,6 @@
 export async function ForgotPassword(email: string): Promise<void> {
     try {
-        const res = await fetch("/forgot-password", {
+        const res = await fetch(`${process.env.API_URL}/forgot-password`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

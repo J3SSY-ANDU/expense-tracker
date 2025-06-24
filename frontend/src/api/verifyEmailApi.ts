@@ -1,6 +1,6 @@
 export async function VerifyEmail(token: string): Promise<void> {
   try {
-    const res = await fetch("/verify-email", {
+    const res = await fetch(`${process.env.API_URL}/verify-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

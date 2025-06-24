@@ -7,7 +7,7 @@ export async function Signup(
   password: string
 ): Promise<User | {}> {
   try {
-    const res = await fetch("/process-signup", {
+    const res = await fetch(`${process.env.API_URL}/process-signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

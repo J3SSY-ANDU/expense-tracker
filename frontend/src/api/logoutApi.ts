@@ -1,6 +1,6 @@
 export async function Logout(): Promise<void> {
     try {
-      const res = await fetch("/logout", {
+      const res = await fetch(`${process.env.API_URL}/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

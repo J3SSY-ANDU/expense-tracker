@@ -1,7 +1,7 @@
 import { Category, NewCategory } from "../types";
 export async function FetchCategoriesData(): Promise<Category[] | null> {
   try {
-    const res = await fetch("/all-categories", {
+    const res = await fetch(`${process.env.API_URL}/all-categories`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export async function FetchCategoriesData(): Promise<Category[] | null> {
 
 export async function GenerateCategoryData(): Promise<Category[] | null> {
   try {
-    const res = await fetch("/generate-default-categories", {
+    const res = await fetch(`${process.env.API_URL}/generate-default-categories`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export async function GenerateCategoryData(): Promise<Category[] | null> {
 
 export async function GetCategory(category_id: string): Promise<Category | null> {
   try {
-    const res = await fetch(`/get-category?category_id=${category_id}`, {
+    const res = await fetch(`${process.env.API_URL}/get-category?category_id=${category_id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,7 @@ export async function AddCategory(
   category: NewCategory
 ): Promise<Category | null> {
   try {
-    const res = await fetch("/add-category", {
+    const res = await fetch(`${process.env.API_URL}/add-category`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export async function AddCategory(
 
 export async function UpdateCategoryName(category_id: string, name: string) {
   try {
-    const res = await fetch("/update-category-name", {
+    const res = await fetch(`${process.env.API_URL}/update-category-name`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -97,7 +97,7 @@ export async function UpdateCategoryDescription(
   category_id: string, description: string
 ): Promise<Category | null> {
   try {
-    const res = await fetch("/update-category-description", {
+    const res = await fetch(`${process.env.API_URL}/update-category-description`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -116,7 +116,7 @@ export async function UpdateCategoryDescription(
 
 export async function DeleteCategory(category_id: string): Promise<boolean> {
   try {
-    const res = await fetch(`/delete-category`, {
+    const res = await fetch(`${process.env.API_URL}/delete-category`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
