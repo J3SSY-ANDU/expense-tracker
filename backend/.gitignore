@@ -6,7 +6,6 @@ accounts.db
 requests.rest
 test.sql
 database/expensesData.js
-database/categoriesData.js
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
