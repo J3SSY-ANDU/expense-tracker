@@ -49,6 +49,7 @@ const { deleteAccountEmail } = require("./emails");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.set("trust proxy", 1); // trust Render’s proxy
 
 app.use(
   cors({
@@ -139,17 +140,30 @@ app.get("/verify-user-creation", async (req, res) => {
 app.post("/process-login", async (req, res) => {
   const { email, password } = req.body;
   const user = await authenticateUser(email, password);
+
   if (!user) {
     return res.status(401).send("Login failed!");
   }
-  req.session.userId = user.id;
+
   const isVerified = await userIsVerified(user.id);
   if (!isVerified) {
     console.log("Email not verified!");
     return res.status(401).send("Email not verified!");
   }
-  res.status(200).send("Login successful!");
+
+  req.session.userId = user.id;
+
+  // ✅ Explicitly save session before sending response
+  req.session.save((err) => {
+    if (err) {
+      console.error("Session save error:", err);
+      return res.status(500).send("Session save failed!");
+    }
+    console.log("Login successful, session saved");
+    res.status(200).send("Login successful!");
+  });
 });
+
 
 app.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
