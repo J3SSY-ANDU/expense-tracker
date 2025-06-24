@@ -54,7 +54,10 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",                      // local dev
-      "http://expense-tracker-gules-pi.vercel.app"            // 👈 replace with actual Vercel URL
+      "https://expense-tracker-gules-pi.vercel.app",
+      "https://expense-tracker-jessys-projects-8b4c4acf.vercel.app",
+      "https://expense-tracker-git-main-jessys-projects-8b4c4acf.vercel.app",
+      "https://expense-tracker-fvkn74p8t-jessys-projects-8b4c4acf.vercel.app"     
     ],
     credentials: true,
   })
