@@ -12,6 +12,7 @@ export async function Signup(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ firstname, lastname, email, password }),
     });
     if (res.status === 200) {

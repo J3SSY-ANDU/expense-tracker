@@ -3,10 +3,11 @@ export async function Login(email: string, password: string): Promise<boolean> {
         const res = await fetch(`${process.env.API_URL}/process-login`, {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+                "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({ email, password }),
-          });
+        });
         if (res.status === 200) {
             console.log("Login successful!");
             return true;

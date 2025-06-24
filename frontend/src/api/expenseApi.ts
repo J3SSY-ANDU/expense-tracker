@@ -7,6 +7,7 @@ export async function FetchExpensesData(): Promise<Expense[] | null> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
     if (res.status === 200) {
       const expensesData: Expense[] = await res.json(); // Make sure that the response is of type Expense[]
@@ -27,6 +28,7 @@ export async function CreateExpense(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify(expense),
     });
     if (res.status === 201) {
@@ -46,6 +48,7 @@ export async function UpdateExpenseName(expense_id: string, name: string): Promi
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ expense_id, name }),
     });
     if (res.status === 200) {
@@ -65,6 +68,7 @@ export async function UpdateExpenseAmount(expense_id: string, amount: number): P
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ expense_id, amount }),
     });
     if (res.status === 200) {
@@ -84,6 +88,7 @@ export async function UpdateExpenseCategory(expense_id: string, category_id: str
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ expense_id, category_id }),
     });
     if (res.status === 200) {
@@ -103,6 +108,7 @@ export async function UpdateExpenseDate(expense_id: string, date: string): Promi
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ expense_id, date }),
     });
     if (res.status === 200) {
@@ -122,6 +128,7 @@ export async function UpdateExpenseNotes(expense_id: string, notes: string): Pro
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ expense_id, notes }),
     });
     if (res.status === 200) {
@@ -141,6 +148,7 @@ export async function DeleteExpense(expense_id: string): Promise<boolean> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ expense_id }),
     });
     if (res.status === 200) {

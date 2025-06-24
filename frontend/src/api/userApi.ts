@@ -1,5 +1,5 @@
 import { User } from "../types";
-import {  } from "react-router-dom";
+import { } from "react-router-dom";
 
 export async function FetchUserData(): Promise<User | null> {
   try {
@@ -8,6 +8,7 @@ export async function FetchUserData(): Promise<User | null> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
     if (res.status === 200) {
       const userData: User = await res.json(); // Make sure that the response is of type User
@@ -26,6 +27,7 @@ export async function GetUserVerificationStatus(id: string): Promise<string | nu
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
     if (res.status === 200) {
       console.log("User creation verified");
@@ -55,6 +57,7 @@ export async function ChangePassword(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ oldPassword, newPassword }),
     });
     if (res.status === 200) {
@@ -73,6 +76,7 @@ export async function ChangeName(newFirstname: string, newLastname: string): Pro
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ newFirstname, newLastname }),
     });
     if (res.status === 200) {
@@ -91,6 +95,7 @@ export async function DeleteUser(): Promise<boolean> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
     if (res.status === 200) {
       window.location.href = "/signup";

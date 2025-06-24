@@ -5,6 +5,7 @@ export async function ForgotPassword(email: string): Promise<void> {
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({ email }),
         });
         if (res.status === 200) {

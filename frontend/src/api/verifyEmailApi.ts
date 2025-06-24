@@ -5,6 +5,7 @@ export async function VerifyEmail(token: string): Promise<void> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
       body: JSON.stringify({ token }),
     });
     if (res.status === 200) {

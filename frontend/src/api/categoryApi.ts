@@ -6,6 +6,8 @@ export async function FetchCategoriesData(): Promise<Category[] | null> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
+
     });
     if (res.status === 200) {
       const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
@@ -24,6 +26,8 @@ export async function GenerateCategoryData(): Promise<Category[] | null> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
+
     });
     if (res.status === 200) {
       const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
@@ -42,6 +46,8 @@ export async function GetCategory(category_id: string): Promise<Category | null>
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
+
     });
     if (res.status === 200) {
       const categoryData: Category = await res.json(); // Make sure that the response is of type Category
@@ -62,6 +68,8 @@ export async function AddCategory(
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
+
       body: JSON.stringify(category),
     });
     if (res.status === 201) {
@@ -81,6 +89,8 @@ export async function UpdateCategoryName(category_id: string, name: string) {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
+
       body: JSON.stringify({ category_id, name }),
     });
     if (res.status === 200) {
@@ -102,7 +112,9 @@ export async function UpdateCategoryDescription(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({category_id, description}),
+      credentials: "include",
+
+      body: JSON.stringify({ category_id, description }),
     });
     if (res.status === 200) {
       const updatedCategory: Category = await res.json(); // Make sure that the response is of type Category
@@ -121,6 +133,8 @@ export async function DeleteCategory(category_id: string): Promise<boolean> {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
+
       body: JSON.stringify({ category_id }),
     });
     if (res.status === 200) {

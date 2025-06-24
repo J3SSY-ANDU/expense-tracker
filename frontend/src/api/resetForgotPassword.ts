@@ -5,6 +5,7 @@ export async function ResetForgotPassword(token: string, new_password: string): 
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
             body: JSON.stringify({ token, new_password }),
         });
         if (res.status === 200) {
