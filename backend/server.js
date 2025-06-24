@@ -1,6 +1,7 @@
 const express = require("express");
 const session = require("express-session");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const bcrypt = require("bcrypt");
 const path = require("path");
 // const generateCSV = require('./generateCSV');
@@ -48,6 +49,16 @@ const { deleteAccountEmail } = require("./emails");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",                      // local dev
+      "http://expense-tracker-gules-pi.vercel.app"            // 👈 replace with actual Vercel URL
+    ],
+    credentials: true,
+  })
+);
 
 app.use(
   session({
