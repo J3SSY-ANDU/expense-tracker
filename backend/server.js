@@ -70,7 +70,7 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7,
       secure: true, // ✅ Needed on HTTPS (Render)
       httpOnly: true,
-      sameSite: "none", // 🔥 REQUIRED for cross-site cookies
+      sameSite: "None", // 🔥 REQUIRED for cross-site cookies
     },
     resave: true,
     saveUninitialized: false,
