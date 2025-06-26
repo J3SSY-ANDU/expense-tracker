@@ -1,13 +1,16 @@
 const express = require("express");
 const session = require("express-session");
-const dotenv = require("dotenv");
+const dotenv = require("dotenv").config({
+  path:
+    process.env.NODE_ENV === "production"
+      ? ".env.production"
+      : ".env.development",
+});
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const path = require("path");
-// const generateCSV = require('./generateCSV');
-dotenv.config();
+
 const app = express();
-const port = process.env.PORT || 4000;
 const {
   createUser,
   authenticateUser,
@@ -69,7 +72,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,
-      secure: true, // ✅ Needed on HTTPS (Render)
+      secure: false, // ✅ Needed on HTTPS (Render)
       httpOnly: true,
       sameSite: "None", // 🔥 REQUIRED for cross-site cookies
     },
@@ -378,10 +381,6 @@ app.post("/delete-expense", async (req, res) => {
   res.status(200).send("Expense deleted successfully!");
 });
 
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}...`);
-});
-
 app.post("/delete-user", async (req, res) => {
   const id = req.session.userId;
   const expenses = await getExpensesByUser(id);
@@ -468,3 +467,9 @@ app.get("/monthly-history", async (req, res) => {
   console.log("Data fetch successfully!");
   return res.status(200).send(history);
 })
+
+const port = process.env.PORT || 10000;
+
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}...`);
+});

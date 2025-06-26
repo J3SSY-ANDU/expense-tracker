@@ -1,15 +1,20 @@
 const nodemailer = require("nodemailer");
-const dotenv = require("dotenv").config();
+const dotenv = require("dotenv").config({
+    path:
+        process.env.NODE_ENV === "production"
+            ? ".env.production"
+            : ".env.development",
+});
 const { getEmailConfirmationToken } = require("./database/emailConfirmation");
 const { getForgotPasswordToken } = require("./database/forgotPassword");
 const { getUserById } = require("./database/users");
 
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Replace with your email provider
-  auth: {
-    user: process.env.EMAIL, // Your email
-    pass: process.env.EMAIL_PASSWORD, // Your email password or app password
-  },
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL, 
+        pass: process.env.EMAIL_PASSWORD,
+    },
 });
 
 const sendEmail = async (email, user_id) => {
@@ -20,7 +25,7 @@ const sendEmail = async (email, user_id) => {
             return null;
         }
 
-        const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
+        const verificationUrl = `${process.env.API_URL}/verify-email?token=${token}`;
 
         const mailOptions = {
             from: process.env.EMAIL,
@@ -50,7 +55,7 @@ const forgotPasswordEmail = async (email) => {
             return null;
         }
 
-        const resetUrl = `${process.env.CLIENT_URL}/reset-forgot-password?token=${token}`;
+        const resetUrl = `${process.env.API_URL}/reset-forgot-password?token=${token}`;
 
         const mailOptions = {
             from: process.env.EMAIL,

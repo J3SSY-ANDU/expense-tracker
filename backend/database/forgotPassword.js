@@ -1,6 +1,11 @@
 const { decode } = require("punycode");
 const { connectionPool } = require("./db");
-const dotenv = require("dotenv").config();
+const dotenv = require("dotenv").config({
+  path:
+    process.env.NODE_ENV === "production"
+      ? ".env.production"
+      : ".env.development",
+});
 const jwt = require("jsonwebtoken");
 const { updatePassword, getUserByEmail } = require("./users");
 

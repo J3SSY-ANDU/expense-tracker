@@ -1,6 +1,8 @@
 node_modules/
 user_files/
 .env
+.env.development
+.env.production
 users.db
 accounts.db
 requests.rest

@@ -1,5 +1,10 @@
 const { connectionPool } = require("./db");
-const dotenv = require("dotenv").config();
+const dotenv = require("dotenv").config({
+  path:
+    process.env.NODE_ENV === "production"
+      ? ".env.production"
+      : ".env.development",
+});
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 
