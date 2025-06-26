@@ -72,7 +72,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,
-      secure: false, // ✅ Needed on HTTPS (Render)
+      secure: process.env.NODE_ENV === "production", // 🔥 REQUIRED for cross-site cookies
       httpOnly: true,
       sameSite: "None", // 🔥 REQUIRED for cross-site cookies
     },
