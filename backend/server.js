@@ -74,7 +74,7 @@ app.use(
       maxAge: 1000 * 60 * 60 * 24 * 7,
       secure: process.env.NODE_ENV === "production", // 🔥 REQUIRED for cross-site cookies
       httpOnly: true,
-      sameSite: "None", // 🔥 REQUIRED for cross-site cookies
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // 🔥 REQUIRED for cross-site cookies
     },
     resave: true,
     saveUninitialized: false,

@@ -1,3 +1,4 @@
-Budget App.session.sql
 .vscode/
 .DS_Store
+expense-tracker.session.sql
+expense-tracker-dev.session.sql

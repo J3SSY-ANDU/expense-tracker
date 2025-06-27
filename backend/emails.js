@@ -25,7 +25,7 @@ const sendEmail = async (email, user_id) => {
             return null;
         }
 
-        const verificationUrl = `${process.env.API_URL}/verify-email?token=${token}`;
+        const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
 
         const mailOptions = {
             from: process.env.EMAIL,
@@ -55,7 +55,7 @@ const forgotPasswordEmail = async (email) => {
             return null;
         }
 
-        const resetUrl = `${process.env.API_URL}/reset-forgot-password?token=${token}`;
+        const resetUrl = `${process.env.CLIENT_URL}/reset-forgot-password?token=${token}`;
 
         const mailOptions = {
             from: process.env.EMAIL,
