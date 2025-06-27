@@ -43,7 +43,7 @@ export function VerifyEmail() {
     }
 
     verifyEmail();
-  });
+  }, []);
 
   return (
     <Paper

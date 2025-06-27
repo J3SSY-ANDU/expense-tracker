@@ -108,7 +108,9 @@ app.post("/process-signup", async (req, res) => {
 
 app.post("/verify-email", async (req, res) => {
   const { token } = req.body;
+  console.log("Received token:", token); // LOG
   const user_id = await verifyEmailConfirmation(token);
+  console.log("Verification result user_id:", user_id); // LOG
   if (!user_id) {
     return res.status(401).send("Email verification failed!");
   }
