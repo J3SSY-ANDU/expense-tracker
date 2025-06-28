@@ -51,6 +51,10 @@ const createUser = async (firstname, lastname, email, password) => {
 
 const getUserById = async (id) => {
   try {
+    if (!id) {
+      console.log("User ID is invalid.");
+      return null;
+    }
     const [user] = await connectionPool.query(
       `SELECT * FROM users WHERE id = ?`,
       [id]

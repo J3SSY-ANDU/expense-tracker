@@ -60,6 +60,10 @@ const verifyEmailConfirmation = async (token) => {
   try {
     const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
     const user_id = decoded.user_id;
+    if (!user_id) {
+      console.log("Invalid token.");
+      return null;
+    }
     const [result] = await connectionPool.query(
       `SELECT * FROM emailConfirmation WHERE user_id = ? AND token = ?`,
       [user_id, token]
@@ -77,6 +81,16 @@ const verifyEmailConfirmation = async (token) => {
     return user_id;
   } catch (err) {
     console.error(`Error verifying email confirmation: ${err}`);
+    return null;
+  }
+};
+
+const getUserIdFromToken = async (token) => {
+  try {
+    const decoded = jwt.decode(token);
+    return decoded ? decoded.user_id : null;
+  } catch (err) {
+    console.error(`Error getting user ID from token: ${err}`);
     return null;
   }
 };
@@ -101,4 +115,5 @@ module.exports = {
   verifyEmailConfirmation,
   getEmailConfirmationToken,
   deleteEmailConfirmation,
+  getUserIdFromToken,
 };

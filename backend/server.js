@@ -44,7 +44,7 @@ const {
   getCategoryById,
 } = require("./database/categories");
 const { categoriesData } = require("./database/categoriesData");
-const { createEmailConfirmation, verifyEmailConfirmation, deleteEmailConfirmation } = require("./database/emailConfirmation");
+const { createEmailConfirmation, verifyEmailConfirmation, getUserIdFromToken, deleteEmailConfirmation } = require("./database/emailConfirmation");
 const { sendEmail, forgotPasswordEmail } = require("./emails");
 const { createForgotPassword, changeForgotPassword } = require("./database/forgotPassword");
 const { getHistoryByUser } = require("./database/history");
@@ -108,14 +108,24 @@ app.post("/process-signup", async (req, res) => {
 
 app.post("/verify-email", async (req, res) => {
   const { token } = req.body;
-  console.log("Received token:", token); // LOG
-  const user_id = await verifyEmailConfirmation(token);
-  console.log("Verification result user_id:", user_id); // LOG
-  if (!user_id) {
-    return res.status(401).send("Email verification failed!");
+  const user_id = await verifyEmailConfirmation(token); // returns user id if token is valid
+
+  if (user_id) {
+    // Token is valid, verify user
+    return res.status(200).send("Email verified successfully!");
   }
-  res.status(200).send("Email verified successfully!");
-})
+
+  // If token is missing/invalid, check if the user is already verified
+  const userIdFromToken = await getUserIdFromToken(token); // decode but don't verify signature/expiration
+  if (userIdFromToken) {
+    const user = await getUserById(userIdFromToken);
+    if (user && user.is_verified) {
+      return res.status(200).send("Email already verified!");
+    }
+  }
+
+  return res.status(401).send("Email verification failed!");
+});
 
 app.post("/resend-verification-email", async (req, res) => {
   const id = req.session.userId;
