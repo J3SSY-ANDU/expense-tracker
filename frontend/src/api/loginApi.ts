@@ -1,4 +1,6 @@
-export async function Login(email: string, password: string): Promise<boolean> {
+import { User } from "../types";
+
+export async function Login(email: string, password: string): Promise<User | {error: string}> {
     try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/process-login`, {
             method: "POST",
@@ -10,13 +12,14 @@ export async function Login(email: string, password: string): Promise<boolean> {
         });
         if (res.status === 200) {
             console.log("Login successful!");
-            return true;
+            return res.json();
         } else {
             console.error("Login failed!");
-            return false;
+            const data = await res.json();
+            return {error: data.error ?? "Unknown error occurred."};
         }
     } catch (err) {
         console.error(`Error fetching the API: ${err}`);
-        return false;
+        return {error: "Failed to connect to the server. Please try again later."};
     }
 }

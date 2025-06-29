@@ -110,10 +110,6 @@ export function SignupForm() {
         setError({ ...error, failed: data.error });
         setLoading(false);
         emptyFields();
-      } else {
-        setError({ ...error, failed: "An unexpected error occurred. Please try again." });
-        setLoading(false);
-        emptyFields();
       }
     } catch (err) {
       console.error(`Error fetching the API: ${err}`);

@@ -161,30 +161,38 @@ app.get("/verify-user-creation", async (req, res) => {
 })
 
 app.post("/process-login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = await authenticateUser(email, password);
-
-  if (!user) {
-    return res.status(401).send("Login failed!");
-  }
-
-  const isVerified = await userIsVerified(user.id);
-  if (!isVerified) {
-    console.log("Email not verified!");
-    return res.status(401).send("Email not verified!");
-  }
-
-  req.session.userId = user.id;
-
-  // ✅ Explicitly save session before sending response
-  req.session.save((err) => {
-    if (err) {
-      console.error("Session save error:", err);
-      return res.status(500).send("Session save failed!");
+  try {
+    const { email, password } = req.body;
+    const user = await authenticateUser(email, password);
+    const isVerified = await userIsVerified(user.id);
+    if (!isVerified) {
+      console.log("Email not verified!");
+      return res.status(401).json({error: "Please verify your email before logging in!"});
     }
-    console.log("Login successful, session saved");
-    res.status(200).send("Login successful!");
-  });
+
+    // ✅ Explicitly save session before sending response
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).json({error: "Session save failed!"});
+      }
+      console.log("Login successful, session saved");
+      res.status(200).json(user);
+    });
+  } catch (error) {
+    console.error("Error processing login:", error);
+    // Do not reveal if user or password is wrong
+    if (
+      error.message === "USER_NOT_FOUND" ||
+      error.message === "INVALID_CREDENTIALS"
+    ) {
+      return res.status(401).json({error: "Invalid email or password!"});
+    } else if (error.message === "USER_VERIFICATION_ERROR") {
+      return res.status(500).json({error: "User verification error."});
+    } else {
+      return res.status(500).json({error: "Unknown server error."});
+    }
+  }
 });
 
 

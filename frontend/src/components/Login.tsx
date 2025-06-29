@@ -21,8 +21,9 @@ export function Login() {
   const [error, setError] = useState({
     email: "",
     password: "",
-    general: "",
+    failed: "",
   });
+  console.log(process.env.REACT_APP_API_URL);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -30,7 +31,7 @@ export function Login() {
     let error = {
       email: "",
       password: "",
-      general: "",
+      failed: "",
     };
     let isValid = true;
 
@@ -61,15 +62,15 @@ export function Login() {
         setLoading(false);
         return;
       }
-      const res = await LoginApi(email, password);
-      if (res) {
+      const data = await LoginApi(email, password);
+      if (data && "id" in data) {
         console.log("Login successful!");
         setLoading(false);
         emptyFields();
         navigate("/");
-      } else {
+      } else if (data && "error" in data){
         console.error("Login failed!");
-        setError({ ...error, general: "Invalid email or password." });
+        setError({ ...error, failed: data.error });
         setLoading(false);
         emptyFields();
       }
@@ -126,7 +127,7 @@ export function Login() {
           size="small"
           onChange={(e) => {
             setEmail(e.target.value);
-            setError({ ...error, email: "", general: "" });
+            setError({ ...error, email: "", failed: "" });
           }}
           sx={{
             width: "100%",
@@ -167,7 +168,7 @@ export function Login() {
           size="small"
           onChange={(e) => {
             setPassword(e.target.value);
-            setError({ ...error, password: "", general: "" });
+            setError({ ...error, password: "", failed: "" });
           }}
           sx={{
             width: "100%",
@@ -200,7 +201,7 @@ export function Login() {
             </AlertTitle>
           </Alert>
         )}
-        {error.general && (
+        {error.failed && (
           <Alert
             severity="error"
             variant="standard"
@@ -217,7 +218,7 @@ export function Login() {
                 margin: 0, // Set the margin to 0
               }}
             >
-              {error.general}
+              {error.failed}
             </AlertTitle>
           </Alert>
         )}

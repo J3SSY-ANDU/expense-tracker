@@ -85,18 +85,18 @@ const authenticateUser = async (email, password) => {
     const user = await getUserByEmail(email);
     if (!user) {
       console.log("User not found.");
-      return null;
+      throw new Error("USER_NOT_FOUND");
     }
     const match = await bcrypt.compare(password, user.password);
     if (match) {
       return user;
     } else {
       console.log("Invalid credentials.");
-      return null;
+      throw new Error("INVALID_CREDENTIALS");
     }
   } catch (err) {
     console.error(`Error authenticating user: ${err}`);
-    return null;
+    throw err;
   }
 };
 
@@ -163,7 +163,7 @@ const userIsVerified = async (id) => {
     return true;
   } catch (err) {
     console.error(`Error checking if user is verified: ${err}`);
-    return false;
+    throw new Error("USER_VERIFICATION_ERROR");
   }
 };
 
