@@ -101,15 +101,15 @@ app.post("/process-signup", async (req, res) => {
     req.session.userId = user.id;
     await createEmailConfirmation(user.id);
     await sendEmail(user.email, user.id);
-    res.status(200).json({user: user, message: "Signup successful! Please verify your email.", status: "success"});
+    res.status(200).json(user);
   } catch (error) {
     console.error("Error processing signup:", error);
     if (error.message === "USER_EXISTS") {
-      return res.status(409).send({ error: "User already exists!" });
+      return res.status(409).json({ error: "User already exists!" });
     } else if (error.message === "USER_CREATION_FAILED") {
-      return res.status(500).send({ error: "Failed to create user." });
+      return res.status(500).json({ error: "Failed to create user." });
     } else {
-      return res.status(500).send({ error: "Unknown server error." });
+      return res.status(500).json({ error: "Unknown server error." });
     }
   }
 });

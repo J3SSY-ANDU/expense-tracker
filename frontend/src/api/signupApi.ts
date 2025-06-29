@@ -21,7 +21,7 @@ export async function Signup(
     } else {
       console.log("Failed to sign up");
       const data = await res.json();
-      return {error: data.error};
+      return {error: data.error ?? "An error occurred during signup. Please try again."};
     }
   } catch (err) {
     console.error(`Error signing up ${err}`);
