@@ -94,16 +94,24 @@ app.get("/user-data", async (req, res) => {
 });
 
 app.post("/process-signup", async (req, res) => {
-  const { firstname, lastname, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await createUser(firstname, lastname, email, hashedPassword);
-  if (!user) {
-    return res.status(401).send("User creation failed!");
+  try {
+    const { firstname, lastname, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await createUser(firstname, lastname, email, hashedPassword);
+    req.session.userId = user.id;
+    await createEmailConfirmation(user.id);
+    await sendEmail(user.email, user.id);
+    res.status(200).json({user: user, message: "Signup successful! Please verify your email.", status: "success"});
+  } catch (error) {
+    console.error("Error processing signup:", error);
+    if (error.message === "USER_EXISTS") {
+      return res.status(409).send({ error: "User already exists!" });
+    } else if (error.message === "USER_CREATION_FAILED") {
+      return res.status(500).send({ error: "Failed to create user." });
+    } else {
+      return res.status(500).send({ error: "Unknown server error." });
+    }
   }
-  req.session.userId = user.id;
-  await createEmailConfirmation(user.id);
-  await sendEmail(user.email, user.id);
-  res.status(200).send(user);
 });
 
 app.post("/verify-email", async (req, res) => {

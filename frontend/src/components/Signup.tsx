@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import "../styles/signup.css";
 import { Signup, GenerateCategoryData } from "../api";
+import { User } from "../types";
 
 export function SignupForm() {
   const [firstname, setFirstname] = useState("");
@@ -98,15 +99,19 @@ export function SignupForm() {
         return;
       }
 
-      const user = await Signup(firstname, lastname, email, password);
+      const data: User | { error: string } | {} = await Signup(firstname, lastname, email, password);
 
-      if (user && "id" in user) {
+      if (data && "id" in data) {
         await GenerateCategoryData();
         setLoading(false);
         emptyFields();
-        navigate("/verify-email?id=" + user.id);
+        navigate("/verify-email?id=" + data.id);
+      } else if (data && "error" in data) {
+        setError({ ...error, failed: data.error });
+        setLoading(false);
+        emptyFields();
       } else {
-        setError({ ...error, failed: "Failed to sign up." });
+        setError({ ...error, failed: "An unexpected error occurred. Please try again." });
         setLoading(false);
         emptyFields();
       }

@@ -28,7 +28,7 @@ const createUser = async (firstname, lastname, email, password) => {
     const userByEmail = await getUserByEmail(email);
     if (userByEmail) {
       console.log("User already exists.");
-      return null;
+      throw new Error("USER_EXISTS");
     }
     const id = uuidv4(); // Generate a unique ID
     const fullname = `${firstname} ${lastname}`;
@@ -39,13 +39,13 @@ const createUser = async (firstname, lastname, email, password) => {
     const user = await getUserById(id);
     if (!user) {
       console.log(`Failed. Try again.`);
-      return null;
+      throw new Error("USER_CREATION_FAILED");
     }
     console.log("User created successfully!");
     return user;
   } catch (err) {
     console.error(`Error creating user: ${err}`);
-    return null;
+    throw err;
   }
 };
 
