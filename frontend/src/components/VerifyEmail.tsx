@@ -38,7 +38,17 @@ export function VerifyEmail() {
       } else if (!tokenParam && userIdParam) {
         await GetUserVerificationStatus(userIdParam);
       } else if (!userIdParam && tokenParam) {
-        await VerifyEmailApi(tokenParam);
+        const result = await VerifyEmailApi(tokenParam);
+        if (result.error) {
+          console.error("Email verification failed:", result.error);
+          navigate("/signup");
+        } else {
+          console.log("Email verified successfully:", result.message);
+          if (result.token) {
+            localStorage.setItem("authToken", result.token);
+          }
+          navigate("/");
+        }
       }
     }
 
