@@ -1,5 +1,5 @@
 const express = require("express");
-const session = require("express-session");
+const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config({
   path:
     process.env.NODE_ENV === "production"
@@ -44,11 +44,25 @@ const {
   getCategoryById,
 } = require("./database/categories");
 const { categoriesData } = require("./database/categoriesData");
-const { createEmailConfirmation, verifyEmailConfirmation, getUserIdFromToken, deleteEmailConfirmation } = require("./database/emailConfirmation");
-const { sendEmail, forgotPasswordEmail } = require("./emails");
+const { sendEmailVerification, forgotPasswordEmail } = require("./emails");
 const { createForgotPassword, changeForgotPassword } = require("./database/forgotPassword");
 const { getHistoryByUser } = require("./database/history");
 const { deleteAccountEmail } = require("./emails");
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1]; // Support "Bearer <token>"
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  jwt.verify(token, process.env.AUTH_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -67,30 +81,12 @@ app.use(
   })
 );
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      secure: process.env.NODE_ENV === "production", // 🔥 REQUIRED for cross-site cookies
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax", // 🔥 REQUIRED for cross-site cookies
-    },
-    resave: true,
-    saveUninitialized: false,
-  })
-);
-
-app.get("/user-data", async (req, res) => {
-  const id = req.session.userId;
-  if (!id) {
-    return res.status(401).send("User not found!");
-  }
-  const user = await getUserById(id);
+app.get("/user-data", authenticateToken, async (req, res) => {
+  const user = await getUserById(req.user.id);
   if (!user) {
-    return res.status(401).send("User not found!");
+    return res.status(401).json({ error: "User not found!" });
   }
-  res.status(200).send(user);
+  res.status(200).json(user);
 });
 
 app.post("/process-signup", async (req, res) => {
@@ -98,9 +94,7 @@ app.post("/process-signup", async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(firstname, lastname, email, hashedPassword);
-    req.session.userId = user.id;
-    await createEmailConfirmation(user.id);
-    await sendEmail(user.email, user.id);
+    await sendEmailVerification(user.email, user.id);
     res.status(200).json(user);
   } catch (error) {
     console.error("Error processing signup:", error);
@@ -114,36 +108,40 @@ app.post("/process-signup", async (req, res) => {
   }
 });
 
-app.post("/verify-email", async (req, res) => {
-  const { token } = req.body;
-  const user_id = await verifyEmailConfirmation(token); // returns user id if token is valid
-
-  if (user_id) {
-    // Token is valid, verify user
-    return res.status(200).send("Email verified successfully!");
-  }
-
-  // If token is missing/invalid, check if the user is already verified
-  const userIdFromToken = await getUserIdFromToken(token); // decode but don't verify signature/expiration
-  if (userIdFromToken) {
-    const user = await getUserById(userIdFromToken);
-    if (user && user.is_verified) {
-      return res.status(200).send("Email already verified!");
+app.get("/verify-email", async (req, res) => {
+  const { token } = req.query;
+  let user_id;
+  try {
+    const decoded = jwt.verify(token, process.env.EMAIL_SECRET);
+    user_id = decoded.user_id;
+    if (!user_id) {
+      return res.status(401).json({ error: "INVALID_TOKEN" });
     }
+    const user = await getUserById(user_id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found!" });
+    }
+    if (user.is_verified) {
+      return res.status(200).json({ message: "Email already verified!" });
+    } else {
+      await verifyUser(user_id);
+      const authToken = jwt.sign({ id: user_id }, process.env.AUTH_SECRET, {
+        expiresIn: "30m",
+      });
+      return res.status(200).json({ message: "Email verification successful!", token: authToken });
+    }
+  } catch (err) {
+    console.error("Error verifying token or user:", err);
+    return res.status(401).json({ error: "Email verification failed!" });
   }
-
-  return res.status(401).send("Email verification failed!");
 });
 
 app.post("/resend-verification-email", async (req, res) => {
-  const id = req.session.userId;
   const user = await getUserById(id);
   if (!user) {
     return res.status(401).send("User not found!");
   }
-  await deleteEmailConfirmation(id);
-  await createEmailConfirmation(id);
-  await sendEmail(user.email, id);
+  await sendEmailVerification(user.email, id);
   res.status(200).send("Verification email sent!");
 })
 
@@ -167,14 +165,14 @@ app.post("/process-login", async (req, res) => {
     const isVerified = await userIsVerified(user.id);
     if (!isVerified) {
       console.log("Email not verified!");
-      return res.status(401).json({error: "Please verify your email before logging in!"});
+      return res.status(401).json({ error: "Please verify your email before logging in!" });
     }
 
     // ✅ Explicitly save session before sending response
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
-        return res.status(500).json({error: "Session save failed!"});
+        return res.status(500).json({ error: "Session save failed!" });
       }
       console.log("Login successful, session saved");
       res.status(200).json(user);
@@ -186,11 +184,11 @@ app.post("/process-login", async (req, res) => {
       error.message === "USER_NOT_FOUND" ||
       error.message === "INVALID_CREDENTIALS"
     ) {
-      return res.status(401).json({error: "Invalid email or password!"});
+      return res.status(401).json({ error: "Invalid email or password!" });
     } else if (error.message === "USER_VERIFICATION_ERROR") {
-      return res.status(500).json({error: "User verification error."});
+      return res.status(500).json({ error: "User verification error." });
     } else {
-      return res.status(500).json({error: "Unknown server error."});
+      return res.status(500).json({ error: "Unknown server error." });
     }
   }
 });
@@ -220,7 +218,7 @@ app.post('/reset-forgot-password', async (req, res) => {
   res.status(200).send("Password reset successfully!");
 })
 
-app.post("/logout", (req, res) => {
+app.post("/logout", authenticateToken, (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.log(`Error destroying session: ${err}`);
@@ -232,14 +230,12 @@ app.post("/logout", (req, res) => {
   });
 });
 
-app.get("/all-categories", async (req, res) => {
-  const user_id = req.session.userId;
-  const categories = await getOrderedCategories(user_id);
-  res.status(200).send(categories);
+app.get("/all-categories", authenticateToken, async (req, res) => {
+  const categories = await getOrderedCategories(req.user.id);
+  res.status(200).json(categories);
 })
 
-app.get("/generate-default-categories", async (req, res) => {
-  const id = req.session.userId;
+app.get("/generate-default-categories", authenticateToken, async (req, res) => {
   const date = new Date();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
@@ -253,78 +249,76 @@ app.get("/generate-default-categories", async (req, res) => {
       category.description,
     );
   }
-  res.status(200).send("Default categories created!");
+  res.status(200).json({ message: "Default categories created!" });
 });
 
-app.get("/get-category", async (req, res) => {
+app.get("/get-category", authenticateToken, async (req, res) => {
   const { category_id } = req.query;
   const category = await getCategoryById(category_id);
   if (!category) {
-    return res.status(401).send("Category not found!");
+    return res.status(401).json({ error: "Category not found!" });
   }
-  res.status(200).send(category);
+  res.status(200).json(category);
 });
 
-app.post("/update-category-name", async (req, res) => {
+app.post("/update-category-name", authenticateToken, async (req, res) => {
   const { category_id, name } = req.body;
   const updatedCategory = await updateCategoryName(category_id, name);
   if (!updatedCategory) {
-    return res.status(401).send("Category name update failed!");
+    return res.status(401).json({ error: "Category name update failed!" });
   }
-  res.status(200).send(updatedCategory);
+  res.status(200).json(updatedCategory);
 })
 
-app.post("/update-category-description", async (req, res) => {
+app.post("/update-category-description", authenticateToken, async (req, res) => {
   const { category_id, description } = req.body;
   const updatedCategory = await updateCategoryDescription(category_id, description);
   if (!updatedCategory) {
-    return res.status(401).send("Category description update failed!");
+    return res.status(401).json({ error: "Category description update failed!" });
   }
-  res.status(200).send(updatedCategory);
+  res.status(200).json(updatedCategory);
 })
 
-app.post("/add-category", async (req, res) => {
+app.post("/add-category", authenticateToken, async (req, res) => {
   const { name, user_id, month, year, total_expenses, description } = req.body;
   const category = await createCategory(name, user_id, month, year, total_expenses, description);
   if (!category) {
-    return res.status(401).send("Category creation failed!");
+    return res.status(401).json({ error: "Category creation failed!" });
   }
-  res.status(201).send(category);
+  res.status(201).json(category);
 })
 
-app.post("/delete-category", async (req, res) => {
+app.post("/delete-category", authenticateToken, async (req, res) => {
   const { category_id } = req.body;
   const deleted = await deleteCategory(category_id);
   if (!deleted) {
-    return res.status(401).send("Category deletion failed!");
+    return res.status(401).json({ error: "Category deletion failed!" });
   }
-  res.status(200).send("Category deleted successfully!");
+  res.status(200).json({ message: "Category deleted successfully!" });
 })
 
-app.get("/all-expenses", async (req, res) => {
-  const id = req.session.userId;
-  const expenses = await getOrganizedExpenses(id);
+app.get("/all-expenses", authenticateToken, async (req, res) => {
+  const expenses = await getOrganizedExpenses(req.user.id);
   if (!expenses) {
-    return res.status(401).send("Data fetch failed!");
+    return res.status(401).json({ error: "Data fetch failed!" });
   }
   console.log("Data fetch successfully!");
-  return res.status(200).send(expenses);
+  return res.status(200).json(expenses);
 });
 
-app.get("/all-monthly-expenses", async (req, res) => {
-  const id = req.session.userId;
+app.get("/all-monthly-expenses", authenticateToken, async (req, res) => {
   const date = new Date();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
-  const expenses = await getExpensesByMonth(id, month, year);
+  const expenses = await getExpensesByMonth(req.user.id, month, year);
   if (!expenses) {
-    return res.status(401).send("Data fetch failed!");
+    return res.status(401).json({ error: "Data fetch failed!" });
   }
   console.log("Data fetch successfully!");
-  return res.status(200).send(expenses);
+  return res.status(200).json(expenses);
 })
 
-app.post("/create-expense", async (req, res) => {
+app.post("/create-expense", authenticateToken, async (req, res) => {
   const { name, user_id, amount, category_id, date, notes } = req.body;
   const expense = await createExpense(
     name,
@@ -335,165 +329,160 @@ app.post("/create-expense", async (req, res) => {
     notes
   );
   if (!expense) {
-    return res.status(401).send("Expense creation failed!");
+    return res.status(401).json({ error: "Expense creation failed!" });
   }
-  res.status(201).send(expense);
+  res.status(201).json(expense);
 });
 
-app.post("/update-expense-name", async (req, res) => {
+app.post("/update-expense-name", authenticateToken, async (req, res) => {
   const { expense_id, name } = req.body;
   const updatedExpense = await updateExpenseName(
     expense_id,
     name
   );
   if (!updatedExpense) {
-    return res.status(401).send("Expense update failed!");
+    return res.status(401).json({ error: "Expense update failed!" });
   }
-  res.status(200).send(updatedExpense);
+  res.status(200).json(updatedExpense);
 });
 
-app.post("/update-expense-amount", async (req, res) => {
+app.post("/update-expense-amount", authenticateToken, async (req, res) => {
   const { expense_id, amount } = req.body;
   const updatedExpense = await updateExpenseAmount(
     expense_id,
     amount
   );
   if (!updatedExpense) {
-    return res.status(401).send("Expense update failed!");
+    return res.status(401).json({ error: "Expense update failed!" });
   }
-  res.status(200).send(updatedExpense);
+  res.status(200).json(updatedExpense);
 });
 
-app.post("/update-expense-category", async (req, res) => {
+app.post("/update-expense-category", authenticateToken, async (req, res) => {
   const { expense_id, category_id } = req.body;
   const updatedExpense = await updateExpenseCategory(
     expense_id,
     category_id
   );
   if (!updatedExpense) {
-    return res.status(401).send("Expense update failed!");
+    return res.status(401).json({ error: "Expense update failed!" });
   }
-  res.status(200).send(updatedExpense);
+  res.status(200).json(updatedExpense);
 });
 
-app.post("/update-expense-date", async (req, res) => {
+app.post("/update-expense-date", authenticateToken, async (req, res) => {
   const { expense_id, date } = req.body;
   const updatedExpense = await updateExpenseDate(
     expense_id,
     date
   );
   if (!updatedExpense) {
-    return res.status(401).send("Expense update failed!");
+    return res.status(401).json({ error: "Expense update failed!" });
   }
-  res.status(200).send(updatedExpense);
+  res.status(200).json(updatedExpense);
 });
 
-app.post("/update-expense-notes", async (req, res) => {
+app.post("/update-expense-notes", authenticateToken, async (req, res) => {
   const { expense_id, notes } = req.body;
   const updatedExpense = await updateExpenseNotes(
     expense_id,
     notes
   );
   if (!updatedExpense) {
-    return res.status(401).send("Expense update failed!");
+    return res.status(401).json({ error: "Expense update failed!" });
   }
-  res.status(200).send(updatedExpense);
+  res.status(200).json(updatedExpense);
 });
 
-app.post("/delete-expense", async (req, res) => {
+app.post("/delete-expense", authenticateToken, async (req, res) => {
   const { expense_id } = req.body;
   const deleted = await deleteExpense(expense_id);
   if (!deleted) {
-    return res.status(401).send("Expense deletion failed!");
+    return res.status(401).json({ error: "Expense deletion failed!" });
   }
-  res.status(200).send("Expense deleted successfully!");
+  res.status(200).json({ message: "Expense deleted successfully!" });
 });
 
-app.post("/delete-user", async (req, res) => {
-  const id = req.session.userId;
-  const expenses = await getExpensesByUser(id);
+app.post("/delete-user", authenticateToken, async (req, res) => {
+  const expenses = await getExpensesByUser(req.user.id);
   if (expenses) {
     for (let expense of expenses) {
       await deleteExpense(expense.id);
     }
   }
-  const categories = await getCategoriesByUser(id);
+  const categories = await getCategoriesByUser(req.user.id);
   if (categories) {
     for (let category of categories) {
       await deleteCategory(category.id);
     }
   }
-  const user = await getUserById(id);
+  const user = await getUserById(req.user.id);
   if (!user) {
-    return res.status(401).send("User not found!");
+    return res.status(401).json({ error: "User not found!" });
   }
   else {
-    const deleted = await deleteUser(id);
+    const deleted = await deleteUser(req.user.id);
     if (!deleted) {
-      return res.status(401).send("Account deletion failed!");
+      return res.status(401).json({ error: "Account deletion failed!" });
     }
     await deleteAccountEmail(user.firstname, user.email);
-    res.status(200).send("Account deleted successfully!");
+    res.status(200).json({ message: "Account deleted successfully!" });
   }
 })
 
-app.post("/change-password", async (req, res) => {
+app.post("/change-password", authenticateToken, async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const id = req.session.userId;
-  const user = await getUserById(id);
+  const user = await getUserById(req.user.id);
   if (!user) {
     console.log("User not found!");
-    return res.status(401).send("User not found!");
+    return res.status(401).json({ error: "User not found!" });
   }
   const match = await bcrypt.compare(oldPassword, user.password);
   if (!match) {
     console.log("Invalid credentials!");
-    return res.status(401).send("Invalid credentials!");
+    return res.status(401).json({ error: "Invalid credentials!" });
   }
   const new_password_hash = await bcrypt.hash(newPassword, 10);
-  const updated = await updatePassword(id, new_password_hash);
+  const updated = await updatePassword(req.user.id, new_password_hash);
   if (!updated) {
     console.log("Password change failed!");
-    return res.status(401).send("Password change failed!");
+    return res.status(401).json({ error: "Password change failed!" });
   }
-  res.status(200).send("Password changed successfully!");
+  res.status(200).json({ message: "Password changed successfully!" });
 })
 
-app.post("/change-name", async (req, res) => {
+app.post("/change-name", authenticateToken, async (req, res) => {
   const { new_firstname, new_lastname } = req.body;
-  const id = req.session.userId;
-  const updated = await updateName(id, new_firstname, new_lastname);
+  const updated = await updateName(req.user.id, new_firstname, new_lastname);
   if (!updated) {
-    return res.status(401).send("Name change failed!");
+    return res.status(401).json({ error: "Name change failed!" });
   }
-  res.status(200).send("Name changed successfully!");
+  res.status(200).json({ message: "Name changed successfully!" });
 })
 
-app.get("/history", async (req, res) => {
-  const id = req.session.userId;
-  const history = await getHistoryByUser(id);
+app.get("/history", authenticateToken, async (req, res) => {
+  const history = await getHistoryByUser(req.user.id);
   if (!history) {
-    return res.status(401).send("Data fetch failed!");
+    return res.status(401).json({ error: "Data fetch failed!" });
   }
   console.log("Data fetch successfully!");
-  return res.status(200).send(history);
+  return res.status(200).json(history);
 });
 
-app.get("/monthly-history", async (req, res) => {
-  const id = req.session.userId;
+app.get("/monthly-history", authenticateToken, async (req, res) => {
   const month = parseInt(req.query.month);
   const year = parseInt(req.query.year);
 
   if (isNaN(month) || isNaN(year)) {
-    return res.status(400).send("Invalid month or year!");
+    return res.status(400).json({ error: "Invalid month or year!" });
   }
 
-  const history = await getExpensesByMonth(id, month, year);
+  const history = await getExpensesByMonth(req.user.id, month, year);
   if (!history) {
-    return res.status(401).send("Data fetch failed!");
+    return res.status(401).json({ error: "Data fetch failed!" });
   }
   console.log("Data fetch successfully!");
-  return res.status(200).send(history);
+  return res.status(200).json(history);
 })
 
 const port = process.env.PORT || 10000;
