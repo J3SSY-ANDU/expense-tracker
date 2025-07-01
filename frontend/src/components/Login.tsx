@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { Login as LoginApi } from "../api";
 import "../styles/login.css";
+import { User } from "../types";
 
 export function Login() {
   const [email, setEmail] = useState("");
@@ -62,13 +63,12 @@ export function Login() {
         setLoading(false);
         return;
       }
-      const data = await LoginApi(email, password);
-      if (data && "id" in data) {
+      const data: { user: User; token: string } | { error: string } = await LoginApi(email, password);
+      if ("user" in data && data.user && data.user.id) {
         console.log("Login successful!");
-        setLoading(false);
-        emptyFields();
-        navigate("/");
-      } else if (data && "error" in data){
+        localStorage.setItem("authToken", data.token);
+        window.location.replace("/"); // Redirect to home page
+      } else if ("error" in data) {
         console.error("Login failed!");
         setError({ ...error, failed: data.error });
         setLoading(false);

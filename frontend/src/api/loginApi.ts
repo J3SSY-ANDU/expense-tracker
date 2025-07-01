@@ -1,6 +1,6 @@
 import { User } from "../types";
 
-export async function Login(email: string, password: string): Promise<User | {error: string}> {
+export async function Login(email: string, password: string): Promise<{user: User, token: string} | {error: string}> {
     try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/process-login`, {
             method: "POST",

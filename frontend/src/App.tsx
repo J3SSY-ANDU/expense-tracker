@@ -9,7 +9,6 @@ import {
   FetchExpensesData,
   FetchUserData,
   FetchHistoryData,
-  Logout,
 } from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
 import expense_tracker from "./expense-tracker.svg";
