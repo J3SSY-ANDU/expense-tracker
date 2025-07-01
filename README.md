@@ -98,7 +98,6 @@ Follow these steps to set up the project locally:
 ### User Endpoints
   - POST `/process-signup`: Create a new user.
   - POST `/process-login`: Log in to the system.
-  - POST `/logout`: Log out of the current session.
 ### Expense Endpoints
   - GET `/all-expenses`: Fetch all expenses for a user.
   - POST `/create-expense`: Add a new expense.

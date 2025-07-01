@@ -165,7 +165,7 @@ app.post("/process-login", async (req, res) => {
     const isVerified = await userIsVerified(user.id);
     if (!isVerified) {
       console.log("Email not verified!");
-      return res.status(401).json({ error: "Please verify your email before logging in!" });
+      throw new Error("USER_NOT_VERIFIED");
     }
     // Generate JWT token for the user
     const token = jwt.sign({ id: user.id, purpose: "authentication" }, process.env.AUTH_SECRET, {
@@ -180,6 +180,8 @@ app.post("/process-login", async (req, res) => {
       error.message === "INVALID_CREDENTIALS"
     ) {
       return res.status(401).json({ error: "Invalid email or password!" });
+    } else if (error.message === "USER_NOT_VERIFIED") {
+      return res.status(403).json({ error: "Email not verified. Please verify your email." });
     } else if (error.message === "USER_VERIFICATION_ERROR") {
       return res.status(500).json({ error: "User verification error." });
     } else {
@@ -212,18 +214,6 @@ app.post('/reset-forgot-password', async (req, res) => {
   }
   res.status(200).send("Password reset successfully!");
 })
-
-app.post("/logout", authenticateToken, (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.log(`Error destroying session: ${err}`);
-      return res.status(401).send("Logout failed!");
-    }
-    res.clearCookie("connect.sid");
-    console.log("Logged out successfully!");
-    res.status(200).send("Logged out successfully!");
-  });
-});
 
 app.get("/all-categories", authenticateToken, async (req, res) => {
   const categories = await getOrderedCategories(req.user.id);

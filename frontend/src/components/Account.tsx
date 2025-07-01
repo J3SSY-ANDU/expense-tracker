@@ -15,7 +15,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import { User } from "../types";
-import { Logout, DeleteUser, ChangePassword } from "../api";
+import { DeleteUser, ChangePassword } from "../api";
 import { useState } from "react";
 
 export function Account({
@@ -32,7 +32,11 @@ export function Account({
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const handleLogout = async () => {
-    await Logout();
+    // Clear user data and token
+    setUser(null);
+    localStorage.removeItem("authToken");
+    // Redirect to login page
+    window.location.replace("/login");
   };
 
   const handleDeleteUser = async () => {
