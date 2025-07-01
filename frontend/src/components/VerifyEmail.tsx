@@ -43,11 +43,11 @@ export function VerifyEmail() {
           console.error("Email verification failed:", result.error);
           navigate("/signup");
         } else {
-          console.log("Email verified successfully:", result.message);
+          console.log("Email verified successfully");
           if (result.token) {
             localStorage.setItem("authToken", result.token);
+            window.location.replace("/");
           }
-          navigate("/");
         }
       }
     }

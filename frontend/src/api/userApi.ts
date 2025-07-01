@@ -1,11 +1,13 @@
 import { User } from "../types";
 import { } from "react-router-dom";
 
+const token = localStorage.getItem("authToken");
 export async function FetchUserData(): Promise<User | null> {
   try {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/user-data`, {
       method: "GET",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -55,6 +57,7 @@ export async function ChangePassword(
     const res = await fetch(`${process.env.REACT_APP_API_URL}/change-password`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -74,6 +77,7 @@ export async function ChangeName(newFirstname: string, newLastname: string): Pro
     const res = await fetch(`${process.env.REACT_APP_API_URL}/change-name`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -93,6 +97,7 @@ export async function DeleteUser(): Promise<boolean> {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-user`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",

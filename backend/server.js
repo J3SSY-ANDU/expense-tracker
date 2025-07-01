@@ -110,22 +110,22 @@ app.post("/process-signup", async (req, res) => {
 
 app.get("/verify-email", async (req, res) => {
   const { token } = req.query;
-  let user_id;
+  let id;
   try {
     const decoded = jwt.verify(token, process.env.EMAIL_SECRET);
-    user_id = decoded.user_id;
-    if (!user_id) {
+    id = decoded.id;
+    if (!id) {
       return res.status(401).json({ error: "INVALID_TOKEN" });
     }
-    const user = await getUserById(user_id);
+    const user = await getUserById(id);
     if (!user) {
       return res.status(404).json({ error: "User not found!" });
     }
     if (user.is_verified) {
       return res.status(200).json({ message: "Email already verified!" });
     } else {
-      await verifyUser(user_id);
-      const authToken = jwt.sign({ id: user_id }, process.env.AUTH_SECRET, {
+      await verifyUser(id);
+      const authToken = jwt.sign({ id: user.id, purpose: "authentication" }, process.env.AUTH_SECRET, {
         expiresIn: "30m",
       });
       return res.status(200).json({ message: "Email verification successful!", token: authToken });
@@ -167,16 +167,11 @@ app.post("/process-login", async (req, res) => {
       console.log("Email not verified!");
       return res.status(401).json({ error: "Please verify your email before logging in!" });
     }
-
-    // ✅ Explicitly save session before sending response
-    req.session.save((err) => {
-      if (err) {
-        console.error("Session save error:", err);
-        return res.status(500).json({ error: "Session save failed!" });
-      }
-      console.log("Login successful, session saved");
-      res.status(200).json(user);
+    // Generate JWT token for the user
+    const token = jwt.sign({ id: user.id, purpose: "authentication" }, process.env.AUTH_SECRET, {
+      expiresIn: "30m",
     });
+    res.status(200).json({ user, token });
   } catch (error) {
     console.error("Error processing login:", error);
     // Do not reveal if user or password is wrong
@@ -236,6 +231,7 @@ app.get("/all-categories", authenticateToken, async (req, res) => {
 })
 
 app.get("/generate-default-categories", authenticateToken, async (req, res) => {
+  const id = req.user.id;
   const date = new Date();
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
