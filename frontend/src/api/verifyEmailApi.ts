@@ -1,20 +1,17 @@
-export async function VerifyEmail(token: string): Promise<void> {
+export async function VerifyEmail(token: string): Promise<{ message?: string; token?: string; error?: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-email`, {
-      method: "POST",
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-email?token=${encodeURIComponent(token)}`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include",
-      body: JSON.stringify({ token }),
     });
-    if (res.status === 200) {
-      console.log("Email verified successfully");
-      window.location.href = "/";
-    } else {
-      throw new Error(res.statusText);
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "Email verification failed.");
     }
-  } catch (err) {
-    console.error(`Error verifying email ${err}`);
+    return data;
+  } catch (err: any) {
+    return { error: err.message || "Unknown error" };
   }
 }

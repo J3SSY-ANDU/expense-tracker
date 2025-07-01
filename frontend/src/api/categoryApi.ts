@@ -1,9 +1,11 @@
 import { Category, NewCategory } from "../types";
+const token = localStorage.getItem("authToken");
 export async function FetchCategoriesData(): Promise<Category[] | null> {
   try {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/all-categories`, {
       method: "GET",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -24,6 +26,7 @@ export async function GenerateCategoryData(): Promise<Category[] | null> {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/generate-default-categories`, {
       method: "GET",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -44,6 +47,7 @@ export async function GetCategory(category_id: string): Promise<Category | null>
     const res = await fetch(`${process.env.REACT_APP_API_URL}/get-category?category_id=${category_id}`, {
       method: "GET",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -66,6 +70,7 @@ export async function AddCategory(
     const res = await fetch(`${process.env.REACT_APP_API_URL}/add-category`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -87,6 +92,7 @@ export async function UpdateCategoryName(category_id: string, name: string) {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-category-name`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -110,6 +116,7 @@ export async function UpdateCategoryDescription(
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-category-description`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -131,6 +138,7 @@ export async function DeleteCategory(category_id: string): Promise<boolean> {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-category`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",

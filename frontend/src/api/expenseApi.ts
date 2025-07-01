@@ -1,10 +1,12 @@
 import { Expense, NewExpense } from "../types/Expense";
 
+const token = localStorage.getItem("authToken");
 export async function FetchExpensesData(): Promise<Expense[] | null> {
   try {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/all-monthly-expenses`, {
       method: "GET",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -26,6 +28,7 @@ export async function CreateExpense(
     const res = await fetch(`${process.env.REACT_APP_API_URL}/create-expense`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -46,6 +49,7 @@ export async function UpdateExpenseName(expense_id: string, name: string): Promi
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-name`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -66,6 +70,7 @@ export async function UpdateExpenseAmount(expense_id: string, amount: number): P
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-amount`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -86,6 +91,7 @@ export async function UpdateExpenseCategory(expense_id: string, category_id: str
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-category`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -106,6 +112,7 @@ export async function UpdateExpenseDate(expense_id: string, date: string): Promi
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-date`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -126,6 +133,7 @@ export async function UpdateExpenseNotes(expense_id: string, notes: string): Pro
     const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense-notes`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",
@@ -146,6 +154,7 @@ export async function DeleteExpense(expense_id: string): Promise<boolean> {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-expense`, {
       method: "POST",
       headers: {
+        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         "Content-Type": "application/json",
       },
       credentials: "include",

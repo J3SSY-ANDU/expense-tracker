@@ -76,9 +76,6 @@ export function Login() {
       }
     } catch (err) {
       console.error(`Error fetching the API: ${err}`);
-      setLoading(false);
-      setEmail("");
-      setPassword("");
     }
   };
 

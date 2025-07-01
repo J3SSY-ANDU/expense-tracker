@@ -1,29 +1,27 @@
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config({
     path:
         process.env.NODE_ENV === "production"
             ? ".env.production"
             : ".env.development",
 });
-const { getEmailConfirmationToken } = require("./database/emailConfirmation");
 const { getForgotPasswordToken } = require("./database/forgotPassword");
 const { getUserById } = require("./database/users");
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.EMAIL, 
+        user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD,
     },
 });
 
-const sendEmail = async (email, user_id) => {
+const sendEmailVerification = async (email, user_id) => {
     try {
-        const token = await getEmailConfirmationToken(user_id);
-        if (!token) {
-            console.log("Token not found.");
-            return null;
-        }
+        const token = jwt.sign({ id: user_id, purpose: "verify_email" }, process.env.EMAIL_SECRET, {
+            expiresIn: "15m",
+        });
 
         const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
 
@@ -106,4 +104,4 @@ const deleteAccountEmail = async (name, email) => {
     }
 }
 
-module.exports = { sendEmail, forgotPasswordEmail, deleteAccountEmail };
+module.exports = { sendEmailVerification, forgotPasswordEmail, deleteAccountEmail };
