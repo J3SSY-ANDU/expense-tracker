@@ -5,7 +5,7 @@ export async function Signup(
   lastname: string,
   email: string,
   password: string
-): Promise<User | {error: string}> {
+): Promise<{user: User; token: string} | {error: string}> {
   try {
     const res = await fetch(`${process.env.REACT_APP_API_URL}/process-signup`, {
       method: "POST",
@@ -17,7 +17,8 @@ export async function Signup(
     });
     if (res.status === 200) {
       console.log("Signed up successfully");
-      return res.json();
+      const data = await res.json();
+      return data.user;
     } else {
       console.log("Failed to sign up");
       const data = await res.json();

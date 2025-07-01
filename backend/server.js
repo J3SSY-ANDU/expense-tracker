@@ -94,8 +94,8 @@ app.post("/process-signup", async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(firstname, lastname, email, hashedPassword);
-    await sendEmailVerification(user.email, user.id);
-    res.status(200).json(user);
+    const token = await sendEmailVerification(user.email, user.id);
+    res.status(200).json({user, token});
   } catch (error) {
     console.error("Error processing signup:", error);
     if (error.message === "USER_EXISTS") {
