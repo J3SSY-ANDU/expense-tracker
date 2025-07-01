@@ -9,6 +9,7 @@ import {
   FetchExpensesData,
   FetchUserData,
   FetchHistoryData,
+  GenerateCategoryData,
 } from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
 import expense_tracker from "./expense-tracker.svg";
@@ -29,16 +30,18 @@ export default function App() {
         return;
       }
       setUser(userData);
-      setLoading(false);
 
+      await GenerateCategoryData(); // Ensure categories are generated for the user
+      
       const categoriesData = await FetchCategoriesData();
       setCategories(categoriesData);
-
+      
       const expensesData = await FetchExpensesData();
       setExpenses(expensesData);
-
+      
       const historyData = await FetchHistoryData();
       setHistory(historyData);
+      setLoading(false);
     };
     fetchData();
   }, [navigate]);

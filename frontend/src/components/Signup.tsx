@@ -12,7 +12,7 @@ import {
   Paper,
 } from "@mui/material";
 import "../styles/signup.css";
-import { Signup, GenerateCategoryData } from "../api";
+import { Signup } from "../api";
 import { User } from "../types";
 
 export function SignupForm() {
@@ -102,7 +102,6 @@ export function SignupForm() {
       const data: User | { error: string } | {} = await Signup(firstname, lastname, email, password);
 
       if (data && "id" in data) {
-        await GenerateCategoryData();
         setLoading(false);
         emptyFields();
         navigate("/verify-email?id=" + data.id);
