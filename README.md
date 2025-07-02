@@ -6,11 +6,9 @@
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
 - [Usage](#usage)
-- [API Endpoints](#api-endpoints)
 - [Deployment Status](#deployment-status)
 - [Future Enhancements](#future-enhancements)
 - [License](#license)
-- [Contributions](#contributions)
 
 ---
 
@@ -32,10 +30,11 @@ Expense Tracker is a **full-stack web application** designed to help users manag
 ---
 
 ## Technologies Used
+
 ### Frontend
 - **React**: For building a responsive and dynamic user interface.
 - **MUI (Material-UI)**: For styled components and consistent design.
-  
+
 ### Backend
 - **Node.js**: Server runtime environment.
 - **Express.js**: Web framework for API routing.
@@ -47,6 +46,7 @@ Expense Tracker is a **full-stack web application** designed to help users manag
 ---
 
 ## Installation
+
 Follow these steps to set up the project locally:
 
 ### Prerequisites
@@ -59,28 +59,48 @@ Follow these steps to set up the project locally:
    git clone https://github.com/your-username/expense-tracker.git
    cd expense-tracker
    ```
-2. **Install dependencies**:
+2. **Install dependencies (both frontend and backend)**:
    ```bash
-   npm install
+   cd backend
+   yarn install
    ```
-3. **Set up environment variables: Create a .env file in the root directory with the following**:
+   ```bash
+   cd frontend
+   yarn install
+   ```
+3. **Set up environment variables:**
+   
+   Create a .env file in the `backend` directory with the following:
    ```env
-   DB_HOST=your-db-host
-   DB_USER=your-db-username
-   DB_PASSWORD=your-db-password
-   DB_NAME=your-database-name
-   SESSION_SECRET=your-session-secret
+   PORT=4000
+   NODE_ENV=development
+   MYSQL_HOST=your-db-host
+   MYSQL_PORT=your-db-port
+   MYSQL_USER=your-db-username
+   MYSQL_PASSWORD=your-db-password
+   MYSQL_DB=your-db-name
+   AUTH_SECRET=your-auth-secret
+   EMAIL_SECRET=your-email-token-secret
+   EMAIL=your-email
+   EMAIL_PASSWORD=your-email-password
+   API_URL=http://localhost:4000
+   CLIENT_URL=http://localhost:3000
    ```
-4. **Run the application locally**:
-   - **Backend**:
+   Create a .env file in the `frontend` directory with the following:
+    ```env
+    REACT_APP_API_URL=http://localhost:4000
+    ```
+5. **Run the application locally**:
+   
+   **Backend**:
    ```bash
-   node server.js
+   yarn dev
    ```
-   - **Frontend**:
+   **Frontend**:
    ```bash
-   npm start
+   yarn start
    ```
-5. **Access the app: Visit http://localhost:4000 (or the port configured in .env).**
+7. **Access the app: Visit http://localhost:3000 for the frontend and http://localhost:4000 for backend APIs.**
 
 ## Usage
 1. **Sign Up**:
@@ -93,33 +113,15 @@ Follow these steps to set up the project locally:
    - Explore monthly transaction summaries.
 5. **Track Categories**:
    - Organize and monitor total spending by category.
-  
-## API Endpoints
-### User Endpoints
-  - POST `/process-signup`: Create a new user.
-  - POST `/process-login`: Log in to the system.
-### Expense Endpoints
-  - GET `/all-expenses`: Fetch all expenses for a user.
-  - POST `/create-expense`: Add a new expense.
-  - POST `/update-expense-name`: Update the name of an expense.
-  - POST `/delete-expense`: Remove an expense.
-### Category Endpoints
-  - GET `/all-categories`: Fetch all categories for a user.
-  - POST `/add-category`: Create a new category.
-### History Endpoints
-  - GET `/history`: Fetch the history of expenses by month.
 
 ## Deployment Status
-### Local Deployment
-The application is fully functional locally. It uses Node.js for the backend, MySQL as the database, and React for the frontend.
-### AWS Deployment
-The AWS deployment is currently in progress. The backend will be hosted using AWS Elastic Beanstalk, and the MySQL database will be set up on Amazon RDS. Static assets may also be delivered through AWS S3 and CloudFront.
+- **Frontend**: Deployed via [Vercel](https://vercel.com)
+- **Backend**: Deployed via [Render](https://render.com)
+- **Database**: Hosted on [Railway](https://railway.app)
 
 ## Future Enhancements
-  - Complete AWS deployment for global accessibility.
+- Improve dashboard analytics with charts.
+- Add budgeting tools.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/J3SSY-ANDU/expense-tracker?tab=MIT-1-ov-file) file for details.
-
-## Contributions
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/J3SSY-ANDU/expense-tracker/issues) or submit a pull request.   
