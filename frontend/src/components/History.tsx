@@ -2,7 +2,6 @@ import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import { Category, Expense, History as MonthlyHistory, User } from "../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useState } from "react";
-import { FetchHistoryExpensesByMonthYear, GetCategory } from "../api";
 import { ExpensesTable } from "./ExpensesTable";
 
 export function History({
@@ -23,40 +22,20 @@ export function History({
 
   const handleAccordionToggle = async (
     id: string,
-    month: number,
-    year: number
+    historyExpenses: Expense[],
+    historyCategories: Category[]
   ) => {
     if (expandedAccordion === id) {
       // Close the currently expanded accordion
       setExpandedAccordion(null);
       setExpenses(null); // Clear the expenses when closing
+      setCategories(null); // Clear the categories when closing
     } else {
       // Expand the clicked accordion
       setExpandedAccordion(id);
+      setExpenses(historyExpenses);
+      setCategories(historyCategories);
       setLoading(false);
-      try {
-        const expensesByMonthYear = await FetchHistoryExpensesByMonthYear(
-          month,
-          year
-        );
-        setExpenses(expensesByMonthYear);
-        if (expensesByMonthYear && expensesByMonthYear[0]) {
-          const categoryIds = expensesByMonthYear.map(
-            (expense) => expense.category_id
-          );
-          const categoriesData = await Promise.all(
-            categoryIds.map((categoryId) => GetCategory(categoryId))
-          );
-          setCategories(
-            () =>
-              categoriesData.filter(
-                (category) => category !== null
-              ) as Category[]
-          );
-        }
-      } catch (err) {
-        console.error(`Error fetching history data: ${err}`);
-      }
     }
   };
 
@@ -78,8 +57,8 @@ export function History({
             onChange={() =>
               handleAccordionToggle(
                 monthlyHistory.id,
-                monthlyHistory.month,
-                monthlyHistory.year
+                monthlyHistory.expenses,
+                monthlyHistory.categories
               )
             }
           >
