@@ -23,7 +23,7 @@ import { VerifyEmail } from "./verifyEmailApi";
 import { ResendVerificationEmail } from "./resendVerificationEmailApi";
 import { ForgotPassword } from "./forgotPasswordApi";
 import { ResetForgotPassword } from "./resetForgotPassword";
-import { FetchHistoryData, FetchHistoryExpensesByMonthYear } from "./historyApi";
+import { FetchHistoryData } from "./historyApi";
 import { Login } from "./loginApi";
 
 export {
@@ -51,7 +51,6 @@ export {
   ChangePassword,
   ChangeName,
   FetchHistoryData,
-  FetchHistoryExpensesByMonthYear,
   GetCategory,
   Login, 
   GetUserVerificationStatus

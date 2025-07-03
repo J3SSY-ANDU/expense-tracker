@@ -448,28 +448,18 @@ app.post("/change-name", authenticateToken, async (req, res) => {
 
 app.get("/history", authenticateToken, async (req, res) => {
   const history = await getHistoryByUser(req.user.id);
+  for (const monthlyHistory of history) {
+    const expenses = await getExpensesByMonth(req.user.id, monthlyHistory.month, monthlyHistory.year);
+    monthlyHistory.expenses = expenses || [];
+    const categories = await Promise.all(expenses.map(expense => getCategoryById(expense.category_id)));
+    monthlyHistory.categories = categories || [];
+  }
   if (!history) {
     return res.status(401).json({ error: "Data fetch failed!" });
   }
   console.log("Data fetch successfully!");
   return res.status(200).json(history);
 });
-
-app.get("/monthly-history", authenticateToken, async (req, res) => {
-  const month = parseInt(req.query.month);
-  const year = parseInt(req.query.year);
-
-  if (isNaN(month) || isNaN(year)) {
-    return res.status(400).json({ error: "Invalid month or year!" });
-  }
-
-  const history = await getExpensesByMonth(req.user.id, month, year);
-  if (!history) {
-    return res.status(401).json({ error: "Data fetch failed!" });
-  }
-  console.log("Data fetch successfully!");
-  return res.status(200).json(history);
-})
 
 const port = process.env.PORT || 10000;
 
