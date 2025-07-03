@@ -1,7 +1,7 @@
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
 import { Category, Expense, History as MonthlyHistory, User } from "../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 
 export function History({
@@ -20,10 +20,18 @@ export function History({
   );
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!history || !expandedAccordion) return;
+    const expandedMonth = history.find(h => h.id === expandedAccordion);
+    if (expandedMonth) {
+      setExpenses(expandedMonth.expenses);
+      setCategories(expandedMonth.categories);
+      setLoading(false);
+    }
+  }, [history, expandedAccordion]);
+
   const handleAccordionToggle = async (
     id: string,
-    historyExpenses: Expense[],
-    historyCategories: Category[]
   ) => {
     if (expandedAccordion === id) {
       // Close the currently expanded accordion
@@ -39,14 +47,10 @@ export function History({
       setCategories(null);
       setTimeout(() => {
         setExpandedAccordion(id);
-        setExpenses(historyExpenses);
-        setCategories(historyCategories);
       }, 200);
     } else {
       // No accordion is open, open the new one immediately
       setExpandedAccordion(id);
-      setExpenses(historyExpenses);
-      setCategories(historyCategories);
       setLoading(false);
     }
   };
@@ -69,8 +73,6 @@ export function History({
             onChange={() =>
               handleAccordionToggle(
                 monthlyHistory.id,
-                monthlyHistory.expenses,
-                monthlyHistory.categories
               )
             }
           >

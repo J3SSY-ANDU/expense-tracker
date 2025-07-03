@@ -45,8 +45,8 @@ export function ExpenseCard({
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
   selectedExpense: Expense | null;
   setSelectedExpense: React.Dispatch<React.SetStateAction<Expense | null>>;
-  selectedCategory: string;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
+  selectedCategory: Category | null;
+  setSelectedCategory: React.Dispatch<React.SetStateAction<Category | null>>;
   setShowDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;
   categories: Category[] | null;
   selectedDate: Dayjs | null;
@@ -156,9 +156,13 @@ export function ExpenseCard({
               labelId="new-category"
               id="new-category"
               variant="outlined"
-              value={selectedCategory}
+              value={selectedCategory?.id || ""}
               label="Select Category"
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+                const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
+                setSelectedCategory(selectedCat);
+              }}
               size="small"
             >
               {categories?.map((category) => (

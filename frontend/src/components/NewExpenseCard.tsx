@@ -41,8 +41,8 @@ export function NewExpenseCard({
   setNewExpenseName: React.Dispatch<React.SetStateAction<string>>;
   newExpenseAmount: string;
   handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  selectedCategory: string;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
+  selectedCategory: Category | null;
+  setSelectedCategory: React.Dispatch<React.SetStateAction<Category | null>>;
   categories: Category[] | null;
   selectedDate: Dayjs | null;
   setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
@@ -86,25 +86,28 @@ export function NewExpenseCard({
               }
             />
           </FormControl>
-          <FormControl fullWidth>
+            <FormControl fullWidth>
             <InputLabel id="category">Select Category</InputLabel>
             <Select
               fullWidth
               labelId="category"
               id="category"
               variant="outlined"
-              value={selectedCategory}
+              value={selectedCategory?.id || ""}
               label="Select Category"
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => {
+              const selectedId = e.target.value;
+              const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
+              setSelectedCategory(selectedCat);
+            }}
             >
               {categories?.map((category) => (
-                <MenuItem
-                  key={category.id}
-                  value={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  {category.name}
-                </MenuItem>
+              <MenuItem
+                key={category.id}
+                value={category.id}
+              >
+                {category.name}
+              </MenuItem>
               ))}
             </Select>
           </FormControl>
