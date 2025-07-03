@@ -63,48 +63,48 @@ export function History({
   if (!history || !history[0]) {
     console.log("history:", history);
     return;
-  } else {
-    return (
-      <div>
-        <h2>History</h2>
-        {history.map((monthlyHistory: MonthlyHistory) => {
-          return (
-            <Accordion
-              key={monthlyHistory.id}
-              expanded={expandedAccordion === monthlyHistory.id}
-              elevation={0}
-              sx={{ zIndex: 0 }}
-              onChange={() =>
-                handleAccordionToggle(
-                  monthlyHistory.id,
-                  monthlyHistory.month,
-                  monthlyHistory.year
-                )
-              }
-            >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <h3>{monthlyHistory.name}</h3>
-              </AccordionSummary>
-              <AccordionDetails>
-                {!loading ? (
-                  <ExpensesTable
-                    user={user}
-                    expenses={expenses}
-                    setExpenses={setExpenses}
-                    categories={categories}
-                    setCategories={setCategories}
-                    setHistory={setHistory}
-                    mode="category"
-                    title=""
-                  />
-                ) : (
-                  <div>Loading...</div>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          );
-        })}
-      </div>
-    );
   }
+
+  return (
+    <div>
+      <h2>History</h2>
+      {history.map((monthlyHistory: MonthlyHistory) => {
+        return (
+          <Accordion
+            key={monthlyHistory.id}
+            expanded={expandedAccordion === monthlyHistory.id}
+            elevation={0}
+            sx={{ zIndex: 0 }}
+            onChange={() =>
+              handleAccordionToggle(
+                monthlyHistory.id,
+                monthlyHistory.month,
+                monthlyHistory.year
+              )
+            }
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <h3>{monthlyHistory.name}</h3>
+            </AccordionSummary>
+            <AccordionDetails>
+              {!loading ? (
+                <ExpensesTable
+                  user={user}
+                  expenses={expenses}
+                  setExpenses={setExpenses}
+                  categories={categories}
+                  setCategories={setCategories}
+                  setHistory={setHistory}
+                  mode="category"
+                  title=""
+                />
+              ) : (
+                <div>Loading...</div>
+              )}
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+    </div>
+  );
 }

@@ -3,7 +3,7 @@ import { History as MonthlyHistory, Expense } from "../types";
 const token = localStorage.getItem("authToken");
 export async function FetchHistoryData(): Promise<MonthlyHistory[] | null> {
   try {
-    const res = await fetch(`${process.env.API_URL}/history`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/history`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
