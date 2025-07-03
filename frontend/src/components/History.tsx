@@ -28,10 +28,22 @@ export function History({
     if (expandedAccordion === id) {
       // Close the currently expanded accordion
       setExpandedAccordion(null);
+      setLoading(true)
       setExpenses(null); // Clear the expenses when closing
       setCategories(null); // Clear the categories when closing
+    } else if (expandedAccordion) {
+      // Another accordion is open, close it first, then open the new one after a delay
+      setExpandedAccordion(null);
+      setLoading(false);
+      setExpenses(null);
+      setCategories(null);
+      setTimeout(() => {
+        setExpandedAccordion(id);
+        setExpenses(historyExpenses);
+        setCategories(historyCategories);
+      }, 200);
     } else {
-      // Expand the clicked accordion
+      // No accordion is open, open the new one immediately
       setExpandedAccordion(id);
       setExpenses(historyExpenses);
       setCategories(historyCategories);
