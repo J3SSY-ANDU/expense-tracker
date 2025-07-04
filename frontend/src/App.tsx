@@ -54,7 +54,7 @@ export default function App() {
     <Box
       className="App"
       sx={{
-        padding: "2rem 10rem",
+        padding: "2rem 4rem",
         display: "flex",
         flexDirection: "column",
         gap: "3rem",

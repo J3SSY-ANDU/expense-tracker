@@ -59,7 +59,7 @@ export function ExpensesTable({
   const [creatingExpense, setCreatingExpense] = useState<boolean>(false);
   const [newExpenseName, setNewExpenseName] = useState<string>("");
   const [newExpenseAmount, setNewExpenseAmount] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [newExpenseNotes, setNewExpenseNotes] = useState<string>("");
   const [openExpense, setOpenExpense] = useState<boolean>(false); // State for backdrop
@@ -116,7 +116,7 @@ export function ExpensesTable({
       name: newExpenseName,
       user_id: user.id,
       amount: Number(newExpenseAmount),
-      category_id: selectedCategory,
+      category_id: selectedCategory ? selectedCategory.id : "",
       date: selectedDate
         ? formatDateToYYYYMMDD(selectedDate.toDate())
         : formatDateToYYYYMMDD(new Date()),
@@ -125,7 +125,6 @@ export function ExpensesTable({
 
     try {
       const createdExpense = await CreateExpense(newExpenseData);
-      console.log("Created Expense:", createdExpense);
 
       if (!createdExpense) {
         console.error("Error creating expense");
@@ -140,17 +139,91 @@ export function ExpensesTable({
         month !== new Date().getMonth() + 1 ||
         year !== new Date().getFullYear()
       ) {
-        FetchHistoryData()
-          .then((data) => {
-            setHistory(data);
-            setExpenses((prev) => (prev ? prev : []));
-            setCategories((prev) => (prev ? prev : []));
-            setCreatingExpense(false);
-            setNewExpense(false);
-          })
-          .catch(() => {
-            setCreatingExpense(false);
-          });
+        setHistory((prev) => {
+          if (!prev) return prev;
+          const existingHistoryIndex = prev.findIndex(
+            (history) => history.month === month && history.year === year
+          );
+          const cat: Category | undefined = categories?.find(c => c.id === createdExpense.category_id);
+          const usedCategory: Category = cat
+            ? { ...cat, total_expenses: createdExpense.amount }
+            : {
+              id: createdExpense.category_id,
+              user_id: user?.id || "",
+              name: selectedCategory?.name || "Uncategorized",
+              total_expenses: createdExpense.amount,
+              description: "",
+              order: 0,
+            };
+
+          if (existingHistoryIndex !== -1) {
+            // Copy the existing history object (do NOT mutate directly!)
+            const oldHistory = prev[existingHistoryIndex];
+
+            // Create new arrays for expenses and categories
+            const newExpenses = [createdExpense, ...oldHistory.expenses];
+
+            // Find if the category already exists in this history
+            const categoryIndex = oldHistory.categories.findIndex(
+              (category) => category.id === createdExpense.category_id
+            );
+
+            let newCategories: Category[];
+            if (categoryIndex !== -1) {
+              // Update the category's total_expenses in a new array
+              newCategories = oldHistory.categories.map((catObj, idx) =>
+                idx === categoryIndex
+                  ? {
+                    ...catObj,
+                    total_expenses: (
+                      Number(catObj.total_expenses) + Number(createdExpense.amount)
+                    ).toFixed(2),
+                  }
+                  : catObj
+              );
+              console.log("newCategories", newCategories);
+              console.log("newExpenses", newExpenses);
+            } else {
+              // Add the usedCategory to the front of the array
+              newCategories = [usedCategory, ...oldHistory.categories];
+              console.log("newCategories", newCategories);
+              console.log("newExpenses", newExpenses);
+            }
+
+            // Build a new MonthlyHistory object
+            const newHistory: MonthlyHistory = {
+              ...oldHistory,
+              expenses: newExpenses,
+              total_expenses: Number(oldHistory.total_expenses) + Number(createdExpense.amount),
+              categories: newCategories,
+            };
+
+            console.log("newHistory", newHistory);
+
+            // Return a new array with the updated history at the same index
+            return prev.map((h, i) => (i === existingHistoryIndex ? newHistory : h));
+          }
+
+          // No history for this month/year: create one with only the selected category and new expense
+          const newHistory: MonthlyHistory = {
+            id: crypto.randomUUID(),
+            name: new Date(year, month - 1).toLocaleString("default", {
+              month: "long",
+            }),
+            user_id: user?.id || "",
+            month,
+            year,
+            total_expenses: Number(createdExpense.amount),
+            expenses: [createdExpense],
+            categories: [usedCategory],
+          };
+
+          console.log("newHistory", newHistory);
+
+          return [newHistory, ...prev];
+        });
+        setCreatingExpense(false);
+        setNewExpense(false);
         return;
       }
       setExpenses((prev) =>
@@ -170,6 +243,11 @@ export function ExpensesTable({
 
       setCreatingExpense(false);
       setNewExpense(false);
+      setNewExpenseName("");
+      setNewExpenseAmount("");
+      setSelectedCategory(null);
+      setSelectedDate(null);
+      setNewExpenseNotes("");
     } catch (err) {
       console.error(`Error creating expense ${err}`);
       setCreatingExpense(false);
@@ -195,8 +273,8 @@ export function ExpensesTable({
       setExpenses((prev) => {
         return prev
           ? prev.map((expense) =>
-              expense.id === selectedExpense.id ? updatedExpense : expense
-            )
+            expense.id === selectedExpense.id ? updatedExpense : expense
+          )
           : null;
       });
 
@@ -230,8 +308,8 @@ export function ExpensesTable({
       setExpenses((prev) => {
         return prev
           ? prev.map((expense) =>
-              expense.id === selectedExpense.id ? updatedExpense : expense
-            )
+            expense.id === selectedExpense.id ? updatedExpense : expense
+          )
           : null;
       });
 
@@ -296,8 +374,8 @@ export function ExpensesTable({
         setExpenses((prev) => {
           return prev
             ? prev.map((expense) =>
-                expense.id === selectedExpense.id ? updatedExpense : expense
-              )
+              expense.id === selectedExpense.id ? updatedExpense : expense
+            )
             : null;
         });
         return prev;
@@ -340,7 +418,7 @@ export function ExpensesTable({
     if (updatedExpense) {
       if (
         new Date(updatedExpense.date).getMonth() + 1 !==
-          new Date().getMonth() + 1 &&
+        new Date().getMonth() + 1 &&
         new Date(updatedExpense.date).getFullYear() !== new Date().getFullYear()
       ) {
         FetchHistoryData()
@@ -374,8 +452,8 @@ export function ExpensesTable({
       setExpenses((prev) => {
         return prev
           ? prev.map((expense) =>
-              expense.id === selectedExpense.id ? updatedExpense : expense
-            )
+            expense.id === selectedExpense.id ? updatedExpense : expense
+          )
           : null;
       });
 
@@ -410,8 +488,8 @@ export function ExpensesTable({
       setExpenses((prev) => {
         return prev
           ? prev.map((expense) =>
-              expense.id === selectedExpense.id ? updatedExpense : expense
-            )
+            expense.id === selectedExpense.id ? updatedExpense : expense
+          )
           : null;
       });
 
@@ -537,12 +615,8 @@ export function ExpensesTable({
         setOpenExpense={setOpenExpense}
         selectedExpense={selectedExpense}
         setSelectedExpense={setSelectedExpense}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
         setShowDeleteDialog={setShowDeleteDialog}
         categories={categories}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
         showDeleteDialog={showDeleteDialog}
         handleExpenseAmountChange={handleExpenseAmountChange}
         handleChangeCategory={handleChangeCategory}
