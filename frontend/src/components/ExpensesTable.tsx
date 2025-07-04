@@ -243,6 +243,11 @@ export function ExpensesTable({
 
       setCreatingExpense(false);
       setNewExpense(false);
+      setNewExpenseName("");
+      setNewExpenseAmount("");
+      setSelectedCategory(null);
+      setSelectedDate(null);
+      setNewExpenseNotes("");
     } catch (err) {
       console.error(`Error creating expense ${err}`);
       setCreatingExpense(false);
@@ -610,12 +615,8 @@ export function ExpensesTable({
         setOpenExpense={setOpenExpense}
         selectedExpense={selectedExpense}
         setSelectedExpense={setSelectedExpense}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
         setShowDeleteDialog={setShowDeleteDialog}
         categories={categories}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
         showDeleteDialog={showDeleteDialog}
         handleExpenseAmountChange={handleExpenseAmountChange}
         handleChangeCategory={handleChangeCategory}

@@ -20,19 +20,15 @@ import { Category, Expense } from "../types";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 export function ExpenseCard({
   openExpense,
   setOpenExpense,
   selectedExpense,
   setSelectedExpense,
-  selectedCategory,
-  setSelectedCategory,
   setShowDeleteDialog,
   categories,
-  selectedDate,
-  setSelectedDate,
   showDeleteDialog,
   handleExpenseAmountChange,
   handleChangeCategory,
@@ -45,12 +41,8 @@ export function ExpenseCard({
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
   selectedExpense: Expense | null;
   setSelectedExpense: React.Dispatch<React.SetStateAction<Expense | null>>;
-  selectedCategory: Category | null;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<Category | null>>;
   setShowDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;
   categories: Category[] | null;
-  selectedDate: Dayjs | null;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
   showDeleteDialog: boolean;
   handleExpenseAmountChange: () => Promise<void>;
   handleChangeCategory: (id: string) => void;
@@ -156,13 +148,15 @@ export function ExpenseCard({
               labelId="new-category"
               id="new-category"
               variant="outlined"
-              value={selectedCategory?.id || ""}
+              value={selectedExpense?.category_id || ""}
               label="Select Category"
-              onChange={(e) => {
-                const selectedId = e.target.value;
-                const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
-                setSelectedCategory(selectedCat);
-              }}
+              onChange={(e) => setSelectedExpense((prev) => {
+                if (prev) {
+                  return { ...prev, category_id: e.target.value };
+                } else {
+                  return null;
+                }
+              })}
               size="small"
             >
               {categories?.map((category) => (
@@ -181,9 +175,15 @@ export function ExpenseCard({
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Date"
-              value={selectedDate}
+              value={selectedExpense?.date ? dayjs(selectedExpense.date) : null}
               onChange={(newValue) => {
-                setSelectedDate(newValue);
+                setSelectedExpense((prev) => {
+                  if (prev) {
+                    return { ...prev, date: newValue ? newValue.toDate() : prev.date };
+                  } else {
+                    return null;
+                  }
+                });
                 handleChangeDate(newValue);
               }}
               slotProps={{ textField: { fullWidth: true } }}
