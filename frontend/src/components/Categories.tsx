@@ -91,6 +91,26 @@ export function Categories({
     }
   }, [expenses, newExpensesByCategory, setExpenses]);
 
+  useEffect(() => {
+  if (!selectedCategory || !expenses || !newExpensesByCategory) return;
+
+  // Get all global expenses for this category
+  const globalIds = new Set(
+    expenses.filter(e => e.category_id === selectedCategory.id).map(e => e.id)
+  );
+  // Get all local (category) expense ids
+  const localIds = new Set(newExpensesByCategory.map(e => e.id));
+
+  // Find ids that are in global but not in local (deleted in category view)
+  const deletedIds = Array.from(globalIds).filter(id => !localIds.has(id));
+
+  if (deletedIds.length > 0) {
+    setExpenses(prev =>
+      prev ? prev.filter(e => !deletedIds.includes(e.id)) : prev
+    );
+  }
+}, [newExpensesByCategory, selectedCategory, expenses, setExpenses]);
+
   const handleSaveCategory = useCallback(async () => {
     if (!user) {
       return;
