@@ -41,6 +41,7 @@ export function ExpensesTable({
   setHistory,
   mode,
   title,
+  handleDeleteExpenseByCategory, // keep in props for now, but will only use if mode === "category"
 }: {
   user: User | null;
   expenses: Expense[] | null;
@@ -50,6 +51,7 @@ export function ExpensesTable({
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
   mode: ExpenseTableModeValues;
   title: string;
+  handleDeleteExpenseByCategory?: (expenseId: string) => void;
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
@@ -507,6 +509,11 @@ export function ExpensesTable({
     if (!selectedExpense) return;
     const isDeleted = await DeleteExpense(selectedExpense.id);
     if (isDeleted) {
+      // If mode is "category", call the handleDeleteExpenseByCategory function
+      // to update the expenses in the parent component
+      if (mode === "category" && handleDeleteExpenseByCategory) {
+        handleDeleteExpenseByCategory(selectedExpense.id);
+      }
       setExpenses((prev) => {
         return prev
           ? prev.filter((expense) => expense.id !== selectedExpense.id)
