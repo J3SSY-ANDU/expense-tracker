@@ -21,12 +21,7 @@ import { Dayjs } from "dayjs";
 import {
   CreateExpense,
   DeleteExpense,
-  UpdateExpenseName,
-  UpdateExpenseAmount,
-  UpdateExpenseCategory,
-  UpdateExpenseDate,
-  UpdateExpenseNotes,
-  FetchHistoryData,
+  UpdateExpense,
 } from "../api";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
@@ -67,6 +62,7 @@ export function ExpensesTable({
   const [openExpense, setOpenExpense] = useState<boolean>(false); // State for backdrop
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null); // State for selected expense
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
+  const [saveLoading, setSaveLoading] = useState<boolean>(false); // State for save loading
 
   useEffect(() => {
     if (categories && expenses) {
@@ -88,15 +84,6 @@ export function ExpensesTable({
   if (loading) {
     return <div>Loading...</div>;
   }
-
-  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = event.target.value;
-
-    // Regular expression to allow numbers with up to 2 decimal places
-    if (/^\d*(\.\d{0,2})?$/.test(inputValue)) {
-      setNewExpenseAmount(inputValue);
-    }
-  };
 
   function formatDateToYYYYMMDD(date: Date) {
     const year = date.getFullYear();
@@ -256,254 +243,70 @@ export function ExpensesTable({
     }
   };
 
-  const handleChangeExpenseName = async () => {
-    if (!selectedExpense) return;
+  const handleExpenseUpdate = async (updatedExpense: Expense, oldExpense: Expense) => {
+    if (!updatedExpense) return;
+    try {
+      const updated = await UpdateExpense(updatedExpense);
+      if (updated && "error" in updated) {
+        console.error(`Error updating expense: ${updated.error}`);
+        // Add any additional error handling here if needed
 
-    const currentExpense = expenses?.find(
-      (expense) => expense.id === selectedExpense.id
-    );
 
-    if (currentExpense && currentExpense.name === selectedExpense.name) {
-      console.log("No changes detected in name.");
-      return;
-    }
-    const updatedExpense = await UpdateExpenseName(
-      selectedExpense.id,
-      selectedExpense.name
-    );
-    if (updatedExpense) {
-      setExpenses((prev) => {
-        return prev
-          ? prev.map((expense) =>
-            expense.id === selectedExpense.id ? updatedExpense : expense
-          )
-          : null;
-      });
-
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Name updated successfully.");
-    } else {
-      console.log("Failed to update name.");
-    }
-  };
-
-  const handleExpenseAmountChange = async () => {
-    if (!selectedExpense) return;
-
-    const currentExpense = expenses?.find(
-      (expense) => expense.id === selectedExpense.id
-    );
-
-    if (currentExpense && currentExpense.amount === selectedExpense.amount) {
-      console.log("No changes detected in amount.");
-      return;
-    }
-
-    const updatedExpense = await UpdateExpenseAmount(
-      selectedExpense.id,
-      Number(selectedExpense.amount)
-    );
-    if (updatedExpense) {
-      setExpenses((prev) => {
-        return prev
-          ? prev.map((expense) =>
-            expense.id === selectedExpense.id ? updatedExpense : expense
-          )
-          : null;
-      });
-
-      setCategories((prev) => {
-        if (!prev) return prev;
-        const category = prev.find(
-          (category) => category.id === selectedExpense.category_id
-        );
-        if (!category) return prev;
-        category.total_expenses = (
-          Number(category.total_expenses) -
-          Number(currentExpense?.amount) +
-          Number(updatedExpense.amount)
-        ).toFixed(2);
-        return prev;
-      });
-
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Amount updated successfully.");
-    } else {
-      console.log("Failed to update amount.");
-    }
-  };
-
-  const handleChangeCategory = async (newCategoryId: string) => {
-    if (!selectedExpense) return;
-
-    const sameCategory = selectedExpense?.category_id === newCategoryId;
-
-    if (sameCategory) {
-      console.log("No changes detected in category.");
-      return;
-    }
-
-    console.log(`selectedCategory: ${newCategoryId}`);
-    if (!newCategoryId) return;
-    const updatedExpense = await UpdateExpenseCategory(
-      selectedExpense.id,
-      newCategoryId
-    );
-    if (updatedExpense) {
-      setCategories((prev) => {
-        if (!prev) return prev;
-        const oldCategory = prev.find(
-          (category) => category.id === selectedExpense.category_id
-        );
-        if (!oldCategory) return prev;
-        oldCategory.total_expenses = (
-          Number(oldCategory.total_expenses) - Number(selectedExpense.amount)
-        ).toFixed(2);
-        const newCategory = prev.find(
-          (category) => category.id === newCategoryId
-        );
-        if (!newCategory) return prev;
-        newCategory.total_expenses = (
-          Number(newCategory.total_expenses) + Number(selectedExpense.amount)
-        ).toFixed(2);
-
-        setExpenses((prev) => {
-          return prev
-            ? prev.map((expense) =>
-              expense.id === selectedExpense.id ? updatedExpense : expense
-            )
-            : null;
-        });
-        return prev;
-      });
-
-      setSelectedExpense(updatedExpense);
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Category updated successfully.");
-    } else {
-      console.log("Failed to update category.");
-    }
-  };
-
-  const handleChangeDate = async (newDate: Dayjs | null) => {
-    if (!selectedExpense) return;
-
-    const currentExpense = expenses?.find(
-      (expense) => expense.id === selectedExpense.id
-    );
-
-    const formatedDate: string = newDate
-      ? formatDateToYYYYMMDD(newDate.toDate())
-      : "";
-
-    if (
-      currentExpense &&
-      formatDateToYYYYMMDD(new Date(currentExpense.date)) === formatedDate
-    ) {
-      console.log("No changes detected in date.");
-      return;
-    }
-
-    const updatedExpense = await UpdateExpenseDate(
-      selectedExpense.id,
-      formatedDate
-    );
-    if (updatedExpense) {
-      if (
-        new Date(updatedExpense.date).getMonth() + 1 !==
-        new Date().getMonth() + 1 &&
-        new Date(updatedExpense.date).getFullYear() !== new Date().getFullYear()
-      ) {
-        FetchHistoryData()
-          .then((data) => {
-            setHistory(data);
-            setExpenses((prev) =>
-              prev
-                ? prev.filter((expense) => expense.id !== updatedExpense.id)
-                : null
-            );
-            setCategories((prev) => {
-              if (!prev) return prev;
-              const category = prev.find(
-                (category) => category.id === updatedExpense.category_id
-              );
-              if (!category) return prev;
-              category.total_expenses = (
-                Number(category.total_expenses) - Number(updatedExpense?.amount)
-              ).toFixed(2);
-              return prev;
-            });
-            setCreatingExpense(false);
-            setNewExpense(false);
-          })
-          .catch(() => {
-            setCreatingExpense(false);
-          });
+        setSaveLoading(false);
         return;
       }
-
-      setExpenses((prev) => {
-        return prev
-          ? prev.map((expense) =>
-            expense.id === selectedExpense.id ? updatedExpense : expense
-          )
-          : null;
+      setExpenses((prev) =>
+        prev ? prev.map((exp) => (exp.id === updatedExpense.id ? updatedExpense : exp)) : null
+      );
+      setCategories((prev) => {
+        if (!prev) return prev;
+        // If category didn't change, update only that category's total_expenses
+        if (oldExpense?.category_id === updatedExpense.category_id) {
+          return prev.map((category) =>
+        category.id === updatedExpense.category_id
+          ? {
+          ...category,
+          total_expenses: (
+            Number(category.total_expenses) -
+            Number(oldExpense?.amount || 0) +
+            Number(updatedExpense.amount)
+          ).toFixed(2),
+            }
+          : category
+          );
+        } else {
+          // Category changed: update both old and new categories
+          return prev.map((category) => {
+        if (category.id === oldExpense?.category_id) {
+          // Subtract from old category
+          return {
+            ...category,
+            total_expenses: (
+          Number(category.total_expenses) -
+          Number(oldExpense?.amount || 0)
+            ).toFixed(2),
+          };
+        }
+        if (category.id === updatedExpense.category_id) {
+          // Add to new category
+          return {
+            ...category,
+            total_expenses: (
+          Number(category.total_expenses) +
+          Number(updatedExpense.amount)
+            ).toFixed(2),
+          };
+        }
+        return category;
+          });
+        }
       });
-
-      setSelectedExpense(updatedExpense);
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Date updated successfully.");
-    } else {
-      console.log("Failed to update date.");
+      setSaveLoading(false);
+      setOpenExpense(false);
+    } catch (err) {
+      console.error(`Error updating expense ${err}`);
     }
-  };
-
-  const handleChangeNotes = async () => {
-    if (!selectedExpense) return;
-
-    const currentExpense = expenses?.find(
-      (expense) => expense.id === selectedExpense.id
-    );
-
-    if (currentExpense && currentExpense.notes === selectedExpense.notes) {
-      console.log("No changes detected in notes.");
-      return;
-    }
-
-    const updatedExpense = await UpdateExpenseNotes(
-      selectedExpense.id,
-      selectedExpense.notes
-    );
-    if (updatedExpense) {
-      setExpenses((prev) => {
-        return prev
-          ? prev.map((expense) =>
-            expense.id === selectedExpense.id ? updatedExpense : expense
-          )
-          : null;
-      });
-
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Notes updated successfully.");
-    } else {
-      console.log("Failed to update notes.");
-    }
-  };
+  }
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
@@ -606,7 +409,7 @@ export function ExpensesTable({
         newExpenseName={newExpenseName}
         setNewExpenseName={setNewExpenseName}
         newExpenseAmount={newExpenseAmount}
-        handleAmountChange={handleAmountChange}
+        setNewExpenseAmount={setNewExpenseAmount}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         categories={categories}
@@ -625,12 +428,10 @@ export function ExpensesTable({
         setShowDeleteDialog={setShowDeleteDialog}
         categories={categories}
         showDeleteDialog={showDeleteDialog}
-        handleExpenseAmountChange={handleExpenseAmountChange}
-        handleChangeCategory={handleChangeCategory}
-        handleChangeDate={handleChangeDate}
-        handleChangeNotes={handleChangeNotes}
         handleDeleteExpense={handleDeleteExpense}
-        handleChangeExpenseName={handleChangeExpenseName}
+        handleExpenseUpdate={handleExpenseUpdate}
+        saveLoading={saveLoading}
+        setSaveLoading={setSaveLoading}
       />
     </Box>
   );

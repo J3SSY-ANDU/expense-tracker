@@ -24,7 +24,7 @@ export function NewExpenseCard({
   newExpenseName,
   setNewExpenseName,
   newExpenseAmount,
-  handleAmountChange,
+  setNewExpenseAmount,
   selectedCategory,
   setSelectedCategory,
   categories,
@@ -40,7 +40,7 @@ export function NewExpenseCard({
   newExpenseName: string;
   setNewExpenseName: React.Dispatch<React.SetStateAction<string>>;
   newExpenseAmount: string;
-  handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setNewExpenseAmount: React.Dispatch<React.SetStateAction<string>>;
   selectedCategory: Category | null;
   setSelectedCategory: React.Dispatch<React.SetStateAction<Category | null>>;
   categories: Category[] | null;
@@ -79,7 +79,7 @@ export function NewExpenseCard({
             <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
             <FilledInput
               value={newExpenseAmount}
-              onChange={handleAmountChange}
+              onChange={(e) => setNewExpenseAmount(e.target.value)}
               id="filled-adornment-amount"
               startAdornment={
                 <InputAdornment position="start">$</InputAdornment>
