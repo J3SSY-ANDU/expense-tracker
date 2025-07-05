@@ -20,49 +20,51 @@ import { Category, Expense } from "../types";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
 
 export function ExpenseCard({
   openExpense,
   setOpenExpense,
   selectedExpense,
   setSelectedExpense,
-  selectedCategory,
-  setSelectedCategory,
   setShowDeleteDialog,
   categories,
-  selectedDate,
-  setSelectedDate,
   showDeleteDialog,
-  handleExpenseAmountChange,
-  handleChangeCategory,
-  handleChangeDate,
-  handleChangeNotes,
   handleDeleteExpense,
-  handleChangeExpenseName,
+  handleExpenseUpdate,
+  saveLoading = false,
+  setSaveLoading,
 }: {
   openExpense: boolean;
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
   selectedExpense: Expense | null;
   setSelectedExpense: React.Dispatch<React.SetStateAction<Expense | null>>;
-  selectedCategory: string;
-  setSelectedCategory: React.Dispatch<React.SetStateAction<string>>;
   setShowDeleteDialog: React.Dispatch<React.SetStateAction<boolean>>;
   categories: Category[] | null;
-  selectedDate: Dayjs | null;
-  setSelectedDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
   showDeleteDialog: boolean;
-  handleExpenseAmountChange: () => Promise<void>;
-  handleChangeCategory: (id: string) => void;
-  handleChangeDate: (newValue: Dayjs | null) => void;
-  handleChangeNotes: () => Promise<void>;
   handleDeleteExpense: () => void;
-  handleChangeExpenseName: () => Promise<void>;
+  handleExpenseUpdate: (updatedExpense: Expense, oldExpense: Expense) => void;
+  saveLoading: boolean;
+  setSaveLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+  const [updatedName, setUpdatedName] = useState<string | null>(null);
+  const [updatedAmount, setUpdatedAmount] = useState<string | null>(null);
+  const [updatedCategory, setUpdatedCategory] = useState<string | null>(null);
+  const [updatedDate, setUpdatedDate] = useState<Dayjs | null>(null);
+  const [updatedNotes, setUpdatedNotes] = useState<string | null>(null);
+
   return (
     <Backdrop
       open={openExpense}
-      onClick={() => setOpenExpense(false)}
+      onClick={() => {
+        setUpdatedName(null);
+        setUpdatedAmount(null);
+        setUpdatedCategory(null);
+        setUpdatedDate(null);
+        setUpdatedNotes(null);
+        setOpenExpense(false);
+      }}
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
     >
       <Card
@@ -85,22 +87,8 @@ export function ExpenseCard({
             }}
           >
             <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSelectedExpense((prev) => {
-                  if (prev) {
-                    return { ...prev, name: e.target.value };
-                  } else {
-                    return null;
-                  }
-                })
-              }
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await handleChangeExpenseName();
-                }
-              }}
-              onBlur={async () => {
-                await handleChangeExpenseName();
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setUpdatedName(e.target.value);
               }}
               style={{
                 all: "unset",
@@ -108,7 +96,7 @@ export function ExpenseCard({
                 fontSize: "1.5rem",
                 fontWeight: "700",
               }}
-              value={selectedExpense?.name}
+              value={updatedName !== null ? updatedName : selectedExpense?.name || ""}
               title="name"
               placeholder="Add name..."
             />
@@ -124,20 +112,9 @@ export function ExpenseCard({
               type="text"
               title="amount"
               placeholder="Add amount..."
-              value={selectedExpense?.amount}
+              value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
               onChange={(e) => {
-                setSelectedExpense((prev) => {
-                  if (prev) {
-                    return { ...prev, amount: e.target.value };
-                  } else {
-                    return null;
-                  }
-                });
-              }}
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await handleExpenseAmountChange();
-                }
+                setUpdatedAmount(e.target.value);
               }}
               style={{
                 border: "none",
@@ -156,18 +133,14 @@ export function ExpenseCard({
               labelId="new-category"
               id="new-category"
               variant="outlined"
-              value={selectedCategory}
+              value={updatedCategory !== null ? updatedCategory : selectedExpense?.category_id || ""}
               label="Select Category"
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              size="small"
+              onChange={(e) => setUpdatedCategory(e.target.value)}
             >
               {categories?.map((category) => (
                 <MenuItem
                   key={category.id}
                   value={category.id}
-                  onClick={() => {
-                    handleChangeCategory(category.id);
-                  }}
                 >
                   {category.name}
                 </MenuItem>
@@ -177,11 +150,11 @@ export function ExpenseCard({
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
               label="Date"
-              value={selectedDate}
+              value={updatedDate !== null ? updatedDate : (selectedExpense && selectedExpense.date ? dayjs(selectedExpense.date) : null)}
               onChange={(newValue) => {
-                setSelectedDate(newValue);
-                handleChangeDate(newValue);
+                setUpdatedDate(newValue);
               }}
+              maxDate={dayjs()}
               slotProps={{ textField: { fullWidth: true } }}
             />
           </LocalizationProvider>
@@ -192,7 +165,7 @@ export function ExpenseCard({
             <input
               type="text"
               title="notes"
-              value={selectedExpense?.notes}
+              value={updatedNotes !== null ? updatedNotes : selectedExpense?.notes || ""}
               placeholder="Add notes..."
               style={{
                 border: "none",
@@ -203,20 +176,48 @@ export function ExpenseCard({
                 borderRadius: "3px",
               }}
               onChange={(e) =>
-                setSelectedExpense((prev) => {
-                  if (prev) {
-                    return { ...prev, notes: e.target.value };
-                  } else {
-                    return null;
-                  }
-                })
+                setUpdatedNotes(e.target.value)
               }
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await handleChangeNotes();
-                }
-              }}
             />
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "right", gap: "1rem", borderTop: "1px solid #d3d3d3", paddingTop: "1rem" }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={async () => {
+                setUpdatedName(null);
+                setUpdatedAmount(null);
+                setUpdatedCategory(null);
+                setUpdatedDate(null);
+                setUpdatedNotes(null);
+                setOpenExpense(false);
+              }}>Cancel</Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setSaveLoading(true);
+                if (!selectedExpense) return;
+                const oldExpense = selectedExpense;
+                const updated = {
+                  ...oldExpense,
+                  name: updatedName || oldExpense.name,
+                  amount: updatedAmount || oldExpense.amount,
+                  category_id: updatedCategory || oldExpense.category_id,
+                  date: updatedDate ? updatedDate.toDate() : oldExpense.date,
+                  notes: updatedNotes || oldExpense.notes,
+                };
+                setUpdatedName(null);
+                setUpdatedAmount(null);
+                setUpdatedCategory(null);
+                setUpdatedDate(null);
+                setUpdatedNotes(null);
+                setSelectedExpense(updated);
+                handleExpenseUpdate(updated, oldExpense);
+              }}
+            >
+              {saveLoading ? "Loading..." : "Save"}
+            </Button>
           </Box>
         </CardContent>
       </Card>

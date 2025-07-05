@@ -60,6 +60,38 @@ export function Categories({
     }
   }, [expenses, selectedCategory]);
 
+  useEffect(() => {
+    if (!newExpensesByCategory || !expenses) return;
+
+    const updatedMap = new Map(newExpensesByCategory.map(e => [e.id, e]));
+    let hasChanged = false;
+
+    const newParentExpenses = expenses.map(exp => {
+      if (updatedMap.has(exp.id)) {
+        const updatedExp = updatedMap.get(exp.id);
+        if (
+          updatedExp &&
+          (
+            exp.name !== updatedExp.name ||
+            exp.amount !== updatedExp.amount ||
+            exp.category_id !== updatedExp.category_id ||
+            exp.date !== updatedExp.date ||
+            exp.notes !== updatedExp.notes
+          )
+        ) {
+          hasChanged = true;
+          return { ...updatedExp };
+        }
+      }
+      return exp;
+    });
+
+    if (hasChanged) {
+      setExpenses(newParentExpenses);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newExpensesByCategory]);
+
   const handleSaveCategory = useCallback(async () => {
     if (!user) {
       return;
@@ -146,8 +178,8 @@ export function Categories({
       setCategories((prev) => {
         return prev
           ? prev.map((category) =>
-              category.id === updatedCategory.id ? updatedCategory : category
-            )
+            category.id === updatedCategory.id ? updatedCategory : category
+          )
           : null;
       });
       const activeElement = document.activeElement as HTMLElement;
@@ -184,8 +216,8 @@ export function Categories({
       setCategories((prev) => {
         return prev
           ? prev.map((category) =>
-              category.id === updatedCategory.id ? updatedCategory : category
-            )
+            category.id === updatedCategory.id ? updatedCategory : category
+          )
           : null;
       });
       const activeElement = document.activeElement as HTMLElement;
@@ -316,6 +348,7 @@ export function Categories({
         <CategoryCard
           newExpensesByCategory={newExpensesByCategory}
           setNewExpensesByCategory={setNewExpensesByCategory}
+          setExpenses={setExpenses}
           user={user}
           categories={categories}
           setCategories={setCategories}

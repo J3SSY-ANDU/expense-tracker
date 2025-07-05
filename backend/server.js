@@ -26,11 +26,7 @@ const {
   getExpensesByUser,
   createExpense,
   deleteExpense,
-  updateExpenseName,
-  updateExpenseAmount,
-  updateExpenseCategory,
-  updateExpenseDate,
-  updateExpenseNotes,
+  updateExpense,
   getOrganizedExpenses,
   getExpensesByMonth,
 } = require("./database/expenses");
@@ -94,8 +90,8 @@ app.post("/process-signup", async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(firstname, lastname, email, hashedPassword);
-    await sendEmailVerification(user.email, user.id);
-    res.status(200).json(user);
+    const token = await sendEmailVerification(user.email, user.id);
+    res.status(200).json({ user, token });
   } catch (error) {
     console.error("Error processing signup:", error);
     if (error.message === "USER_EXISTS") {
@@ -320,64 +316,28 @@ app.post("/create-expense", authenticateToken, async (req, res) => {
   res.status(201).json(expense);
 });
 
-app.post("/update-expense-name", authenticateToken, async (req, res) => {
-  const { expense_id, name } = req.body;
-  const updatedExpense = await updateExpenseName(
-    expense_id,
-    name
-  );
-  if (!updatedExpense) {
-    return res.status(401).json({ error: "Expense update failed!" });
+app.put("/update-expense", authenticateToken, async (req, res) => {
+  try {
+    const { id, name, amount, category_id, date, notes } = req.body;
+    if (!id) {
+      throw new Error("EXPENSE_NOT_FOUND");
+    }
+    const updates = { name, amount, category_id, date, notes }
+    const updatedExpense = await updateExpense(id, updates);
+    if (!updatedExpense) {
+      throw new Error("EXPENSE_NOT_FOUND");
+    }
+    res.status(200).json(updatedExpense);
+  } catch (err) {
+    console.error("Error updating expense:", err);
+    if (err.message === "EXPENSE_NOT_FOUND") {
+      return res.status(404).json({ error: "Expense not found!" });
+    } else if (err.message === "INVALID_EXPENSE_DATA") {
+      return res.status(400).json({ error: "Invalid expense data!" });
+    } else {
+      return res.status(500).json({ error: "Unknown server error." });
+    }
   }
-  res.status(200).json(updatedExpense);
-});
-
-app.post("/update-expense-amount", authenticateToken, async (req, res) => {
-  const { expense_id, amount } = req.body;
-  const updatedExpense = await updateExpenseAmount(
-    expense_id,
-    amount
-  );
-  if (!updatedExpense) {
-    return res.status(401).json({ error: "Expense update failed!" });
-  }
-  res.status(200).json(updatedExpense);
-});
-
-app.post("/update-expense-category", authenticateToken, async (req, res) => {
-  const { expense_id, category_id } = req.body;
-  const updatedExpense = await updateExpenseCategory(
-    expense_id,
-    category_id
-  );
-  if (!updatedExpense) {
-    return res.status(401).json({ error: "Expense update failed!" });
-  }
-  res.status(200).json(updatedExpense);
-});
-
-app.post("/update-expense-date", authenticateToken, async (req, res) => {
-  const { expense_id, date } = req.body;
-  const updatedExpense = await updateExpenseDate(
-    expense_id,
-    date
-  );
-  if (!updatedExpense) {
-    return res.status(401).json({ error: "Expense update failed!" });
-  }
-  res.status(200).json(updatedExpense);
-});
-
-app.post("/update-expense-notes", authenticateToken, async (req, res) => {
-  const { expense_id, notes } = req.body;
-  const updatedExpense = await updateExpenseNotes(
-    expense_id,
-    notes
-  );
-  if (!updatedExpense) {
-    return res.status(401).json({ error: "Expense update failed!" });
-  }
-  res.status(200).json(updatedExpense);
 });
 
 app.post("/delete-expense", authenticateToken, async (req, res) => {
@@ -448,28 +408,18 @@ app.post("/change-name", authenticateToken, async (req, res) => {
 
 app.get("/history", authenticateToken, async (req, res) => {
   const history = await getHistoryByUser(req.user.id);
+  for (const monthlyHistory of history) {
+    const expenses = await getExpensesByMonth(req.user.id, monthlyHistory.month, monthlyHistory.year);
+    monthlyHistory.expenses = expenses || [];
+    const categories = await Promise.all(expenses.map(expense => getCategoryById(expense.category_id)));
+    monthlyHistory.categories = categories || [];
+  }
   if (!history) {
     return res.status(401).json({ error: "Data fetch failed!" });
   }
   console.log("Data fetch successfully!");
   return res.status(200).json(history);
 });
-
-app.get("/monthly-history", authenticateToken, async (req, res) => {
-  const month = parseInt(req.query.month);
-  const year = parseInt(req.query.year);
-
-  if (isNaN(month) || isNaN(year)) {
-    return res.status(400).json({ error: "Invalid month or year!" });
-  }
-
-  const history = await getExpensesByMonth(req.user.id, month, year);
-  if (!history) {
-    return res.status(401).json({ error: "Data fetch failed!" });
-  }
-  console.log("Data fetch successfully!");
-  return res.status(200).json(history);
-})
 
 const port = process.env.PORT || 10000;
 
