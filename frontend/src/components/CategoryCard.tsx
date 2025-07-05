@@ -19,6 +19,7 @@ import { Category, Expense, User, History as MonthlyHistory } from "../types";
 export function CategoryCard({
   newExpensesByCategory,
   setNewExpensesByCategory,
+  setExpenses,
   user,
   categories,
   setCategories,
@@ -35,6 +36,7 @@ export function CategoryCard({
   setNewExpensesByCategory: React.Dispatch<
     React.SetStateAction<Expense[] | null>
   >;
+  setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
   user: User | null;
   categories: Category[] | null;
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
@@ -48,6 +50,18 @@ export function CategoryCard({
   handleDeleteCategory: () => void;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
+
+  // Function to handle deleting an expense by category globally
+  const handleDeleteExpenseByCategory = (expenseId: string) => {
+    setExpenses((prevExpenses) => {
+      if (!prevExpenses) return null;
+      const updatedExpenses = prevExpenses.filter(
+        (expense) => expense.id !== expenseId
+      );
+      return updatedExpenses;
+    });
+  };
+
   return (
     <Backdrop
       open={openCategory}
@@ -145,6 +159,9 @@ export function CategoryCard({
               user={user}
               expenses={newExpensesByCategory}
               setExpenses={setNewExpensesByCategory}
+              handleDeleteExpenseByCategory={
+                handleDeleteExpenseByCategory
+              }
               categories={categories}
               setCategories={setCategories}
               setHistory={setHistory}

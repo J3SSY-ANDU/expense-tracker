@@ -198,151 +198,50 @@ const getExpenseById = async (id) => {
   }
 };
 
-const updateExpenseName = async (id, name) => {
+const updateExpense = async (id, updates) => {
   try {
-    await connectionPool.query(`UPDATE expenses SET name = ? WHERE id = ?`, [
-      name,
-      id,
-    ]);
     const expense = await getExpenseById(id);
-    if (expense.name !== name) {
-      console.log(`Failed. Try again.`);
-      return null;
+    if (!expense) {
+      console.log(`Expense not found.`);
+      throw new Error("EXPENSE_NOT_FOUND");
     }
-    console.log("Expense name updated successfully!");
-    return expense;
-  } catch (err) {
-    console.error(`Error updating expense name: ${err}`);
-    return null;
-  }
-};
-
-const updateExpenseAmount = async (id, amount) => {
-  try {
-    const expense = await getExpenseById(id);
-    const amountDiff = parseFloat(amount) - parseFloat(expense.amount);
-    await connectionPool.query(`UPDATE expenses SET amount = ? WHERE id = ?`, [
-      amount,
-      id,
-    ]);
-    await updateCategoryTotalExpenses(
-      expense.category_id,
-      amountDiff,
-    );
-    await updateMonth(
-      expense.user_id,
-      new Date(expense.date).getMonth() + 1,
-      new Date(expense.date).getFullYear(),
-      amountDiff
-    );
-
-    const updatedExpense = await getExpenseById(id);
-    console.log("Expense amount updated successfully!");
-    return updatedExpense;
-  } catch (err) {
-    console.error(`Error updating expense amount: ${err}`);
-    return null;
-  }
-};
-
-const updateExpenseCategory = async (id, category_id) => {
-  try {
-    const expense = await getExpenseById(id);
-    await updateCategoryTotalExpenses(
-      expense.category_id,
-      -expense.amount,
-    );
+    const { name, amount, category_id, date, notes } = updates;
+    const parsedAmount = typeof amount === "string" ? Number(amount) : amount;
+    const parsedDate = typeof date === "string" ? new Date(date) : date;
+    if (
+      typeof name !== "string" ||
+      typeof parsedAmount !== "number" ||
+      typeof category_id !== "string" ||
+      !parsedDate
+    ) {
+      console.log("Invalid expense data.");
+      throw new Error("INVALID_EXPENSE_DATA");
+    }
+    // Update the expense
     await connectionPool.query(
-      `UPDATE expenses SET category_id = ? WHERE id = ?`,
-      [category_id, id]
+      `UPDATE expenses SET name = ?, amount = ?, category_id = ?, date = ?, notes = ? WHERE id = ?`,
+      [name, parsedAmount, category_id, parsedDate, notes, id]
     );
-    await updateCategoryTotalExpenses(
-      category_id,
-      expense.amount,
-    );
-    const updatedExpense = await getExpenseById(id);
-    if (updatedExpense.category_id !== category_id) {
-      console.log(`Failed. Try again.`);
-      return null;
-    }
-    console.log("Expense category updated successfully!");
-    return updatedExpense;
-  } catch (err) {
-    console.error(`Error updating expense category: ${err}`);
-    return null;
-  }
-};
 
-const updateExpenseDate = async (id, date) => {
-  try {
-    const expense = await getExpenseById(id);
-    let historyMonthExists = true;
-    let historyMonth = await getHistoryByMonthYear(
-      expense.user_id,
-      new Date(date).getMonth() + 1,
-      new Date(date).getFullYear()
-    );
-    if (!historyMonth) {
-      historyMonth = await createMonth(
-        expense.user_id,
-        new Date(date).getMonth() + 1,
-        new Date(date).getFullYear(),
-        expense.amount
-      );
-      historyMonthExists = false;
-    }
-    await connectionPool.query(
-      `UPDATE expenses SET date = ?, history_id = ? WHERE id = ?`,
-      [date, historyMonth.id, id]
-    );
-    if (!historyMonthExists) {
-      await updateMonth(
-        expense.user_id,
-        new Date(expense.date).getMonth() + 1,
-        new Date(expense.date).getFullYear(),
-        -expense.amount
-      );
+    // Update category total expenses
+    // Subtract old amount from old category, add new amount to new category
+    if (expense.category_id !== category_id) {
+      // Category changed: update both old and new categories
+      await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
+      await updateCategoryTotalExpenses(category_id, parsedAmount);
     } else {
-      await updateMonth(
-        expense.user_id,
-        new Date(date).getMonth() + 1,
-        new Date(date).getFullYear(),
-        expense.amount
-      );
-      await updateMonth(
-        expense.user_id,
-        new Date(expense.date).getMonth() + 1,
-        new Date(expense.date).getFullYear(),
-        -expense.amount
-      );
+      // Same category: update by the difference
+      const diff = parsedAmount - expense.amount;
+      await updateCategoryTotalExpenses(category_id, diff);
     }
-    const updatedExpense = await getExpenseById(id);
-    console.log("Expense date updated successfully!");
-    return updatedExpense;
-  } catch (err) {
-    console.error(`Error updating expense date: ${err}`);
-    return null;
-  }
-};
 
-const updateExpenseNotes = async (id, notes) => {
-  try {
-    await connectionPool.query(`UPDATE expenses SET notes = ? WHERE id = ?`, [
-      notes,
-      id,
-    ]);
-    const expense = await getExpenseById(id);
-    if (expense.notes !== notes) {
-      console.log(`Failed. Try again.`);
-      return null;
-    }
-    console.log("Expense notes updated successfully!");
-    return expense;
+    console.log("Expense updated successfully!");
+    return await getExpenseById(id);
   } catch (err) {
-    console.error(`Error updating expense notes: ${err}`);
-    return null;
+    console.error(`Error updating expense: ${err}`);
+    throw err;
   }
-};
+}
 
 const deleteExpense = async (id) => {
   try {
@@ -387,11 +286,7 @@ module.exports = {
   getExpensesByCategory,
   getExpensesByDate,
   getExpenseById,
-  updateExpenseName,
-  updateExpenseAmount,
-  updateExpenseCategory,
-  updateExpenseDate,
-  updateExpenseNotes,
+  updateExpense,
   deleteExpense,
   deleteAllExpenses,
   getOrganizedExpenses,

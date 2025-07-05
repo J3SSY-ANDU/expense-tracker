@@ -11,11 +11,7 @@ import {
   FetchExpensesData,
   CreateExpense,
   DeleteExpense,
-  UpdateExpenseName,
-  UpdateExpenseAmount,
-  UpdateExpenseCategory,
-  UpdateExpenseDate,
-  UpdateExpenseNotes,
+  UpdateExpense,
 } from "./expenseApi";
 import { FetchUserData, DeleteUser, ChangePassword, ChangeName, GetUserVerificationStatus } from "./userApi";
 import { Signup } from "./signupApi";
@@ -42,11 +38,7 @@ export {
   GenerateCategoryData,
   UpdateCategoryDescription,
   UpdateCategoryName,
-  UpdateExpenseName,
-  UpdateExpenseAmount,
-  UpdateExpenseCategory,
-  UpdateExpenseDate,
-  UpdateExpenseNotes,
+  UpdateExpense,
   DeleteUser, 
   ChangePassword,
   ChangeName,
