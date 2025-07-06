@@ -189,6 +189,13 @@ export function ExpensesTable({
 
             console.log("newHistory", newHistory);
 
+            setCreatingExpense(false);
+            setNewExpense(false);
+            setNewExpenseName("");
+            setNewExpenseAmount("");
+            setSelectedCategory(null);
+            setSelectedDate(null);
+            setNewExpenseNotes("");
             // Return a new array with the updated history at the same index
             return prev.map((h, i) => (i === existingHistoryIndex ? newHistory : h));
           }
@@ -209,6 +216,13 @@ export function ExpensesTable({
 
           console.log("newHistory", newHistory);
 
+          setCreatingExpense(false);
+          setNewExpense(false);
+          setNewExpenseName("");
+          setNewExpenseAmount("");
+          setSelectedCategory(null);
+          setSelectedDate(null);
+          setNewExpenseNotes("");
           return [newHistory, ...prev];
         });
         setCreatingExpense(false);
@@ -263,44 +277,49 @@ export function ExpensesTable({
         // If category didn't change, update only that category's total_expenses
         if (oldExpense?.category_id === updatedExpense.category_id) {
           return prev.map((category) =>
-        category.id === updatedExpense.category_id
-          ? {
-          ...category,
-          total_expenses: (
-            Number(category.total_expenses) -
-            Number(oldExpense?.amount || 0) +
-            Number(updatedExpense.amount)
-          ).toFixed(2),
-            }
-          : category
+            category.id === updatedExpense.category_id
+              ? {
+                ...category,
+                total_expenses: (
+                  Number(category.total_expenses) -
+                  Number(oldExpense?.amount || 0) +
+                  Number(updatedExpense.amount)
+                ).toFixed(2),
+              }
+              : category
           );
         } else {
           // Category changed: update both old and new categories
           return prev.map((category) => {
-        if (category.id === oldExpense?.category_id) {
-          // Subtract from old category
-          return {
-            ...category,
-            total_expenses: (
-          Number(category.total_expenses) -
-          Number(oldExpense?.amount || 0)
-            ).toFixed(2),
-          };
-        }
-        if (category.id === updatedExpense.category_id) {
-          // Add to new category
-          return {
-            ...category,
-            total_expenses: (
-          Number(category.total_expenses) +
-          Number(updatedExpense.amount)
-            ).toFixed(2),
-          };
-        }
-        return category;
+            if (category.id === oldExpense?.category_id) {
+              // Subtract from old category
+              return {
+                ...category,
+                total_expenses: (
+                  Number(category.total_expenses) -
+                  Number(oldExpense?.amount || 0)
+                ).toFixed(2),
+              };
+            }
+            if (category.id === updatedExpense.category_id) {
+              // Add to new category
+              return {
+                ...category,
+                total_expenses: (
+                  Number(category.total_expenses) +
+                  Number(updatedExpense.amount)
+                ).toFixed(2),
+              };
+            }
+            return category;
           });
         }
       });
+
+      
+
+      
+
       setSaveLoading(false);
       setOpenExpense(false);
     } catch (err) {
@@ -316,6 +335,63 @@ export function ExpensesTable({
       // to update the expenses in the parent component
       if (mode === "category" && handleDeleteExpenseByCategory) {
         handleDeleteExpenseByCategory(selectedExpense.id);
+      }
+
+      const month = new Date(selectedExpense.date).getMonth() + 1;
+      const year = new Date(selectedExpense.date).getFullYear();
+
+      if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
+        setHistory((prev) => {
+          if (!prev) return prev;
+          // Find the MonthlyHistory for this month/year
+          const historyIndex = prev.findIndex(
+            (history) => history.month === month && history.year === year
+          );
+          if (historyIndex === -1) return prev;
+
+          const oldHistory = prev[historyIndex];
+
+          // Remove the expense from the expenses array
+          const newExpenses = oldHistory.expenses.filter(
+            (expense) => expense.id !== selectedExpense.id
+          );
+
+          // Update the category's total_expenses
+          const newCategories = oldHistory.categories.map((cat) =>
+            cat.id === selectedExpense.category_id
+              ? {
+                ...cat,
+                total_expenses: (
+                  Number(cat.total_expenses) - Number(selectedExpense.amount)
+                ).toFixed(2),
+              }
+              : cat
+          );
+
+          // Remove category if its total_expenses becomes 0
+          const filteredCategories = newCategories.filter(
+            (cat) => Number(cat.total_expenses) > 0
+          );
+
+          // Update total_expenses for the month
+          const newTotalExpenses =
+            Number(oldHistory.total_expenses) - Number(selectedExpense.amount);
+
+          const newHistory: MonthlyHistory = {
+            ...oldHistory,
+            expenses: newExpenses,
+            categories: filteredCategories,
+            total_expenses: newTotalExpenses,
+          };
+
+          // If there are no expenses left, remove the history entry
+          if (newExpenses.length === 0) {
+            return prev.filter((_, idx) => idx !== historyIndex);
+          }
+
+          // Otherwise, update the history entry
+          return prev.map((h, i) => (i === historyIndex ? newHistory : h));
+        });
       }
       setExpenses((prev) => {
         return prev
@@ -333,6 +409,7 @@ export function ExpensesTable({
         ).toFixed(2);
         return prev;
       });
+
       setSelectedExpense(null);
       setOpenExpense(false);
     }
