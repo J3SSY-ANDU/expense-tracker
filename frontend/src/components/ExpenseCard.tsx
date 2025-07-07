@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -216,7 +217,7 @@ export function ExpenseCard({
                 handleExpenseUpdate(updated, oldExpense);
               }}
             >
-              {saveLoading ? "Loading..." : "Save"}
+              {saveLoading ? <CircularProgress size={16} /> : "Save"}
             </Button>
           </Box>
         </CardContent>
