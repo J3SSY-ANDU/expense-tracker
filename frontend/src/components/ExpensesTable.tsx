@@ -37,6 +37,7 @@ export function ExpensesTable({
   mode,
   title,
   handleDeleteExpenseByCategory, // keep in props for now, but will only use if mode === "category"
+  handleUpdateHistory, // Optional prop for updating history
 }: {
   user: User | null;
   expenses: Expense[] | null;
@@ -47,6 +48,7 @@ export function ExpensesTable({
   mode: ExpenseTableModeValues;
   title: string;
   handleDeleteExpenseByCategory?: (expenseId: string) => void;
+  handleUpdateHistory?: (updatedExpense: Expense, oldExpense: Expense) => void; // Optional prop for updating history
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
@@ -269,6 +271,13 @@ export function ExpensesTable({
         setSaveLoading(false);
         return;
       }
+
+      // If mode is "history", call the handleUpdateHistory function
+      if (mode === "history" && handleUpdateHistory) {
+        handleUpdateHistory(updatedExpense, oldExpense);
+      }
+
+
       setExpenses((prev) =>
         prev ? prev.map((exp) => (exp.id === updatedExpense.id ? updatedExpense : exp)) : null
       );
@@ -316,9 +325,9 @@ export function ExpensesTable({
         }
       });
 
-      
 
-      
+
+
 
       setSaveLoading(false);
       setOpenExpense(false);
