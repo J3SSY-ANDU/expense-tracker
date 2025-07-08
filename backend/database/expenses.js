@@ -16,6 +16,7 @@ const {
   createMonth,
   updateMonth,
   getHistoryByMonthYear,
+  deleteMonth,
 } = require("./history");
 
 (async () => {
@@ -235,60 +236,90 @@ const updateExpense = async (id, updates) => {
       await updateCategoryTotalExpenses(category_id, diff);
     }
 
-    console.log("Expense updated successfully!");
-    return await getExpenseById(id);
-  } catch (err) {
-    console.error(`Error updating expense: ${err}`);
-    throw err;
+    // Update month total expenses
+    const month = new Date(parsedDate).getMonth() + 1;
+    const year = new Date(parsedDate).getFullYear();
+    const historyMonth = await getHistoryByMonthYear(
+      expense.user_id,
+      month,
+      year
+    );
+    if (!historyMonth) {
+      await createMonth(
+        `${parsedDate.toLocaleString("default", { month: "long" })}`,
+        expense.user_id,
+        month,
+        year,
+        parsedAmount
+      );
+    } else {
+      const oldMonthTotal = historyMonth.total_expenses;
+      const newMonthTotal = oldMonthTotal - expense.amount + parsedAmount;
+      if (newMonthTotal <= 0) {
+        await deleteMonth(historyMonth.id);
+      } else {
+          await updateMonth(
+            expense.user_id,
+            month,
+            year,
+            newMonthTotal - oldMonthTotal
+          );
+        }
+      }
+      console.log("Expense updated successfully!");
+      return await getExpenseById(id);
+    } catch (err) {
+      console.error(`Error updating expense: ${err}`);
+      throw err;
+    }
   }
-}
 
 const deleteExpense = async (id) => {
-  try {
-    const expense = await getExpenseById(id);
-    if (!expense) {
-      console.log(`Expense not found.`);
-      return;
+    try {
+      const expense = await getExpenseById(id);
+      if (!expense) {
+        console.log(`Expense not found.`);
+        return;
+      }
+      await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
+      await updateCategoryTotalExpenses(
+        expense.category_id,
+        -expense.amount,
+      );
+      await updateMonth(
+        expense.user_id,
+        new Date(expense.date).getMonth() + 1,
+        new Date(expense.date).getFullYear(),
+        -expense.amount
+      );
+      console.log("Expense deleted successfully!");
+      return true;
+    } catch (err) {
+      console.error(`Error deleting expense: ${err}`);
+      return false;
     }
-    await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
-    await updateCategoryTotalExpenses(
-      expense.category_id,
-      -expense.amount,
-    );
-    await updateMonth(
-      expense.user_id,
-      new Date(expense.date).getMonth() + 1,
-      new Date(expense.date).getFullYear(),
-      -expense.amount
-    );
-    console.log("Expense deleted successfully!");
-    return true;
-  } catch (err) {
-    console.error(`Error deleting expense: ${err}`);
-    return false;
-  }
-};
+  };
 
-const deleteAllExpenses = async (user_id) => {
-  try {
-    await connectionPool.query(`DELETE FROM expenses WHERE user_id = ?`, [
-      user_id,
-    ]);
-    console.log("All expenses deleted successfully!");
-  } catch (err) {
-    console.error(`Error deleting all expenses: ${err}`);
-  }
-};
+  const deleteAllExpenses = async (user_id) => {
+    try {
+      await connectionPool.query(`DELETE FROM expenses WHERE user_id = ?`, [
+        user_id,
+      ]);
+      console.log("All expenses deleted successfully!");
+    } catch (err) {
+      console.error(`Error deleting all expenses: ${err}`);
+    }
+  };
 
-module.exports = {
-  createExpense,
-  getExpensesByUser,
-  getExpensesByCategory,
-  getExpensesByDate,
-  getExpenseById,
-  updateExpense,
-  deleteExpense,
-  deleteAllExpenses,
-  getOrganizedExpenses,
-  getExpensesByMonth,
-};
+  module.exports = {
+    createExpense,
+    getExpensesByUser,
+    getExpensesByCategory,
+    getExpensesByDate,
+    getExpenseById,
+    updateExpense,
+    deleteExpense,
+    deleteAllExpenses,
+    getOrganizedExpenses,
+    getExpensesByMonth,
+  };
