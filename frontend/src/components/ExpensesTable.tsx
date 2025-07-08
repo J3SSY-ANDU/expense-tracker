@@ -21,7 +21,6 @@ import { Dayjs } from "dayjs";
 import {
   CreateExpense,
   DeleteExpense,
-  UpdateExpense,
 } from "../api";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
@@ -37,7 +36,7 @@ export function ExpensesTable({
   mode,
   title,
   handleDeleteExpenseByCategory, // keep in props for now, but will only use if mode === "category"
-  handleUpdateHistory, // Optional prop for updating history
+  handleUpdateData, // Optional prop for updating history
 }: {
   user: User | null;
   expenses: Expense[] | null;
@@ -48,7 +47,7 @@ export function ExpensesTable({
   mode: ExpenseTableModeValues;
   title: string;
   handleDeleteExpenseByCategory?: (expenseId: string) => void;
-  handleUpdateHistory?: (updatedExpense: Expense, oldExpense: Expense) => void; // Optional prop for updating history
+  handleUpdateData: (updatedExpense: Expense) => Promise<void>; // Optional prop for updating history
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
@@ -259,83 +258,6 @@ export function ExpensesTable({
     }
   };
 
-  const handleExpenseUpdate = async (updatedExpense: Expense, oldExpense: Expense) => {
-    if (!updatedExpense) return;
-    try {
-      const updated = await UpdateExpense(updatedExpense);
-      if (updated && "error" in updated) {
-        console.error(`Error updating expense: ${updated.error}`);
-        // Add any additional error handling here if needed
-
-
-        setSaveLoading(false);
-        return;
-      }
-
-      // If mode is "history", call the handleUpdateHistory function
-      if (mode === "history" && handleUpdateHistory) {
-        handleUpdateHistory(updatedExpense, oldExpense);
-      }
-
-
-      setExpenses((prev) =>
-        prev ? prev.map((exp) => (exp.id === updatedExpense.id ? updatedExpense : exp)) : null
-      );
-      setCategories((prev) => {
-        if (!prev) return prev;
-        // If category didn't change, update only that category's total_expenses
-        if (oldExpense?.category_id === updatedExpense.category_id) {
-          return prev.map((category) =>
-            category.id === updatedExpense.category_id
-              ? {
-                ...category,
-                total_expenses: (
-                  Number(category.total_expenses) -
-                  Number(oldExpense?.amount || 0) +
-                  Number(updatedExpense.amount)
-                ).toFixed(2),
-              }
-              : category
-          );
-        } else {
-          // Category changed: update both old and new categories
-          return prev.map((category) => {
-            if (category.id === oldExpense?.category_id) {
-              // Subtract from old category
-              return {
-                ...category,
-                total_expenses: (
-                  Number(category.total_expenses) -
-                  Number(oldExpense?.amount || 0)
-                ).toFixed(2),
-              };
-            }
-            if (category.id === updatedExpense.category_id) {
-              // Add to new category
-              return {
-                ...category,
-                total_expenses: (
-                  Number(category.total_expenses) +
-                  Number(updatedExpense.amount)
-                ).toFixed(2),
-              };
-            }
-            return category;
-          });
-        }
-      });
-
-
-
-
-
-      setSaveLoading(false);
-      setOpenExpense(false);
-    } catch (err) {
-      console.error(`Error updating expense ${err}`);
-    }
-  }
-
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
     const isDeleted = await DeleteExpense(selectedExpense.id);
@@ -515,7 +437,7 @@ export function ExpensesTable({
         categories={categories}
         showDeleteDialog={showDeleteDialog}
         handleDeleteExpense={handleDeleteExpense}
-        handleExpenseUpdate={handleExpenseUpdate}
+        handleUpdateData={handleUpdateData}
         saveLoading={saveLoading}
         setSaveLoading={setSaveLoading}
       />
