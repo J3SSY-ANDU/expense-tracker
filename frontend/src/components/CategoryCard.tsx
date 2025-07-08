@@ -31,6 +31,7 @@ export function CategoryCard({
   handleChangeName,
   handleChangeDescription,
   handleDeleteCategory,
+  handleUpdateData,
 }: {
   newExpensesByCategory: Expense[] | null;
   setNewExpensesByCategory: React.Dispatch<
@@ -48,6 +49,7 @@ export function CategoryCard({
   handleChangeName: () => Promise<void>;
   handleChangeDescription: () => Promise<void>;
   handleDeleteCategory: () => void;
+  handleUpdateData: (updatedExpense: Expense) => Promise<void>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
 
@@ -165,6 +167,7 @@ export function CategoryCard({
               categories={categories}
               setCategories={setCategories}
               setHistory={setHistory}
+              handleUpdateData={handleUpdateData}
               mode="category"
               title=""
             />

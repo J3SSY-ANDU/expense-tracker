@@ -1,7 +1,7 @@
 import "./App.css";
 import { useState } from "react";
 import { useEffect } from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { Category, Expense, User, History as MonthlyHistory } from "./types";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,6 +10,7 @@ import {
   FetchUserData,
   FetchHistoryData,
   GenerateCategoryData,
+  UpdateExpense,
 } from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
 import expense_tracker from "./expense-tracker.svg";
@@ -32,13 +33,13 @@ export default function App() {
       setUser(userData);
 
       await GenerateCategoryData(); // Ensure categories are generated for the user
-      
+
       const categoriesData = await FetchCategoriesData();
       setCategories(categoriesData);
-      
+
       const expensesData = await FetchExpensesData();
       setExpenses(expensesData);
-      
+
       const historyData = await FetchHistoryData();
       setHistory(historyData);
       setLoading(false);
@@ -48,6 +49,31 @@ export default function App() {
 
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  const handleUpdateData = async (updatedExpense: Expense): Promise<void> => {
+    if (!updatedExpense) return;
+    try {
+      const updated = await UpdateExpense(updatedExpense);
+      if (updated && "error" in updated) {
+        console.error(`Error updating expense: ${updated.error}`);
+        // Add any additional error handling here if needed
+
+
+        return;
+      }
+      // Fetch updated data after successful update
+      const expensesData = await FetchExpensesData();
+      setExpenses(expensesData)
+      const categoriesData = await FetchCategoriesData();
+      setCategories(categoriesData);
+      const historyData = await FetchHistoryData();
+      setHistory(historyData);
+    } catch (error) {
+      console.error("Error updating expense:", error);
+      // Add any additional error handling here if needed
+      return;
+    }
   }
 
   return (
@@ -98,6 +124,7 @@ export default function App() {
         expenses={expenses}
         setExpenses={setExpenses}
         setHistory={setHistory}
+        handleUpdateData={handleUpdateData}
       />
       <ExpensesTable
         user={user}
@@ -106,10 +133,11 @@ export default function App() {
         categories={categories}
         setCategories={setCategories}
         setHistory={setHistory}
+        handleUpdateData={handleUpdateData}
         mode="monthly"
         title={"Monthly Expenses"}
       />
-      <History history={history} setHistory={setHistory} user={user} />
+      <History history={history} setHistory={setHistory} user={user} handleUpdateData={handleUpdateData} />
     </Box>
   );
 }

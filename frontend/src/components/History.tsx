@@ -8,10 +8,14 @@ export function History({
   user,
   history,
   setHistory,
+  handleUpdateData,
 }: {
   user: User | null;
   history: MonthlyHistory[] | null;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
+  handleUpdateData: (
+    updatedExpense: Expense,
+  ) => Promise<void>;
 }) {
   const [expenses, setExpenses] = useState<Expense[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -88,7 +92,8 @@ export function History({
                   categories={categories}
                   setCategories={setCategories}
                   setHistory={setHistory}
-                  mode="category"
+                  handleUpdateData={handleUpdateData}
+                  mode="history"
                   title=""
                 />
               ) : (
