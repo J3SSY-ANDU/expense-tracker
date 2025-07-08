@@ -30,6 +30,7 @@ export function Categories({
   expenses,
   setExpenses,
   setHistory,
+  handleUpdateData,
 }: {
   user: User | null;
   categories: Category[] | null;
@@ -37,6 +38,7 @@ export function Categories({
   expenses: Expense[] | null;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
+  handleUpdateData: (updatedExpense: Expense) => Promise<void>; // Function to update expense data
 }) {
   const [newExpensesByCategory, setNewExpensesByCategory] = useState<
     Expense[] | null
@@ -360,6 +362,7 @@ export function Categories({
           handleChangeName={handleChangeName}
           handleChangeDescription={handleChangeDescription}
           handleDeleteCategory={handleDeleteCategory}
+          handleUpdateData={handleUpdateData}
         />
       </Box>
     </Box>

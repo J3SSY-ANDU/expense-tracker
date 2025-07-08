@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -32,7 +33,7 @@ export function ExpenseCard({
   categories,
   showDeleteDialog,
   handleDeleteExpense,
-  handleExpenseUpdate,
+  handleUpdateData,
   saveLoading = false,
   setSaveLoading,
 }: {
@@ -44,7 +45,7 @@ export function ExpenseCard({
   categories: Category[] | null;
   showDeleteDialog: boolean;
   handleDeleteExpense: () => void;
-  handleExpenseUpdate: (updatedExpense: Expense, oldExpense: Expense) => void;
+  handleUpdateData: (updatedExpense: Expense) => Promise<void>;
   saveLoading: boolean;
   setSaveLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
@@ -195,7 +196,7 @@ export function ExpenseCard({
             <Button
               variant="outlined"
               color="primary"
-              onClick={() => {
+              onClick={async () => {
                 setSaveLoading(true);
                 if (!selectedExpense) return;
                 const oldExpense = selectedExpense;
@@ -213,10 +214,12 @@ export function ExpenseCard({
                 setUpdatedDate(null);
                 setUpdatedNotes(null);
                 setSelectedExpense(updated);
-                handleExpenseUpdate(updated, oldExpense);
+                await handleUpdateData(updated);
+                setSaveLoading(false);
+                setOpenExpense(false);
               }}
             >
-              {saveLoading ? "Loading..." : "Save"}
+              {saveLoading ? <CircularProgress size={16} /> : "Save"}
             </Button>
           </Box>
         </CardContent>
