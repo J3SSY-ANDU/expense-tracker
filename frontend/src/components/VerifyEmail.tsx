@@ -12,6 +12,7 @@ import {
   VerifyEmail as VerifyEmailApi,
   ResendVerificationEmail,
   GetUserVerificationStatus,
+  GenerateCategoryData,
 } from "../api";
 import { useNavigate } from "react-router-dom";
 

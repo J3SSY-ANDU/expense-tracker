@@ -121,6 +121,22 @@ app.get("/verify-email", async (req, res) => {
       return res.status(200).json({ message: "Email already verified!" });
     } else {
       await verifyUser(id);
+      const date = new Date();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      // Wait for all categories to be created before continuing
+      await Promise.all(
+        categoriesData.map(category =>
+          createCategory(
+            category.name,
+            id,
+            month,
+            year,
+            category.total_expenses,
+            category.description,
+          )
+        )
+      );
       const authToken = jwt.sign({ id: user.id, purpose: "authentication" }, process.env.AUTH_SECRET, {
         expiresIn: "30m",
       });
