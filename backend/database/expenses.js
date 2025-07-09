@@ -218,61 +218,69 @@ const updateExpense = async (id, updates) => {
       console.log("Invalid expense data.");
       throw new Error("INVALID_EXPENSE_DATA");
     }
-    // Update the expense
-    await connectionPool.query(
-      `UPDATE expenses SET name = ?, amount = ?, category_id = ?, date = ?, notes = ? WHERE id = ?`,
-      [name, parsedAmount, category_id, parsedDate, notes, id]
-    );
 
-    // Update category total expenses
-    // Subtract old amount from old category, add new amount to new category
-    if (expense.category_id !== category_id) {
-      // Category changed: update both old and new categories
-      await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
-      await updateCategoryTotalExpenses(category_id, parsedAmount);
-    } else {
-      // Same category: update by the difference
-      const diff = parsedAmount - expense.amount;
-      await updateCategoryTotalExpenses(category_id, diff);
-    }
-
-    // Update month total expenses
+    // Find or create the correct history month for the new date
     const month = new Date(parsedDate).getMonth() + 1;
     const year = new Date(parsedDate).getFullYear();
-    const historyMonth = await getHistoryByMonthYear(
+    let historyMonthExists = true;
+    let historyMonth = await getHistoryByMonthYear(
       expense.user_id,
       month,
       year
     );
     if (!historyMonth) {
-      await createMonth(
+      historyMonth = await createMonth(
         `${parsedDate.toLocaleString("default", { month: "long" })}`,
         expense.user_id,
         month,
         year,
         parsedAmount
       );
-    } else {
-      const oldMonthTotal = historyMonth.total_expenses;
-      const newMonthTotal = oldMonthTotal - expense.amount + parsedAmount;
-      if (newMonthTotal <= 0) {
-        await deleteMonth(historyMonth.id);
-      } else {
-          await updateMonth(
-            expense.user_id,
-            month,
-            year,
-            newMonthTotal - oldMonthTotal
-          );
-        }
-      }
-      console.log("Expense updated successfully!");
-      return await getExpenseById(id);
-    } catch (err) {
-      console.error(`Error updating expense: ${err}`);
-      throw err;
+      historyMonthExists = false;
     }
+
+    // Update the expense
+    await connectionPool.query(
+      `UPDATE expenses SET name = ?, amount = ?, category_id = ?, date = ?, notes = ?, history_id = ? WHERE id = ?`,
+      [name, parsedAmount, category_id, parsedDate, notes, historyMonth.id, id]
+    );
+
+    // Update category total expenses
+    if (expense.category_id !== category_id) {
+      await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
+      await updateCategoryTotalExpenses(category_id, parsedAmount);
+    } else {
+      const diff = parsedAmount - expense.amount;
+      await updateCategoryTotalExpenses(category_id, diff);
+    }
+
+    // Update month total expenses
+    const oldMonth = new Date(expense.date).getMonth() + 1;
+    const oldYear = new Date(expense.date).getFullYear();
+
+    await updateMonth(
+      expense.user_id,
+      oldMonth,
+      oldYear,
+      -expense.amount
+    );
+    
+    if (historyMonthExists) {
+      await updateMonth(
+        expense.user_id,
+        month,
+        year,
+        parsedAmount
+      );
+    }
+
+    console.log("Expense updated successfully!");
+    return await getExpenseById(id);
+  } catch (err) {
+    console.error(`Error updating expense: ${err}`);
+    throw err;
   }
+};
 
 const deleteExpense = async (id) => {
     try {
