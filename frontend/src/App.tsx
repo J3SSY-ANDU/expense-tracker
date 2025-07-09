@@ -9,7 +9,6 @@ import {
   FetchExpensesData,
   FetchUserData,
   FetchHistoryData,
-  GenerateCategoryData,
   UpdateExpense,
 } from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
@@ -31,8 +30,6 @@ export default function App() {
         return;
       }
       setUser(userData);
-
-      await GenerateCategoryData(); // Ensure categories are generated for the user
 
       const categoriesData = await FetchCategoriesData();
       setCategories(categoriesData);
