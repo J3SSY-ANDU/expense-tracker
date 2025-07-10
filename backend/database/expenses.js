@@ -258,7 +258,6 @@ const updateExpense = async (id, updates) => {
         newMonth,
         newYear
       );
-      console.log(`New month category: ${newMonthCategory ? newMonthCategory.id : "not found"}`);
       if (!newMonthCategory) {
         const oldCategory = await getCategoryById(expense.category_id);
         const createdCategory = await createCategory(
