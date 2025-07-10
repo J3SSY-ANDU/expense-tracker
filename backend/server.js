@@ -427,7 +427,10 @@ app.get("/history", authenticateToken, async (req, res) => {
   for (const monthlyHistory of history) {
     const expenses = await getExpensesByMonth(req.user.id, monthlyHistory.month, monthlyHistory.year);
     monthlyHistory.expenses = expenses || [];
-    const categories = await Promise.all(expenses.map(expense => getCategoryById(expense.category_id)));
+    // Get unique category IDs from expenses
+    const uniqueCategoryIds = [...new Set((expenses || []).map(expense => expense.category_id))];
+    // Fetch unique categories
+    const categories = await Promise.all(uniqueCategoryIds.map(id => getCategoryById(id)));
     monthlyHistory.categories = categories || [];
   }
   if (!history) {
