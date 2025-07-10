@@ -251,14 +251,15 @@ const updateExpense = async (id, updates) => {
       await updateCategoryTotalExpenses(expense.category_id, -expense.amount);
 
       // Find or create the category for the new month by name
-      const oldCategory = await getCategoryById(expense.category_id);
+      const selectedCategory = await getCategoryById(category_id);
       let newMonthCategory = await getCategoryByMonthYear(
-        oldCategory.name,
-        oldCategory.user_id,
+        selectedCategory.name,
+        selectedCategory.user_id,
         newMonth,
         newYear
       );
       if (!newMonthCategory) {
+        const oldCategory = await getCategoryById(expense.category_id);
         const createdCategory = await createCategory(
           oldCategory.name,
           oldCategory.user_id,
