@@ -12,6 +12,7 @@
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "axios": "^1.10.0",
     "cra-template": "1.2.0",
     "dayjs": "^1.11.13",
     "react": "^19.0.0",

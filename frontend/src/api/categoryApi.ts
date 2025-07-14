@@ -9,7 +9,6 @@ export async function FetchCategoriesData(): Promise<Category[] | null> {
         "Content-Type": "application/json",
       },
       credentials: "include",
-
     });
     if (res.status === 200) {
       const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
