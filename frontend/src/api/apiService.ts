@@ -33,6 +33,17 @@ const api = axios.create({
   }
 })
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            localStorage.removeItem("authToken");
+            window.location.href = "/login"; // Or show a modal
+        }
+        return Promise.reject(error);
+    }
+);
+
 // Add a request interceptor
 api.interceptors.request.use(
   config => {
