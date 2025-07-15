@@ -1,14 +1,17 @@
+import axios from "axios";
 import { History as MonthlyHistory } from "../types";
 import { api } from "./apiService";
 
-export async function FetchHistoryData(): Promise<MonthlyHistory[] | null> {
+export async function FetchHistoryData(): Promise<MonthlyHistory[] | { error: string }> {
   try {
     const res = await api.get("/history");
-    if (res.status === 200) {
-      return res.data;
+    return res.data;
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching history data ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }

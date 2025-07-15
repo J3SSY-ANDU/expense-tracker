@@ -1,81 +1,83 @@
 import { User } from '../types'
 import {} from 'react-router-dom'
 import { api } from './apiService'
+import axios from 'axios'
 
-export async function FetchUserData (): Promise<User | null> {
+export async function FetchUserData (): Promise<User | { error: string }> {
   try {
     const res = await api.get('/user-data')
-    if (res.status === 200) {
-      return res.data
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching user data ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null
 }
 
 export async function GetUserVerificationStatus (
   id: string
-): Promise<string | null> {
+): Promise<string | { error: string }> {
   try {
     const res = await api.get(`/verify-user-creation?id=${id}`)
-    if (res.status === 200) {
-      console.log('User creation verified')
-      window.location.href = '/login'
-      return 'Verified'
-    } else if (res.status === 401) {
-      console.log('User creation not verified')
-      return 'Not Verified'
-    } else if (res.status === 404) {
-      console.log('User not found')
-      window.location.href = '/signup'
-      return 'Not Found'
+    return res.data;
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error verifying user creation ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null
 }
 
 export async function ChangePassword (
   oldPassword: string,
   newPassword: string
-): Promise<boolean> {
+): Promise<boolean | { error: string }> {
   try {
     const res = await api.post('/change-password', { oldPassword, newPassword })
-    if (res.status === 200) {
-      return true
+    return res.data;
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error changing password ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false
 }
 
 export async function ChangeName (
   newFirstname: string,
   newLastname: string
-): Promise<boolean> {
+): Promise<boolean | { error: string }> {
   try {
     const res = await api.post('/change-name', { newFirstname, newLastname })
-    if (res.status === 200) {
-      return true
+    return res.data;
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error changing name ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false
 }
 
-export async function DeleteUser (): Promise<boolean> {
+export async function DeleteUser (): Promise<boolean | { error: string }> {
   try {
     const res = await api.post("/delete-user");
-    if (res.status === 200) {
-      window.location.href = '/signup'
-      return true
+    window.location.href = '/signup'
+    return res.data;
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error deleting user ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false
 }

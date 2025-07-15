@@ -1,21 +1,24 @@
+import axios from 'axios'
 import { Expense, NewExpense } from '../types/Expense'
 import { api } from './apiService'
 
-export async function FetchExpensesData (): Promise<Expense[] | null> {
+export async function FetchExpensesData (): Promise<Expense[] | { error: string }> {
   try {
     const res = await api.get(`/all-monthly-expenses`)
-    if (res.status === 200) {
-      return res.data
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching expenses data ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null
 }
 
 export async function CreateExpense (
   expense: NewExpense
-): Promise<Expense | null> {
+): Promise<Expense | { error: string }> {
   try {
     const { name, user_id, amount, category_id, date, notes } = expense
     const res = await api.post('/create-expense', {
@@ -26,13 +29,15 @@ export async function CreateExpense (
       date,
       notes
     })
-    if (res.status === 201) {
-      return res.data
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error creating expense ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null
 }
 
 export async function UpdateExpense (
@@ -48,27 +53,27 @@ export async function UpdateExpense (
       date,
       notes
     })
-    if (res.status === 200) {
-      return res.data
-    } else {
-      return res.data.error
-        ? { error: res.data.error }
-        : { error: 'Failed to update expense' }
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error updating expense ${err}`)
-    return { error: 'Something went wrong. Please try again.' }
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
 }
 
-export async function DeleteExpense (expense_id: string): Promise<boolean> {
+export async function DeleteExpense (expense_id: string): Promise<boolean | { error: string }> {
   try {
     const res = await api.post('/delete-expense', { expense_id })
-    if (res.status === 200) {
-      return true
+    return res.data;
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error deleting expense ${err}`)
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false
 }
