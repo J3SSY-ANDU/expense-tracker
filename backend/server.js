@@ -228,71 +228,122 @@ app.post('/reset-forgot-password', async (req, res) => {
 })
 
 app.get("/all-categories", authenticateToken, async (req, res) => {
-  const categories = await getOrderedCategories(req.user.id);
-  res.status(200).json(categories);
+  try {
+    const categories = await getOrderedCategories(req.user.id);
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ error: "Failed to fetch categories." });
+  }
 })
 
 app.get("/generate-default-categories", authenticateToken, async (req, res) => {
-  const id = req.user.id;
-  const date = new Date();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  for (let category of categoriesData) {
-    await createCategory(
-      category.name,
-      id,
-      month,
-      year,
-      category.total_expenses,
-      category.description,
-    );
+  try {
+    const id = req.user.id;
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    for (let category of categoriesData) {
+      await createCategory(
+        category.name,
+        id,
+        month,
+        year,
+        category.total_expenses,
+        category.description,
+      );
+    }
+    res.status(200).json({ message: "Default categories created!" });
+  } catch (error) {
+    console.error("Error generating default categories:", error);
+    // Always return an error object for frontend consistency
+    res.status(500).json({ error: "Failed to generate default categories." });
   }
-  res.status(200).json({ message: "Default categories created!" });
 });
 
 app.get("/get-category", authenticateToken, async (req, res) => {
-  const { category_id } = req.query;
-  const category = await getCategoryById(category_id);
-  if (!category) {
-    return res.status(401).json({ error: "Category not found!" });
+  try {
+    const { category_id } = req.query;
+    if (!category_id) {
+      return res.status(400).json({ error: "category_id is required." });
+    }
+    const category = await getCategoryById(category_id);
+    if (!category) {
+      return res.status(404).json({ error: "Category not found!" });
+    }
+    res.status(200).json(category);
+  } catch (error) {
+    console.error("Error fetching category:", error);
+    res.status(500).json({ error: "Failed to fetch category." });
   }
-  res.status(200).json(category);
 });
 
 app.post("/update-category-name", authenticateToken, async (req, res) => {
-  const { category_id, name } = req.body;
-  const updatedCategory = await updateCategoryName(category_id, name);
-  if (!updatedCategory) {
-    return res.status(401).json({ error: "Category name update failed!" });
+  try {
+    const { category_id, name } = req.body;
+    if (!category_id || !name) {
+      return res.status(400).json({ error: "category_id and name are required." });
+    }
+    const updatedCategory = await updateCategoryName(category_id, name);
+    if (!updatedCategory) {
+      return res.status(401).json({ error: "Category name update failed!" });
+    }
+    res.status(200).json(updatedCategory);
+  } catch (error) {
+    console.error("Error updating category name:", error);
+    res.status(500).json({ error: "Failed to update category name." });
   }
-  res.status(200).json(updatedCategory);
 })
 
 app.post("/update-category-description", authenticateToken, async (req, res) => {
-  const { category_id, description } = req.body;
-  const updatedCategory = await updateCategoryDescription(category_id, description);
-  if (!updatedCategory) {
-    return res.status(401).json({ error: "Category description update failed!" });
+  try {
+    const { category_id, description } = req.body;
+    if (!category_id || !description) {
+      return res.status(400).json({ error: "category_id and description are required." });
+    }
+    const updatedCategory = await updateCategoryDescription(category_id, description);
+    if (!updatedCategory) {
+      return res.status(401).json({ error: "Category description update failed!" });
+    }
+    res.status(200).json(updatedCategory);
+  } catch (error) {
+    console.error("Error updating category description:", error);
+    res.status(500).json({ error: "Failed to update category description." });
   }
-  res.status(200).json(updatedCategory);
 })
 
 app.post("/add-category", authenticateToken, async (req, res) => {
-  const { name, user_id, month, year, total_expenses, description } = req.body;
-  const category = await createCategory(name, user_id, month, year, total_expenses, description);
-  if (!category) {
-    return res.status(401).json({ error: "Category creation failed!" });
+  try {
+    const { name, user_id, month, year, total_expenses, description } = req.body;
+    if (!name || !user_id || !month || !year || total_expenses === undefined) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    const category = await createCategory(name, user_id, month, year, total_expenses, description);
+    if (!category) {
+      return res.status(401).json({ error: "Category creation failed!" });
+    }
+    res.status(201).json(category);
+  } catch (error) {
+    console.error("Error creating category:", error);
+    res.status(500).json({ error: "Failed to create category." });
   }
-  res.status(201).json(category);
 })
 
 app.post("/delete-category", authenticateToken, async (req, res) => {
-  const { category_id } = req.body;
-  const deleted = await deleteCategory(category_id);
-  if (!deleted) {
-    return res.status(401).json({ error: "Category deletion failed!" });
+  try {
+    const { category_id } = req.body;
+    if (!category_id) {
+      return res.status(400).json({ error: "category_id is required." });
+    }
+    const deleted = await deleteCategory(category_id);
+    if (!deleted) {
+      return res.status(401).json({ error: "Category deletion failed!" });
+    }
+    res.status(200).json({ message: "Category deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    res.status(500).json({ error: "Failed to delete category." });
   }
-  res.status(200).json({ message: "Category deleted successfully!" });
 })
 
 app.get("/all-expenses", authenticateToken, async (req, res) => {
