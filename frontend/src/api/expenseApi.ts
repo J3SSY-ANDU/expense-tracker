@@ -1,90 +1,74 @@
-import { Expense, NewExpense } from "../types/Expense";
+import { Expense, NewExpense } from '../types/Expense'
+import { api } from './apiService'
 
-const token = localStorage.getItem("authToken");
-export async function FetchExpensesData(): Promise<Expense[] | null> {
+export async function FetchExpensesData (): Promise<Expense[] | null> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/all-monthly-expenses`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+    const res = await api.get(`/all-monthly-expenses`)
     if (res.status === 200) {
-      const expensesData: Expense[] = await res.json(); // Make sure that the response is of type Expense[]
-      return expensesData;
+      return res.data
     }
   } catch (err) {
-    console.error(`Error fetching expenses data ${err}`);
+    console.error(`Error fetching expenses data ${err}`)
   }
-  return null;
+  return null
 }
 
-export async function CreateExpense(
+export async function CreateExpense (
   expense: NewExpense
 ): Promise<Expense | null> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/create-expense`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(expense),
-    });
+    const { name, user_id, amount, category_id, date, notes } = expense
+    const res = await api.post('/create-expense', {
+      name,
+      user_id,
+      amount,
+      category_id,
+      date,
+      notes
+    })
     if (res.status === 201) {
-      const newExpense: Expense = await res.json(); // Make sure that the response is of type Expense
-      return newExpense;
+      return res.data
     }
   } catch (err) {
-    console.error(`Error creating expense ${err}`);
+    console.error(`Error creating expense ${err}`)
   }
-  return null;
+  return null
 }
 
-export async function UpdateExpense(expense: Expense): Promise<Expense | { error: string}> {
+export async function UpdateExpense (
+  expense: Expense
+): Promise<Expense | { error: string }> {
   try {
-    const { id, name, amount, category_id, date, notes } = expense;
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ id, name, amount, category_id, date, notes }),
-    });
+    const { id, name, amount, category_id, date, notes } = expense
+    const res = await api.put('/update-expense', {
+      id,
+      name,
+      amount,
+      category_id,
+      date,
+      notes
+    })
     if (res.status === 200) {
-      const updatedExpense: Expense = await res.json(); // Make sure that the response is of type Expense
-      return updatedExpense;
+      return res.data
     } else {
-      const data = await res.json();
-      return data.error ? { error: data.error } : { error: "Failed to update expense" };
+      return res.data.error
+        ? { error: res.data.error }
+        : { error: 'Failed to update expense' }
     }
   } catch (err) {
-    console.error(`Error updating expense ${err}`);
-    return { error: "Something went wrong. Please try again." }
+    console.error(`Error updating expense ${err}`)
+    return { error: 'Something went wrong. Please try again.' }
   }
 }
 
-export async function DeleteExpense(expense_id: string): Promise<boolean> {
+export async function DeleteExpense (expense_id: string): Promise<boolean> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-expense`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ expense_id }),
-    });
+    const res = await api.post('/delete-expense', { expense_id })
     if (res.status === 200) {
-      return true;
+      return true
     }
   } catch (err) {
-    console.error(`Error deleting expense ${err}`);
+    console.error(`Error deleting expense ${err}`)
   }
-  return false;
+  return false
 }

@@ -1,66 +1,75 @@
-import axios from "axios";
-import { User } from "../types";
+import axios from 'axios'
+import {
+  AddCategory,
+  ChangeName,
+  ChangePassword,
+  CreateExpense,
+  DeleteCategory,
+  DeleteExpense,
+  DeleteUser,
+  FetchCategoriesData,
+  FetchExpensesData,
+  FetchHistoryData,
+  FetchUserData,
+  ForgotPassword,
+  GenerateCategoryData,
+  GetCategory,
+  GetUserVerificationStatus,
+  LogIn,
+  ResendVerificationEmail,
+  ResetForgotPassword,
+  SignUp,
+  UpdateCategoryDescription,
+  UpdateCategoryName,
+  UpdateExpense,
+  VerifyEmail
+} from './'
 
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL,
-    timeout: 1000,
-    headers: {
-        "Content-Type": "application/json",
-    }
+  baseURL: process.env.REACT_APP_API_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
 
 // Add a request interceptor
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+  config => {
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  error => Promise.reject(error)
+)
 
 const apiService = {
-    signUp: async (
-        firstname: string,
-        lastname: string,
-        email: string,
-        password: string
-    ): Promise<{ user: User; token: string } | { error: string }> => {
-        try {
-            const res = await api.post("/process-signup", { firstname, lastname, email, password })
-            if (res.status === 200) {
-                console.log("Signed up successfully");
-                return res.data.user;
-            } else {
-                console.log("Failed to sign up");
-                return { error: res.data.error ?? "An error occurred during signup. Please try again." };
-            }
-        } catch (err) {
-            console.error(`Error signing up ${err}`);
-            return { error: "Failed to connect to the server. Please try again later." };
-        }
-    },
-    signIn: async (
-        email: string,
-        password: string
-    ): Promise<{ user: User, token: string } | { error: string }> => {
-        try {
-            const res = await api.post("/process-login", { email, password })
-            if (res.status === 200) {
-                console.log("Login successful!");
-                return res.data;
-            } else {
-                console.error("Login failed!");
-                return { error: res.data.error ?? "Unknown error occurred." };
-            }
-        } catch (err) {
-            console.error(`Error fetching the API: ${err}`);
-            return { error: "Failed to connect to the server. Please try again later." };
-        }
-    }
+  signUp: SignUp,
+  logIn: LogIn,
+  verifyEmail: VerifyEmail,
+  resendVerificationEmail: ResendVerificationEmail,
+  resetForgotPassword: ResetForgotPassword,
+  getUserData: FetchUserData,
+  getUserVerificationStatus: GetUserVerificationStatus,
+  changePassword: ChangePassword,
+  changeName: ChangeName,
+  deleteUser: DeleteUser,
+  forgotPassword: ForgotPassword,
+  getCategoriesData: FetchCategoriesData,
+  generateCategoryData: GenerateCategoryData,
+  getCategory: GetCategory,
+  addCategory: AddCategory,
+  updateCategoryName: UpdateCategoryName,
+  updateCategoryDescription: UpdateCategoryDescription,
+  deleteCategory: DeleteCategory,
+  getExpensesData: FetchExpensesData,
+  createExpense: CreateExpense,
+  updateExpense: UpdateExpense,
+  deleteExpense: DeleteExpense,
+  getHistoryData: FetchHistoryData
 }
 
 export default apiService
-
+export {api}

@@ -8,13 +8,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import {
-  VerifyEmail as VerifyEmailApi,
-  ResendVerificationEmail,
-  GetUserVerificationStatus,
-  GenerateCategoryData,
-} from "../api";
 import { useNavigate } from "react-router-dom";
+import apiService from "../api/apiService";
 
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
@@ -37,9 +32,9 @@ export function VerifyEmail() {
         navigate("/signup");
         return;
       } else if (!tokenParam && userIdParam) {
-        await GetUserVerificationStatus(userIdParam);
+        await apiService.getUserVerificationStatus(userIdParam);
       } else if (!userIdParam && tokenParam) {
-        const result = await VerifyEmailApi(tokenParam);
+        const result = await apiService.verifyEmail(tokenParam);
         if (result.error) {
           console.error("Email verification failed:", result.error);
           navigate("/signup");
@@ -94,7 +89,7 @@ export function VerifyEmail() {
         color="primary"
         onClick={() => {
           setLoading(true);
-          ResendVerificationEmail(token!).then(() => {
+          apiService.resendVerificationEmail(token!).then(() => {
             setResendingEmail(false);
             setShowSnackbar(true);
           });

@@ -1,5 +1,4 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -12,7 +11,7 @@ import {
   Button,
   Paper,
 } from "@mui/material";
-import { Login as LoginApi } from "../api";
+import apiService from "../api/apiService";
 import "../styles/login.css";
 import { User } from "../types";
 
@@ -26,7 +25,6 @@ export function Login() {
   });
   console.log(process.env.REACT_APP_API_URL);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const verifyInputs = () => {
     let error = {
@@ -63,7 +61,7 @@ export function Login() {
         setLoading(false);
         return;
       }
-      const data: { user: User; token: string } | { error: string } = await LoginApi(email, password);
+      const data: { user: User; token: string } | { error: string } = await apiService.logIn(email, password);
       if ("user" in data && data.user && data.user.id) {
         console.log("Login successful!");
         localStorage.setItem("authToken", data.token);

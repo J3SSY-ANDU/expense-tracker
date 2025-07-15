@@ -4,15 +4,9 @@ import { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { Category, Expense, User, History as MonthlyHistory } from "./types";
 import { useNavigate } from "react-router-dom";
-import {
-  FetchCategoriesData,
-  FetchExpensesData,
-  FetchUserData,
-  FetchHistoryData,
-  UpdateExpense,
-} from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
 import expense_tracker from "./expense-tracker.svg";
+import apiService from "./api/apiService";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -24,20 +18,20 @@ export default function App() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await FetchUserData();
+      const userData = await apiService.getUserData();
       if (!userData) {
         navigate("/login");
         return;
       }
       setUser(userData);
 
-      const categoriesData = await FetchCategoriesData();
+      const categoriesData = await apiService.getCategoriesData();
       setCategories(categoriesData);
 
-      const expensesData = await FetchExpensesData();
+      const expensesData = await apiService.getExpensesData();
       setExpenses(expensesData);
 
-      const historyData = await FetchHistoryData();
+      const historyData = await apiService.getHistoryData();
       setHistory(historyData);
       setLoading(false);
     };
@@ -51,7 +45,7 @@ export default function App() {
   const handleUpdateData = async (updatedExpense: Expense): Promise<void> => {
     if (!updatedExpense) return;
     try {
-      const updated = await UpdateExpense(updatedExpense);
+      const updated = await apiService.updateExpense(updatedExpense);
       if (updated && "error" in updated) {
         console.error(`Error updating expense: ${updated.error}`);
         // Add any additional error handling here if needed
@@ -60,11 +54,11 @@ export default function App() {
         return;
       }
       // Fetch updated data after successful update
-      const expensesData = await FetchExpensesData();
-      setExpenses(expensesData)
-      const categoriesData = await FetchCategoriesData();
+      const expensesData = await apiService.getExpensesData();
+      setExpenses(expensesData);
+      const categoriesData = await apiService.getCategoriesData();
       setCategories(categoriesData);
-      const historyData = await FetchHistoryData();
+      const historyData = await apiService.getHistoryData();
       setHistory(historyData);
     } catch (error) {
       console.error("Error updating expense:", error);

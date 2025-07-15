@@ -14,13 +14,7 @@ import {
   Expense,
   History as MonthlyHistory,
 } from "../types";
-import {
-  AddCategory,
-  DeleteCategory,
-  DeleteExpense,
-  UpdateCategoryDescription,
-  UpdateCategoryName,
-} from "../api";
+import apiService from "../api/apiService";
 import { CategoryCard } from "./index";
 
 export function Categories({
@@ -109,7 +103,7 @@ export function Categories({
     if (newCategoryName) {
       // Save category
 
-      const createdCategory: Category | null = await AddCategory(
+      const createdCategory: Category | null = await apiService.addCategory(
         newCategoryData
       );
       if (!createdCategory) {
@@ -172,7 +166,7 @@ export function Categories({
       return;
     }
 
-    const updatedCategory = await UpdateCategoryName(
+    const updatedCategory = await apiService.updateCategoryName(
       selectedCategory.id,
       selectedCategory.name
     );
@@ -210,7 +204,7 @@ export function Categories({
       return;
     }
 
-    const updatedCategory = await UpdateCategoryDescription(
+    const updatedCategory = await apiService.updateCategoryDescription(
       selectedCategory.id,
       selectedCategory.description
     );
@@ -238,7 +232,7 @@ export function Categories({
       const expenseDeletions = expenses
         .filter((expense) => expense.category_id === selectedCategory.id)
         .map(async (expense) => {
-          const deleted = await DeleteExpense(expense.id);
+          const deleted = await apiService.deleteExpense(expense.id);
           if (deleted) {
             setExpenses((prev) => {
               return prev ? prev.filter((exp) => exp.id !== expense.id) : null;
@@ -249,7 +243,7 @@ export function Categories({
       // Wait for all expense deletions to complete
       await Promise.all(expenseDeletions);
     }
-    const isDeleted: boolean = await DeleteCategory(selectedCategory.id);
+    const isDeleted: boolean = await apiService.deleteCategory(selectedCategory.id);
     if (isDeleted) {
       setCategories((prev) => {
         return prev

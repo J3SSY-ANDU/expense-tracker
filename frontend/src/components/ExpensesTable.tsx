@@ -18,10 +18,7 @@ import {
   History as MonthlyHistory,
 } from "../types";
 import { Dayjs } from "dayjs";
-import {
-  CreateExpense,
-  DeleteExpense,
-} from "../api";
+import apiService from "../api/apiService";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
 
@@ -114,7 +111,7 @@ export function ExpensesTable({
     };
 
     try {
-      const createdExpense = await CreateExpense(newExpenseData);
+      const createdExpense = await apiService.createExpense(newExpenseData);
 
       if (!createdExpense) {
         console.error("Error creating expense");
@@ -260,7 +257,7 @@ export function ExpensesTable({
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
-    const isDeleted = await DeleteExpense(selectedExpense.id);
+    const isDeleted = await apiService.deleteExpense(selectedExpense.id);
     if (isDeleted) {
       // If mode is "category", call the handleDeleteExpenseByCategory function
       // to update the expenses in the parent component

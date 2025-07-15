@@ -1,25 +1,21 @@
-import { User } from "../types";
+import { User } from '../types'
+import { api } from './apiService'
 
-export async function Login(email: string, password: string): Promise<{user: User, token: string} | {error: string}> {
-    try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/process-login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ email, password }),
-        });
-        if (res.status === 200) {
-            console.log("Login successful!");
-            return res.json();
-        } else {
-            console.error("Login failed!");
-            const data = await res.json();
-            return {error: data.error ?? "Unknown error occurred."};
-        }
-    } catch (err) {
-        console.error(`Error fetching the API: ${err}`);
-        return {error: "Failed to connect to the server. Please try again later."};
+export async function LogIn (
+  email: string,
+  password: string
+): Promise<{ user: User; token: string } | { error: string }> {
+  try {
+    const res = await api.post('/process-login', { email, password })
+    if (res.status === 200) {
+      console.log('Login successful!')
+      return res.data
+    } else {
+      console.error('Login failed!')
+      return { error: res.data.error ?? 'Unknown error occurred.' }
     }
+  } catch (err) {
+    console.error(`Error fetching the API: ${err}`)
+    return { error: 'Failed to connect to the server. Please try again later.' }
+  }
 }

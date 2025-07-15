@@ -12,7 +12,7 @@ import {
   Paper,
 } from "@mui/material";
 import "../styles/signup.css";
-import { Signup } from "../api";
+import apiService from "../api/apiService";
 import { User } from "../types";
 
 export function SignupForm() {
@@ -99,7 +99,7 @@ export function SignupForm() {
         return;
       }
 
-      const data: User | { error: string } | {} = await Signup(firstname, lastname, email, password);
+      const data: User | { error: string } | {} = await apiService.signUp(firstname, lastname, email, password);
 
       if (data && "id" in data) {
         setLoading(false);

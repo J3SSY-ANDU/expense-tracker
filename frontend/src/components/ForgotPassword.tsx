@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ForgotPassword } from "../api";
+import apiService from "../api/apiService";
 import {
   Button,
   Paper,
@@ -19,7 +19,7 @@ export function ForgotPasswordForm() {
     setLoading(true);
     e.preventDefault();
     try {
-      await ForgotPassword(email);
+      await apiService.forgotPassword(email);
       setLoading(false);
       setShowSnackbar(true);
       setEmail("");
