@@ -332,11 +332,10 @@ const updateExpense = async (id, updates) => {
 };
 
 const deleteExpense = async (id) => {
-  try {
     const expense = await getExpenseById(id);
     if (!expense) {
       console.log(`Expense not found.`);
-      return;
+      throw new Error("EXPENSE_NOT_FOUND");
     }
     await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id]);
     await updateCategoryTotalExpenses(
@@ -350,11 +349,6 @@ const deleteExpense = async (id) => {
       -expense.amount
     );
     console.log("Expense deleted successfully!");
-    return true;
-  } catch (err) {
-    console.error(`Error deleting expense: ${err}`);
-    return false;
-  }
 };
 
 const deleteAllExpenses = async (user_id) => {

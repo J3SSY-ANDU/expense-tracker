@@ -189,14 +189,13 @@ const updateCategoryTotalExpenses = async (id, amount) => {
 };
 
 const deleteCategory = async (id) => {
-  try {
+    const category = await getCategoryById(id);
+    if (!category) {
+      console.log(`Category not found.`);
+      throw new Error("CATEGORY_NOT_FOUND");
+    }
     await connectionPool.query(`DELETE FROM categories WHERE id = ?`, [id]);
     console.log("Category deleted successfully!");
-    return true;
-  } catch (err) {
-    console.error(`Error deleting category: ${err}`);
-    return false;
-  }
 };
 
 module.exports = {

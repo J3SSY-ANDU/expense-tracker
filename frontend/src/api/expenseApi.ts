@@ -64,10 +64,10 @@ export async function UpdateExpense (
   }
 }
 
-export async function DeleteExpense (expense_id: string): Promise<boolean | { error: string }> {
+export async function DeleteExpense (expense_id: string): Promise<void | { error: string }> {
   try {
-    const res = await api.post('/delete-expense', { expense_id })
-    return res.data;
+    await api.delete(`/delete-expense/${expense_id}`)
+    console.log(`Expense deleted successfully.`)
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {

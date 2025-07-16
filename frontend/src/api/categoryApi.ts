@@ -105,7 +105,7 @@ export async function UpdateCategoryDescription (
 
 export async function DeleteCategory (category_id: string): Promise<void | { error: string }> {
   try {
-    await api.post('/delete-category', { category_id })
+    await api.delete(`/delete-category/${category_id}`)
     console.log("Category deleted successfully.");
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
