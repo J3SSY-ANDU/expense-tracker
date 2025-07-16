@@ -329,19 +329,19 @@ app.post("/add-category", authenticateToken, async (req, res) => {
   }
 })
 
-app.post("/delete-category", authenticateToken, async (req, res) => {
+app.delete("/delete-category/:category_id", authenticateToken, async (req, res) => {
   try {
-    const { category_id } = req.body;
+    const { category_id } = req.params;
     if (!category_id) {
       return res.status(400).json({ error: "category_id is required." });
     }
-    const deleted = await deleteCategory(category_id);
-    if (!deleted) {
-      return res.status(401).json({ error: "Category deletion failed!" });
-    }
-    res.status(200).json({ message: "Category deleted successfully!" });
+    await deleteCategory(category_id);
+    res.status(204).send();
   } catch (error) {
     console.error("Error deleting category:", error);
+    if (error.message === "CATEGORY_NOT_FOUND") {
+      return res.status(404).json({ error: "Category not found!" });
+    }
     res.status(500).json({ error: "Failed to delete category." });
   }
 })
@@ -356,43 +356,56 @@ app.get("/all-expenses", authenticateToken, async (req, res) => {
 });
 
 app.get("/all-monthly-expenses", authenticateToken, async (req, res) => {
-  const date = new Date();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  const expenses = await getExpensesByMonth(req.user.id, month, year);
-  if (!expenses) {
-    return res.status(401).json({ error: "Data fetch failed!" });
+  try {
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const expenses = await getExpensesByMonth(req.user.id, month, year);
+    if (!expenses) {
+      return res.status(401).json({ error: "Expenses fetch failed!" });
+    }
+    console.log("Data fetch successfully!");
+    return res.status(200).json(expenses);
+  } catch (error) {
+    console.error("Error fetching monthly expenses:", error);
+    return res.status(500).json({ error: "Failed to fetch monthly expenses." });
   }
-  console.log("Data fetch successfully!");
-  return res.status(200).json(expenses);
 })
 
 app.post("/create-expense", authenticateToken, async (req, res) => {
-  const { name, user_id, amount, category_id, date, notes } = req.body;
-  const expense = await createExpense(
-    name,
-    user_id,
-    amount,
-    category_id,
-    date,
-    notes
-  );
-  if (!expense) {
-    return res.status(401).json({ error: "Expense creation failed!" });
+  try {
+    const { name, user_id, amount, category_id, date, notes } = req.body;
+    if (!name || !user_id || !amount || !category_id || !date) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    const expense = await createExpense(
+      name,
+      user_id,
+      amount,
+      category_id,
+      date,
+      notes
+    );
+    if (!expense) {
+      return res.status(401).json({ error: "Expense creation failed!" });
+    }
+    res.status(201).json(expense);
+  } catch (error) {
+    console.error("Error creating expense:", error);
+    res.status(500).json({ error: "Failed to create expense." });
   }
-  res.status(201).json(expense);
 });
 
 app.put("/update-expense", authenticateToken, async (req, res) => {
   try {
     const { id, name, amount, category_id, date, notes } = req.body;
-    if (!id) {
-      throw new Error("EXPENSE_NOT_FOUND");
+    if (!id || !name || !amount || !category_id || !date) {
+      return res.status(400).json({ error: "Invalid expense data!" });
     }
     const updates = { name, amount, category_id, date, notes }
     const updatedExpense = await updateExpense(id, updates);
     if (!updatedExpense) {
-      throw new Error("EXPENSE_NOT_FOUND");
+      return res.status(404).json({ error: "Expense not found!" });
     }
     res.status(200).json(updatedExpense);
   } catch (err) {
@@ -407,13 +420,21 @@ app.put("/update-expense", authenticateToken, async (req, res) => {
   }
 });
 
-app.post("/delete-expense", authenticateToken, async (req, res) => {
-  const { expense_id } = req.body;
-  const deleted = await deleteExpense(expense_id);
-  if (!deleted) {
-    return res.status(401).json({ error: "Expense deletion failed!" });
+app.delete("/delete-expense/:expense_id", authenticateToken, async (req, res) => {
+  try {
+    const { expense_id } = req.params;
+    if (!expense_id) {
+      return res.status(400).json({ error: "expense_id is required." });
+    }
+    await deleteExpense(expense_id);
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting expense:", error);
+    if (error.message === "EXPENSE_NOT_FOUND") {
+      return res.status(404).json({ error: "Expense not found!" });
+    }
+    res.status(500).json({ error: "Failed to delete expense." });
   }
-  res.status(200).json({ message: "Expense deleted successfully!" });
 });
 
 app.post("/delete-user", authenticateToken, async (req, res) => {
