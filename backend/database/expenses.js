@@ -169,17 +169,15 @@ const getExpensesByDate = async (user_id, date) => {
 };
 
 const getExpensesByMonth = async (user_id, month, year) => {
-  try {
     const [expenses] = await connectionPool.query(
-      `SELECT * FROM expenses WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ? ORDER BY created_date DESC;
-`,
+      `SELECT * FROM expenses WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ? ORDER BY created_date DESC;`,
       [user_id, month, year]
     );
+    if (!expenses) {
+      console.log(`No expenses found for this user in ${month}/${year}.`);
+      return [];
+    }
     return expenses;
-  } catch (err) {
-    console.error(`Error getting expenses by month: ${err}`);
-    return null;
-  }
 };
 
 const getExpenseById = async (id) => {

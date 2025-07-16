@@ -61,8 +61,8 @@ export function Login() {
         setLoading(false);
         return;
       }
-      const data: { user: User; token: string } | { error: string } = await apiService.logIn(email, password);
-      if ("user" in data && data.user && data.user.id) {
+      const data: { token: string } | { error: string } = await apiService.logIn(email, password);
+      if ("token" in data) {
         console.log("Login successful!");
         localStorage.setItem("authToken", data.token);
         window.location.replace("/"); // Redirect to home page

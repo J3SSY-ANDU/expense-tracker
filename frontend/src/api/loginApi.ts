@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { User } from '../types'
 import { api } from './apiService'
 
 export async function LogIn (
   email: string,
   password: string
-): Promise<{ user: User; token: string } | { error: string }> {
+): Promise<{ token: string } | { error: string }> {
   try {
     const res = await api.post('/process-login', { email, password })
     console.log('Login successful!')
