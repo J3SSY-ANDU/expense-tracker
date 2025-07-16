@@ -24,29 +24,24 @@ const { v4: uuidv4 } = require('uuid')
 })()
 
 const createUser = async (firstname, lastname, email, password) => {
-  try {
-    const userByEmail = await getUserByEmail(email)
-    if (userByEmail) {
-      console.log('User already exists.')
-      throw new Error('USER_EXISTS')
-    }
-    const id = uuidv4() // Generate a unique ID
-    const fullname = `${firstname} ${lastname}`
-    await connectionPool.query(
-      `INSERT INTO users (id, firstname, lastname, fullname, email, password) VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, firstname, lastname, fullname, email, password]
-    )
-    const user = await getUserById(id)
-    if (!user) {
-      console.log(`Failed. Try again.`)
-      throw new Error('USER_CREATION_FAILED')
-    }
-    console.log('User created successfully!')
-    return user
-  } catch (err) {
-    console.error(`Error creating user: ${err}`)
-    throw err
+  const userByEmail = await getUserByEmail(email)
+  if (userByEmail) {
+    console.log('User already exists.')
+    throw new Error('USER_EXISTS')
   }
+  const id = uuidv4() // Generate a unique ID
+  const fullname = `${firstname} ${lastname}`
+  await connectionPool.query(
+    `INSERT INTO users (id, firstname, lastname, fullname, email, password) VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, firstname, lastname, fullname, email, password]
+  )
+  const user = await getUserById(id)
+  if (!user) {
+    console.log(`Failed. Try again.`)
+    throw new Error('USER_CREATION_FAILED')
+  }
+  console.log('User created successfully!')
+  return user
 }
 
 const getUserById = async id => {
@@ -67,17 +62,12 @@ const getUserById = async id => {
 }
 
 const getUserByEmail = async email => {
-  try {
-    const [user] = await connectionPool.query(
-      `SELECT * FROM users WHERE email = ?`,
-      [email]
-    )
-    if (!user) return null
-    return user[0]
-  } catch (err) {
-    console.error(`Error getting user by email: ${err}`)
-    return null
-  }
+  const [user] = await connectionPool.query(
+    `SELECT * FROM users WHERE email = ?`,
+    [email]
+  )
+  if (!user) return null
+  return user[0]
 }
 
 const authenticateUser = async (email, password) => {
@@ -146,15 +136,15 @@ const updateName = async (id, newFirstname, newLastname) => {
 }
 
 const userIsVerified = async id => {
-    const [user] = await connectionPool.query(
-      `
+  const [user] = await connectionPool.query(
+    `
       SELECT is_verified FROM users WHERE id = ?`,
-      [id]
-    )
-    if (!user[0].is_verified) {
-      return false
-    }
-    return true
+    [id]
+  )
+  if (!user[0].is_verified) {
+    return false
+  }
+  return true
 }
 
 const verifyUser = async id => {

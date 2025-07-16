@@ -99,19 +99,22 @@ export function SignupForm() {
         return;
       }
 
-      const data: User | { error: string } | {} = await apiService.signUp(firstname, lastname, email, password);
+      const data: { user_id: string } | { error: string } | {} = await apiService.signUp(firstname, lastname, email, password);
 
-      if (data && "id" in data) {
+      if ("user_id" in data) {
         setLoading(false);
         emptyFields();
-        navigate("/verify-email?id=" + data.id);
-      } else if (data && "error" in data) {
+        navigate("/verify-email?id=" + data.user_id);
+      } else if ("error" in data) {
         setError({ ...error, failed: data.error });
         setLoading(false);
         emptyFields();
       }
     } catch (err) {
       console.error(`Error fetching the API: ${err}`);
+      setError({ ...error, failed: "Failed to connect to the server. Please try again later." });
+      setLoading(false);
+      emptyFields();
     }
   };
 

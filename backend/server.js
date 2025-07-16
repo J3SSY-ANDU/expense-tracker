@@ -96,7 +96,7 @@ app.post('/process-signup', async (req, res) => {
     const user = await createUser(firstname, lastname, email, hashedPassword)
     const token = await sendEmailVerification(user.email, user.id)
     // EXCLUDE PASSWORD FROM RESPONSE
-    res.status(200).json({ user, token })
+    res.status(200).json({ user_id: user.id })
   } catch (error) {
     console.error('Error processing signup:', error)
     if (error.message === 'USER_EXISTS') {

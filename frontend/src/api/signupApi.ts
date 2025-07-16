@@ -7,7 +7,7 @@ export async function SignUp (
   lastname: string,
   email: string,
   password: string
-): Promise<{ user: User; token: string } | { error: string }> {
+): Promise<{ user_id: string } | { error: string }> {
   try {
     const res = await api.post('/process-signup', {
       firstname,
@@ -16,7 +16,7 @@ export async function SignUp (
       password
     })
     console.log('Signed up successfully')
-    return res.data.user
+    return res.data
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {
