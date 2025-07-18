@@ -57,16 +57,11 @@ const createCategory = async (
 }
 
 const getCategoriesByUser = async user_id => {
-  try {
-    const [categories] = await connectionPool.query(
-      `SELECT * FROM categories WHERE user_id = ?`,
-      [user_id]
-    )
-    return categories
-  } catch (err) {
-    console.error(`Error getting categories: ${err}`)
-    return null
-  }
+  const [categories] = await connectionPool.query(
+    `SELECT * FROM categories WHERE user_id = ?`,
+    [user_id]
+  )
+  return categories
 }
 
 const getCategoryByMonthYear = async (name, user_id, month, year) => {

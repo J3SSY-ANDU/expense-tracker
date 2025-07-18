@@ -81,12 +81,26 @@ app.use(
 )
 
 app.get('/user-data', authenticateToken, async (req, res) => {
-  const user = await getUserById(req.user.id)
-  if (!user) {
-    return res.status(401).json({ error: 'User not found!' })
+  try {
+    const user = await getUserById(req.user.id)
+    if (!user) {
+      return res.status(401).json({ error: 'User not found!' })
+    }
+    // EXCLUDE PASSWORD FROM RESPONSE
+    res
+      .status(200)
+      .json({
+        user_id: user.id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        fullname: user.fullname,
+        email: user.email,
+        is_verified: user.is_verified
+      })
+  } catch (error) {
+    console.error('Error fetching user data:', error)
+    res.status(500).json({ error: 'Failed to fetch user data.' })
   }
-  // EXCLUDE PASSWORD FROM RESPONSE
-  res.status(200).json(user)
 })
 
 app.post('/process-signup', async (req, res) => {
@@ -94,7 +108,7 @@ app.post('/process-signup', async (req, res) => {
     const { firstname, lastname, email, password } = req.body
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await createUser(firstname, lastname, email, hashedPassword)
-    const token = await sendEmailVerification(user.email, user.id)
+    await sendEmailVerification(user.email, user.id)
     // EXCLUDE PASSWORD FROM RESPONSE
     res.status(200).json({ user_id: user.id, emailSent: true })
   } catch (error) {
@@ -476,60 +490,73 @@ app.delete(
   }
 )
 
-app.post('/delete-user', authenticateToken, async (req, res) => {
-  const expenses = await getExpensesByUser(req.user.id)
-  if (expenses) {
-    for (let expense of expenses) {
-      await deleteExpense(expense.id)
+app.delete('/delete-user', authenticateToken, async (req, res) => {
+  try {
+    const user = await getUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found!' });
     }
-  }
-  const categories = await getCategoriesByUser(req.user.id)
-  if (categories) {
-    for (let category of categories) {
-      await deleteCategory(category.id)
-    }
-  }
-  const user = await getUserById(req.user.id)
-  if (!user) {
-    return res.status(401).json({ error: 'User not found!' })
-  } else {
-    const deleted = await deleteUser(req.user.id)
+    // Start transaction
+    await connectionPool.beginTransaction();
+    await connectionPool.query(`DELETE FROM expenses WHERE user_id = ?`, [req.user.id]);
+    await connectionPool.query(`DELETE FROM categories WHERE user_id = ?`, [req.user.id]);
+    const deleted = await deleteUser(req.user.id);
     if (!deleted) {
-      return res.status(401).json({ error: 'Account deletion failed!' })
+      await connectionPool.rollback();
+      return res.status(500).json({ error: 'Account deletion failed!' });
     }
-    await deleteAccountEmail(user.firstname, user.email)
-    res.status(200).json({ message: 'Account deleted successfully!' })
+    await deleteAccountEmail(user.firstname, user.email);
+    await connectionPool.commit();
+    res.status(200).json({ message: 'Account deleted successfully!' });
+  } catch (error) {
+    await connectionPool.rollback();
+    console.error('Error deleting user:', error);
+    return res.status(500).json({ error: 'Failed to delete user.' });
   }
-})
+});
 
 app.post('/change-password', authenticateToken, async (req, res) => {
-  const { oldPassword, newPassword } = req.body
-  const user = await getUserById(req.user.id)
-  if (!user) {
-    console.log('User not found!')
-    return res.status(401).json({ error: 'User not found!' })
+  try {
+    const { oldPassword, newPassword } = req.body
+    if (!oldPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: 'Old and new passwords are required.' })
+    }
+    const match = await bcrypt.compare(oldPassword, user.password)
+    if (!match) {
+      console.log('Invalid credentials!')
+      return res.status(401).json({ error: 'Invalid credentials!' })
+    }
+    const new_password_hash = await bcrypt.hash(newPassword, 10)
+    const updated = await updatePassword(req.user.id, new_password_hash)
+    if (!updated) {
+      return res.status(500).json({ error: 'Password update failed!' })
+    }
+    res.status(200).json({ message: 'Password updated successfully!' })
+  } catch (error) {
+    console.error('Error updating password:', error)
+    res.status(500).json({ error: 'Failed to update password.' })
   }
-  const match = await bcrypt.compare(oldPassword, user.password)
-  if (!match) {
-    console.log('Invalid credentials!')
-    return res.status(401).json({ error: 'Invalid credentials!' })
-  }
-  const new_password_hash = await bcrypt.hash(newPassword, 10)
-  const updated = await updatePassword(req.user.id, new_password_hash)
-  if (!updated) {
-    console.log('Password change failed!')
-    return res.status(401).json({ error: 'Password change failed!' })
-  }
-  res.status(200).json({ message: 'Password changed successfully!' })
 })
 
 app.post('/change-name', authenticateToken, async (req, res) => {
-  const { new_firstname, new_lastname } = req.body
-  const updated = await updateName(req.user.id, new_firstname, new_lastname)
-  if (!updated) {
-    return res.status(401).json({ error: 'Name change failed!' })
+  try {
+    const { new_firstname, new_lastname } = req.body
+    if (!new_firstname || !new_lastname) {
+      return res
+        .status(400)
+        .json({ error: 'First and last names are required.' })
+    }
+    const updated = await updateName(req.user.id, new_firstname, new_lastname)
+    if (!updated) {
+      return res.status(500).json({ error: 'Name update failed!' })
+    }
+    res.status(200).json({ message: 'Name updated successfully!' })
+  } catch (error) {
+    console.error('Error updating name:', error)
+    res.status(500).json({ error: 'Failed to update name.' })
   }
-  res.status(200).json({ message: 'Name changed successfully!' })
 })
 
 app.get('/history', authenticateToken, async (req, res) => {

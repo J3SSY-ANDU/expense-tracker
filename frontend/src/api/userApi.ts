@@ -17,29 +17,14 @@ export async function FetchUserData (): Promise<User | { error: string }> {
   }
 }
 
-export async function GetUserVerificationStatus (
-  id: string
-): Promise<string | { error: string }> {
-  try {
-    const res = await api.get(`/verify-user-creation?id=${id}`)
-    return res.data;
-  } catch (err: any) {
-    // If it's an Axios error, get the backend error message if present
-    if (axios.isAxiosError(err) && err.response && err.response.data) {
-      return { error: err.response.data.error || 'Unknown error occurred.' }
-    }
-    // Otherwise, return a generic error
-    return { error: 'Failed to connect to the server. Please try again later.' }
-  }
-}
-
 export async function ChangePassword (
   oldPassword: string,
   newPassword: string
-): Promise<boolean | { error: string }> {
+): Promise<{ message: string } | { error: string }> {
   try {
     const res = await api.post('/change-password', { oldPassword, newPassword })
-    return res.data;
+    console.log(res.data.message)
+    return res.data
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {
@@ -53,10 +38,11 @@ export async function ChangePassword (
 export async function ChangeName (
   newFirstname: string,
   newLastname: string
-): Promise<boolean | { error: string }> {
+): Promise<{ message: string } | { error: string }> {
   try {
     const res = await api.post('/change-name', { newFirstname, newLastname })
-    return res.data;
+    console.log(res.data.message)
+    return res.data
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {
@@ -67,11 +53,17 @@ export async function ChangeName (
   }
 }
 
-export async function DeleteUser (): Promise<boolean | { error: string }> {
+export async function DeleteUser (): Promise<
+  { message: string } | { error: string }
+> {
   try {
-    const res = await api.post("/delete-user");
-    window.location.href = '/signup'
-    return res.data;
+    const res = await api.delete('/delete-user')
+    if (res.data.message) {
+      localStorage.removeItem('authToken')
+      window.location.href = '/signup'
+      return res.data
+    }
+    return { error: res.data.error || 'Unknown error occurred.' }
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {

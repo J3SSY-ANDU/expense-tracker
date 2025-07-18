@@ -13,7 +13,7 @@ import {
   DeleteExpense,
   UpdateExpense,
 } from "./expenseApi";
-import { FetchUserData, DeleteUser, ChangePassword, ChangeName, GetUserVerificationStatus } from "./userApi";
+import { FetchUserData, DeleteUser, ChangePassword, ChangeName } from "./userApi";
 import { SignUp } from "./signupApi";
 import { VerifyEmail } from "./verifyEmailApi";
 import { ResendVerificationEmail } from "./resendVerificationEmailApi";
@@ -45,5 +45,4 @@ export {
   FetchHistoryData,
   GetCategory,
   LogIn, 
-  GetUserVerificationStatus
 };
