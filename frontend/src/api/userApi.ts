@@ -53,17 +53,12 @@ export async function ChangeName (
   }
 }
 
-export async function DeleteUser (): Promise<
-  { message: string } | { error: string }
-> {
+export async function DeleteUser (): Promise<void | { error: string }> {
   try {
     const res = await api.delete('/delete-user')
-    if (res.data.message) {
-      localStorage.removeItem('authToken')
-      window.location.href = '/signup'
-      return res.data
-    }
-    return { error: res.data.error || 'Unknown error occurred.' }
+    localStorage.removeItem('authToken')
+    window.location.href = '/signup'
+    return res.data
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {

@@ -9,6 +9,7 @@ const dotenv = require('dotenv').config({
 const cors = require('cors')
 const bcrypt = require('bcrypt')
 const path = require('path')
+const { connectionPool } = require('./database/db')
 
 const app = express()
 const {
@@ -123,6 +124,7 @@ app.post('/process-signup', async (req, res) => {
   }
 })
 
+// Needs to be fixed
 app.get('/verify-email', async (req, res) => {
   const { token } = req.query
   let id
@@ -173,6 +175,7 @@ app.get('/verify-email', async (req, res) => {
   }
 })
 
+// Needs to be fixed
 app.post('/resend-verification-email', async (req, res) => {
   const user = await getUserById(id)
   if (!user) {
@@ -180,19 +183,6 @@ app.post('/resend-verification-email', async (req, res) => {
   }
   await sendEmailVerification(user.email, id)
   res.status(200).send('Verification email sent!')
-})
-
-app.get('/verify-user-creation', async (req, res) => {
-  const { id } = req.query
-  const user = await getUserById(id)
-  if (!user) {
-    return res.status(404).send('User not found!')
-  }
-  const isVerified = await userIsVerified(id)
-  if (!isVerified) {
-    return res.status(401).send('Email not verified!')
-  }
-  res.status(200).send('Email verified!')
 })
 
 app.post('/process-login', async (req, res) => {
@@ -228,6 +218,7 @@ app.post('/process-login', async (req, res) => {
   }
 })
 
+// Needs to be fixed
 app.post('/forgot-password', async (req, res) => {
   const { email } = req.body
   const user = await getUserByEmail(email)
@@ -239,6 +230,7 @@ app.post('/forgot-password', async (req, res) => {
   res.status(200).send('Password reset email sent!')
 })
 
+// Need to be fixed
 app.post('/reset-forgot-password', async (req, res) => {
   const { token, new_password } = req.body
   if (!token || !new_password) {
@@ -264,14 +256,13 @@ app.get('/all-categories', authenticateToken, async (req, res) => {
 
 app.get('/generate-default-categories', authenticateToken, async (req, res) => {
   try {
-    const id = req.user.id
     const date = new Date()
     const month = date.getMonth() + 1
     const year = date.getFullYear()
     for (let category of categoriesData) {
       await createCategory(
         category.name,
-        id,
+        req.user.id,
         month,
         year,
         category.total_expenses,
@@ -352,13 +343,13 @@ app.post(
 
 app.post('/add-category', authenticateToken, async (req, res) => {
   try {
-    const { name, user_id, month, year, total_expenses, description } = req.body
-    if (!name || !user_id || !month || !year || total_expenses === undefined) {
+    const { name, month, year, total_expenses, description } = req.body
+    if (!name || !month || !year || total_expenses === undefined) {
       return res.status(400).json({ error: 'All fields are required.' })
     }
     const category = await createCategory(
       name,
-      user_id,
+      req.user.id,
       month,
       year,
       total_expenses,
@@ -395,6 +386,7 @@ app.delete(
   }
 )
 
+// Delete if it's not been used
 app.get('/all-expenses', authenticateToken, async (req, res) => {
   const expenses = await getOrganizedExpenses(req.user.id)
   if (!expenses) {
@@ -423,20 +415,20 @@ app.get('/all-monthly-expenses', authenticateToken, async (req, res) => {
 
 app.post('/create-expense', authenticateToken, async (req, res) => {
   try {
-    const { name, user_id, amount, category_id, date, notes } = req.body
-    if (!name || !user_id || !amount || !category_id || !date) {
+    const { name, amount, category_id, date, notes } = req.body
+    if (!name || !amount || !category_id || !date) {
       return res.status(400).json({ error: 'All fields are required.' })
     }
     const expense = await createExpense(
       name,
-      user_id,
+      req.user.id,
       amount,
       category_id,
       date,
       notes
     )
     if (!expense) {
-      return res.status(401).json({ error: 'Expense creation failed!' })
+      return res.status(500).json({ error: 'Expense creation failed!' })
     }
     res.status(201).json(expense)
   } catch (error) {
@@ -491,25 +483,39 @@ app.delete(
 )
 
 app.delete('/delete-user', authenticateToken, async (req, res) => {
+  let connection;
   try {
+    connection = await connectionPool.getConnection();
+
     const user = await getUserById(req.user.id);
     if (!user) {
+      connection.release();
       return res.status(404).json({ error: 'User not found!' });
     }
-    // Start transaction
-    await connectionPool.beginTransaction();
-    await connectionPool.query(`DELETE FROM expenses WHERE user_id = ?`, [req.user.id]);
-    await connectionPool.query(`DELETE FROM categories WHERE user_id = ?`, [req.user.id]);
-    const deleted = await deleteUser(req.user.id);
-    if (!deleted) {
-      await connectionPool.rollback();
+
+    await connection.beginTransaction();
+
+    await connection.query(`DELETE FROM expenses WHERE user_id = ?`, [req.user.id]);
+    await connection.query(`DELETE FROM categories WHERE user_id = ?`, [req.user.id]);
+    await connection.query(`DELETE FROM history WHERE user_id = ?`, [req.user.id]);
+    const [deleteResult] = await connection.query(`DELETE FROM users WHERE id = ?`, [req.user.id]);
+    if (deleteResult.affectedRows === 0) {
+      await connection.rollback();
+      connection.release();
       return res.status(500).json({ error: 'Account deletion failed!' });
     }
-    await deleteAccountEmail(user.firstname, user.email);
-    await connectionPool.commit();
-    res.status(200).json({ message: 'Account deleted successfully!' });
+
+    await deleteAccountEmail(user.firstname, user.email); // If this fails, catch will handle rollback
+
+    await connection.commit();
+    connection.release();
+    console.log('User deleted successfully!');
+    res.status(204).send();
   } catch (error) {
-    await connectionPool.rollback();
+    if (connection) {
+      await connection.rollback();
+      connection.release();
+    }
     console.error('Error deleting user:', error);
     return res.status(500).json({ error: 'Failed to delete user.' });
   }
@@ -559,6 +565,7 @@ app.post('/change-name', authenticateToken, async (req, res) => {
   }
 })
 
+// Need to be optimized
 app.get('/history', authenticateToken, async (req, res) => {
   try {
     const history = await getHistoryByUser(req.user.id)
