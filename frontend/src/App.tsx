@@ -13,27 +13,42 @@ export default function App() {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
   const [history, setHistory] = useState<MonthlyHistory[] | null>(null);
+  const [errors, setErrors] = useState<string | null>(null);
+  const [updatingDataError, setUpdatingDataError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await apiService.getUserData();
-      if (!userData) {
-        navigate("/login");
+      setLoading(true);
+      setErrors(null);
+      try {
+        // Fetch all data
+        const [userData, categoriesData, expensesData, historyData] = await Promise.all([
+          apiService.getUserData(),
+          apiService.getCategoriesData(),
+          apiService.getExpensesData(),
+          apiService.getHistoryData()
+        ]);
+  
+        if ((!userData || "error" in userData) || (!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData)) {
+          setErrors("Failed to fetch data.");
+          navigate("/login");
+          return;
+        }
+  
+        setUser(userData);
+        setCategories(categoriesData);
+        setExpenses(expensesData);
+        setHistory(historyData);
+  
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setErrors("Something went wrong while fetching data. Please try again later.");
+        setLoading(false);
         return;
       }
-      setUser(userData);
-
-      const categoriesData = await apiService.getCategoriesData();
-      setCategories(categoriesData);
-
-      const expensesData = await apiService.getExpensesData();
-      setExpenses(expensesData);
-
-      const historyData = await apiService.getHistoryData();
-      setHistory(historyData);
-      setLoading(false);
     };
     fetchData();
   }, [navigate]);
@@ -54,15 +69,23 @@ export default function App() {
         return;
       }
       // Fetch updated data after successful update
-      const expensesData = await apiService.getExpensesData();
+      const [expensesData, categoriesData, historyData] = await Promise.all([
+        apiService.getExpensesData(),
+        apiService.getCategoriesData(),
+        apiService.getHistoryData()
+      ]);
+
+      if ((!expensesData || "error" in expensesData) || (!categoriesData || "error" in categoriesData) || (!historyData || "error" in historyData)) {
+        console.error("Failed to fetch updated data.");
+        setUpdatingDataError("Failed to fetch updated data.");
+        return;
+      }
       setExpenses(expensesData);
-      const categoriesData = await apiService.getCategoriesData();
       setCategories(categoriesData);
-      const historyData = await apiService.getHistoryData();
       setHistory(historyData);
     } catch (error) {
       console.error("Error updating expense:", error);
-      // Add any additional error handling here if needed
+      setUpdatingDataError("Failed to update expense. Please try again later.");
       return;
     }
   }
