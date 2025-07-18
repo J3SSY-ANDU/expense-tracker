@@ -96,7 +96,7 @@ app.post('/process-signup', async (req, res) => {
     const user = await createUser(firstname, lastname, email, hashedPassword)
     const token = await sendEmailVerification(user.email, user.id)
     // EXCLUDE PASSWORD FROM RESPONSE
-    res.status(200).json({ user_id: user.id })
+    res.status(200).json({ user_id: user.id, emailSent: true })
   } catch (error) {
     console.error('Error processing signup:', error)
     if (error.message === 'USER_EXISTS') {
@@ -554,8 +554,8 @@ app.get('/history', authenticateToken, async (req, res) => {
       )
       monthlyHistory.categories = categories || []
     }
-    if (!history || history.length === 0) {
-      return res.status(404).json({ error: 'No history found for this user.' })
+    if (!history) {
+      return res.status(404).json({ error: 'History not found.' })
     }
     console.log('Data fetch successfully!')
     return res.status(200).json(history)

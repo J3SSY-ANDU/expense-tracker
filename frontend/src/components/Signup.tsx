@@ -99,12 +99,12 @@ export function SignupForm() {
         return;
       }
 
-      const data: { user_id: string } | { error: string } | {} = await apiService.signUp(firstname, lastname, email, password);
+      const data: { user_id: string, emailSent: boolean } | { error: string } | {} = await apiService.signUp(firstname, lastname, email, password);
 
-      if ("user_id" in data) {
+      if ("user_id" in data && "emailSent" in data && data.emailSent) {
         setLoading(false);
         emptyFields();
-        navigate("/verify-email?id=" + data.user_id);
+        navigate("/verify-email");
       } else if ("error" in data) {
         setError({ ...error, failed: data.error });
         setLoading(false);

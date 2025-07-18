@@ -1,4 +1,3 @@
-import { User } from '../types'
 import { api } from './apiService'
 import axios from 'axios';
 
@@ -7,7 +6,7 @@ export async function SignUp (
   lastname: string,
   email: string,
   password: string
-): Promise<{ user_id: string } | { error: string }> {
+): Promise<{ user_id: string, emailSent: boolean } | { error: string }> {
   try {
     const res = await api.post('/process-signup', {
       firstname,

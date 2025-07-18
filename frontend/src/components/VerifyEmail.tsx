@@ -13,7 +13,6 @@ import apiService from "../api/apiService";
 
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -23,17 +22,12 @@ export function VerifyEmail() {
     async function verifyEmail() {
       const urlParams = new URLSearchParams(window.location.search);
       const tokenParam = urlParams.get("token");
-      const userIdParam = urlParams.get("id");
       setToken(tokenParam);
-      setUserId(userIdParam);
 
-      if (!tokenParam && !userIdParam) {
-        console.error("Token and User ID not found");
-        navigate("/signup");
+      if (!tokenParam) {
+        console.error("Token not found");
         return;
-      } else if (!tokenParam && userIdParam) {
-        await apiService.getUserVerificationStatus(userIdParam);
-      } else if (!userIdParam && tokenParam) {
+      } else if (tokenParam) {
         const result = await apiService.verifyEmail(tokenParam);
         if (result.error) {
           console.error("Email verification failed:", result.error);

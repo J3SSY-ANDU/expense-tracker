@@ -53,7 +53,6 @@ api.interceptors.response.use(
         case 401:
         case 403:
           console.log(`error response: ${error.response.status}`)
-          // localStorage.removeItem('authToken')
           // window.location.href = '/login' // Or show a modal
           break;
         case 500:
