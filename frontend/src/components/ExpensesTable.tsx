@@ -113,8 +113,10 @@ export function ExpensesTable({
     try {
       const createdExpense = await apiService.createExpense(newExpenseData);
 
-      if (!createdExpense) {
+      if (!createdExpense || "error" in createdExpense) {
         console.error("Error creating expense");
+        // Add any additional error handling here if needed
+        
         setCreatingExpense(false);
         return;
       }
