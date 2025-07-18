@@ -92,7 +92,6 @@ export function Categories ({
     }
     const newCategoryData: NewCategory = {
       name: newCategoryName,
-      user_id: user.id,
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
       total_expenses: 0,

@@ -101,7 +101,6 @@ export function ExpensesTable({
 
     const newExpenseData: NewExpense = {
       name: newExpenseName,
-      user_id: user.id,
       amount: Number(newExpenseAmount),
       category_id: selectedCategory ? selectedCategory.id : "",
       date: selectedDate
@@ -138,7 +137,6 @@ export function ExpensesTable({
             ? { ...cat, total_expenses: createdExpense.amount }
             : {
               id: createdExpense.category_id,
-              user_id: user?.id || "",
               name: selectedCategory?.name || "Uncategorized",
               total_expenses: createdExpense.amount,
               description: "",
@@ -206,7 +204,6 @@ export function ExpensesTable({
             name: new Date(year, month - 1).toLocaleString("default", {
               month: "long",
             }),
-            user_id: user?.id || "",
             month,
             year,
             total_expenses: Number(createdExpense.amount),

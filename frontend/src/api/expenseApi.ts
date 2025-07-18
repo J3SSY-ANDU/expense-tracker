@@ -20,10 +20,9 @@ export async function CreateExpense (
   expense: NewExpense
 ): Promise<Expense | { error: string }> {
   try {
-    const { name, user_id, amount, category_id, date, notes } = expense
+    const { name, amount, category_id, date, notes } = expense
     const res = await api.post('/create-expense', {
       name,
-      user_id,
       amount,
       category_id,
       date,

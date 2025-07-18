@@ -47,67 +47,62 @@ const createExpense = async (
   date,
   notes = ''
 ) => {
-  try {
-    const id = uuidv4()
-    const monthDate = new Date(date)
-    const month = new Date(date).getUTCMonth() + 1
-    const year = new Date(date).getFullYear()
-    if (monthDate.getUTCDate() === 1) {
-      monthDate.setUTCDate(monthDate.getUTCDate() + 1)
-    }
-    const monthName = `${monthDate.toLocaleString('default', {
-      month: 'long'
-    })}`
-    let historyMonth = await getHistoryByMonthYear(user_id, month, year)
-    if (!historyMonth) {
-      historyMonth = await createMonth(monthName, user_id, month, year, amount)
-    } else {
-      await updateMonth(user_id, month, year, amount)
-    }
+  const id = uuidv4()
+  const monthDate = new Date(date)
+  const month = new Date(date).getUTCMonth() + 1
+  const year = new Date(date).getFullYear()
+  if (monthDate.getUTCDate() === 1) {
+    monthDate.setUTCDate(monthDate.getUTCDate() + 1)
+  }
+  const monthName = `${monthDate.toLocaleString('default', {
+    month: 'long'
+  })}`
+  let historyMonth = await getHistoryByMonthYear(user_id, month, year)
+  if (!historyMonth) {
+    historyMonth = await createMonth(monthName, user_id, month, year, amount)
+  } else {
+    await updateMonth(user_id, month, year, amount)
+  }
 
-    const thisMonth = new Date().getUTCMonth() + 1
-    const thisYear = new Date().getFullYear()
-    if (month !== thisMonth || year !== thisYear) {
-      const categoryById = await getCategoryById(category_id)
-      const categoryByMonthYear = await getCategoryByMonthYear(
+  const thisMonth = new Date().getUTCMonth() + 1
+  const thisYear = new Date().getFullYear()
+  if (month !== thisMonth || year !== thisYear) {
+    const categoryById = await getCategoryById(category_id)
+    const categoryByMonthYear = await getCategoryByMonthYear(
+      categoryById.name,
+      categoryById.user_id,
+      month,
+      year
+    )
+    if (!categoryByMonthYear) {
+      const newCategory = await createCategory(
         categoryById.name,
         categoryById.user_id,
         month,
-        year
+        year,
+        amount,
+        categoryById.description
       )
-      if (!categoryByMonthYear) {
-        const newCategory = await createCategory(
-          categoryById.name,
-          categoryById.user_id,
-          month,
-          year,
-          amount,
-          categoryById.description
-        )
-        category_id = newCategory.id
-      } else {
-        await updateCategoryTotalExpenses(categoryByMonthYear.id, amount)
-        category_id = categoryByMonthYear.id
-      }
+      category_id = newCategory.id
+    } else {
+      await updateCategoryTotalExpenses(categoryByMonthYear.id, amount)
+      category_id = categoryByMonthYear.id
     }
-    await connectionPool.query(
-      `INSERT INTO expenses (id, user_id, name, amount, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, user_id, name, amount, category_id, date, historyMonth.id, notes]
-    )
-    const expense = await getExpenseById(id)
-    if (!expense) {
-      console.log(`Failed. Try again.`)
-      return null
-    }
-    if (month === thisMonth && year === thisYear) {
-      await updateCategoryTotalExpenses(category_id, amount)
-    }
-    console.log('Expense created successfully!')
-    return expense
-  } catch (err) {
-    console.error(`Error creating expense: ${err}`)
+  }
+  await connectionPool.query(
+    `INSERT INTO expenses (id, user_id, name, amount, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, user_id, name, amount, category_id, date, historyMonth.id, notes]
+  )
+  const expense = await getExpenseById(id)
+  if (!expense) {
+    console.log(`Failed. Try again.`)
     return null
   }
+  if (month === thisMonth && year === thisYear) {
+    await updateCategoryTotalExpenses(category_id, amount)
+  }
+  console.log('Expense created successfully!')
+  return expense
 }
 
 const getExpensesByUser = async user_id => {
