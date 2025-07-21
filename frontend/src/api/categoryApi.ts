@@ -1,155 +1,118 @@
-import { Category, NewCategory } from "../types";
-const token = localStorage.getItem("authToken");
-export async function FetchCategoriesData(): Promise<Category[] | null> {
-  try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/all-categories`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
+import axios from 'axios'
+import { Category, NewCategory } from '../types'
+import { api } from './apiService'
 
-    });
-    if (res.status === 200) {
-      const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
-      return categoriesData;
+export async function FetchCategoriesData (): Promise<
+  Category[] | { error: string }
+> {
+  try {
+    const res = await api.get('/all-categories')
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching categories data ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function GenerateCategoryData(): Promise<Category[] | null> {
+export async function GenerateCategoryData (): Promise<
+  void | { error: string }
+> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/generate-default-categories`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-
-    });
-    if (res.status === 200) {
-      const categoriesData: Category[] = await res.json(); // Make sure that the response is of type Category[]
-      return categoriesData;
+    await api.get('/generate-default-categories')
+    console.log("Default categories generated successfully.");
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error generating categories data ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function GetCategory(category_id: string): Promise<Category | null> {
+export async function GetCategory (
+  category_id: string
+): Promise<Category | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/get-category?category_id=${category_id}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-
-    });
-    if (res.status === 200) {
-      const categoryData: Category = await res.json(); // Make sure that the response is of type Category
-      return categoryData;
+    const res = await api.get(`/get-category?category_id=${category_id}`)
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching category data ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function AddCategory(
+export async function AddCategory (
   category: NewCategory
-): Promise<Category | null> {
+): Promise<Category | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/add-category`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-
-      body: JSON.stringify(category),
-    });
-    if (res.status === 201) {
-      const newCategory: Category | null = await res.json(); // Make sure that the response is of type Category
-      return newCategory;
+    const res = await api.post('/add-category', { category })
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error adding category ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function UpdateCategoryName(category_id: string, name: string) {
+export async function UpdateCategoryName (
+  category_id: string,
+  name: string
+): Promise<Category | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-category-name`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-
-      body: JSON.stringify({ category_id, name }),
-    });
-    if (res.status === 200) {
-      const updatedCategory: Category = await res.json(); // Make sure that the response is of type Category
-      return updatedCategory;
+    const res = await api.post('/update-category-name', { category_id, name })
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error updating category ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function UpdateCategoryDescription(
-  category_id: string, description: string
-): Promise<Category | null> {
+export async function UpdateCategoryDescription (
+  category_id: string,
+  description: string
+): Promise<Category | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-category-description`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-
-      body: JSON.stringify({ category_id, description }),
-    });
-    if (res.status === 200) {
-      const updatedCategory: Category = await res.json(); // Make sure that the response is of type Category
-      return updatedCategory;
+    const res = await api.post(`/update-category-description`, {
+      category_id,
+      description
+    })
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error updating category ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function DeleteCategory(category_id: string): Promise<boolean> {
+export async function DeleteCategory (category_id: string): Promise<void | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-category`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-
-      body: JSON.stringify({ category_id }),
-    });
-    if (res.status === 200) {
-      return true;
+    await api.delete(`/delete-category/${category_id}`)
+    console.log("Category deleted successfully.");
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error deleting category ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false;
 }

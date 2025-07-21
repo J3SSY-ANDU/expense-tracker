@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ResetForgotPassword } from "../api";
+import apiService from "../api/apiService";
 import {
   TextField,
   Typography,
@@ -31,7 +31,7 @@ export function ResetForgotPasswordForm() {
         console.error("Token or password not found");
         return;
       }
-      await ResetForgotPassword(tokenParam, password);
+      await apiService.resetForgotPassword(tokenParam, password);
       // setLoading(false);
       // setPassword("");
       // setConfirmPassword("");

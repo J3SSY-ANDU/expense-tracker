@@ -4,42 +4,51 @@ import { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { Category, Expense, User, History as MonthlyHistory } from "./types";
 import { useNavigate } from "react-router-dom";
-import {
-  FetchCategoriesData,
-  FetchExpensesData,
-  FetchUserData,
-  FetchHistoryData,
-  UpdateExpense,
-} from "./api";
 import { Categories, ExpensesTable, Account, History } from "./components";
 import expense_tracker from "./expense-tracker.svg";
+import apiService from "./api/apiService";
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
   const [history, setHistory] = useState<MonthlyHistory[] | null>(null);
+  const [errors, setErrors] = useState<string | null>(null);
+  const [updatingDataError, setUpdatingDataError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
-      const userData = await FetchUserData();
-      if (!userData) {
-        navigate("/login");
+      setLoading(true);
+      setErrors(null);
+      try {
+        // Fetch all data
+        const [userData, categoriesData, expensesData, historyData] = await Promise.all([
+          apiService.getUserData(),
+          apiService.getCategoriesData(),
+          apiService.getExpensesData(),
+          apiService.getHistoryData()
+        ]);
+  
+        if ((!userData || "error" in userData) || (!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData)) {
+          setErrors("Failed to fetch data.");
+          navigate("/login");
+          return;
+        }
+  
+        setUser(userData);
+        setCategories(categoriesData);
+        setExpenses(expensesData);
+        setHistory(historyData);
+  
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setErrors("Something went wrong while fetching data. Please try again later.");
+        setLoading(false);
         return;
       }
-      setUser(userData);
-
-      const categoriesData = await FetchCategoriesData();
-      setCategories(categoriesData);
-
-      const expensesData = await FetchExpensesData();
-      setExpenses(expensesData);
-
-      const historyData = await FetchHistoryData();
-      setHistory(historyData);
-      setLoading(false);
     };
     fetchData();
   }, [navigate]);
@@ -51,7 +60,7 @@ export default function App() {
   const handleUpdateData = async (updatedExpense: Expense): Promise<void> => {
     if (!updatedExpense) return;
     try {
-      const updated = await UpdateExpense(updatedExpense);
+      const updated = await apiService.updateExpense(updatedExpense);
       if (updated && "error" in updated) {
         console.error(`Error updating expense: ${updated.error}`);
         // Add any additional error handling here if needed
@@ -60,15 +69,23 @@ export default function App() {
         return;
       }
       // Fetch updated data after successful update
-      const expensesData = await FetchExpensesData();
-      setExpenses(expensesData)
-      const categoriesData = await FetchCategoriesData();
+      const [expensesData, categoriesData, historyData] = await Promise.all([
+        apiService.getExpensesData(),
+        apiService.getCategoriesData(),
+        apiService.getHistoryData()
+      ]);
+
+      if ((!expensesData || "error" in expensesData) || (!categoriesData || "error" in categoriesData) || (!historyData || "error" in historyData)) {
+        console.error("Failed to fetch updated data.");
+        setUpdatingDataError("Failed to fetch updated data.");
+        return;
+      }
+      setExpenses(expensesData);
       setCategories(categoriesData);
-      const historyData = await FetchHistoryData();
       setHistory(historyData);
     } catch (error) {
       console.error("Error updating expense:", error);
-      // Add any additional error handling here if needed
+      setUpdatingDataError("Failed to update expense. Please try again later.");
       return;
     }
   }

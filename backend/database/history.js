@@ -57,16 +57,11 @@ const getHistoryById = async (id) => {
 }
 
 const getHistoryByUser = async (user_id) => {
-  try {
     const [history] = await connectionPool.query(
       `SELECT * FROM history WHERE user_id = ? AND (month <> MONTH(CURDATE()) OR year <> YEAR(CURDATE()))`,
       [user_id]
     );
     return history;
-  } catch (err) {
-    console.error(`Error getting history: ${err}`);
-    return null;
-  }
 };
 
 const getHistoryByMonthYear = async (user_id, month, year) => {

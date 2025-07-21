@@ -1,90 +1,78 @@
-import { Expense, NewExpense } from "../types/Expense";
+import axios from 'axios'
+import { Expense, NewExpense } from '../types/Expense'
+import { api } from './apiService'
 
-const token = localStorage.getItem("authToken");
-export async function FetchExpensesData(): Promise<Expense[] | null> {
+export async function FetchExpensesData (): Promise<Expense[] | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/all-monthly-expenses`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    if (res.status === 200) {
-      const expensesData: Expense[] = await res.json(); // Make sure that the response is of type Expense[]
-      return expensesData;
+    const res = await api.get(`/all-monthly-expenses`)
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching expenses data ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function CreateExpense(
+export async function CreateExpense (
   expense: NewExpense
-): Promise<Expense | null> {
+): Promise<Expense | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/create-expense`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(expense),
-    });
-    if (res.status === 201) {
-      const newExpense: Expense = await res.json(); // Make sure that the response is of type Expense
-      return newExpense;
+    const { name, amount, category_id, date, notes } = expense
+    const res = await api.post('/create-expense', {
+      name,
+      amount,
+      category_id,
+      date,
+      notes
+    })
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error creating expense ${err}`);
-  }
-  return null;
-}
-
-export async function UpdateExpense(expense: Expense): Promise<Expense | { error: string}> {
-  try {
-    const { id, name, amount, category_id, date, notes } = expense;
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/update-expense`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ id, name, amount, category_id, date, notes }),
-    });
-    if (res.status === 200) {
-      const updatedExpense: Expense = await res.json(); // Make sure that the response is of type Expense
-      return updatedExpense;
-    } else {
-      const data = await res.json();
-      return data.error ? { error: data.error } : { error: "Failed to update expense" };
-    }
-  } catch (err) {
-    console.error(`Error updating expense ${err}`);
-    return { error: "Something went wrong. Please try again." }
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
 }
 
-export async function DeleteExpense(expense_id: string): Promise<boolean> {
+export async function UpdateExpense (
+  expense: Expense
+): Promise<Expense | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-expense`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ expense_id }),
-    });
-    if (res.status === 200) {
-      return true;
+    const { id, name, amount, category_id, date, notes } = expense
+    const res = await api.put('/update-expense', {
+      id,
+      name,
+      amount,
+      category_id,
+      date,
+      notes
+    })
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error deleting expense ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false;
+}
+
+export async function DeleteExpense (expense_id: string): Promise<void | { error: string }> {
+  try {
+    await api.delete(`/delete-expense/${expense_id}`)
+    console.log(`Expense deleted successfully.`)
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
+    }
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
+  }
 }

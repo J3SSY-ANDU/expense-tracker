@@ -18,10 +18,7 @@ import {
   History as MonthlyHistory,
 } from "../types";
 import { Dayjs } from "dayjs";
-import {
-  CreateExpense,
-  DeleteExpense,
-} from "../api";
+import apiService from "../api/apiService";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
 
@@ -104,7 +101,6 @@ export function ExpensesTable({
 
     const newExpenseData: NewExpense = {
       name: newExpenseName,
-      user_id: user.id,
       amount: Number(newExpenseAmount),
       category_id: selectedCategory ? selectedCategory.id : "",
       date: selectedDate
@@ -114,10 +110,12 @@ export function ExpensesTable({
     };
 
     try {
-      const createdExpense = await CreateExpense(newExpenseData);
+      const createdExpense = await apiService.createExpense(newExpenseData);
 
-      if (!createdExpense) {
+      if (!createdExpense || "error" in createdExpense) {
         console.error("Error creating expense");
+        // Add any additional error handling here if needed
+        
         setCreatingExpense(false);
         return;
       }
@@ -139,7 +137,6 @@ export function ExpensesTable({
             ? { ...cat, total_expenses: createdExpense.amount }
             : {
               id: createdExpense.category_id,
-              user_id: user?.id || "",
               name: selectedCategory?.name || "Uncategorized",
               total_expenses: createdExpense.amount,
               description: "",
@@ -207,7 +204,6 @@ export function ExpensesTable({
             name: new Date(year, month - 1).toLocaleString("default", {
               month: "long",
             }),
-            user_id: user?.id || "",
             month,
             year,
             total_expenses: Number(createdExpense.amount),
@@ -260,7 +256,7 @@ export function ExpensesTable({
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
-    const isDeleted = await DeleteExpense(selectedExpense.id);
+    const isDeleted = await apiService.deleteExpense(selectedExpense.id);
     if (isDeleted) {
       // If mode is "category", call the handleDeleteExpenseByCategory function
       // to update the expenses in the parent component
