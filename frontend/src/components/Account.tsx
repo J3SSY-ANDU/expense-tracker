@@ -15,8 +15,8 @@ import {
   DialogActions,
 } from "@mui/material";
 import { User } from "../types";
-import { DeleteUser, ChangePassword } from "../api";
 import { useState } from "react";
+import apiService, { api } from "../api/apiService";
 
 export function Account({
   user,
@@ -40,7 +40,7 @@ export function Account({
   };
 
   const handleDeleteUser = async () => {
-    await DeleteUser();
+    await apiService.deleteUser();
   };
 
   const handleChangePassword = async () => {
@@ -51,7 +51,7 @@ export function Account({
       setConfirmPassword("");
       return;
     }
-    const success = await ChangePassword(oldPassword, newPassword);
+    const success = await apiService.changePassword(oldPassword, newPassword);
     if (success) {
       alert("Password changed successfully");
       setEditPassword(false);

@@ -1,17 +1,16 @@
+import { api } from "./apiService";
+import axios from "axios";
+
 export async function VerifyEmail(token: string): Promise<{ message?: string; token?: string; error?: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-email?token=${encodeURIComponent(token)}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || "Email verification failed.");
-    }
-    return data;
+    const res = await api.get(`/verify-email?token=${encodeURIComponent(token)}`)
+    return res.data;
   } catch (err: any) {
-    return { error: err.message || "Unknown error" };
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
+    }
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
 }

@@ -1,25 +1,20 @@
-import { User } from "../types";
+import axios from 'axios';
+import { api } from './apiService'
 
-export async function Login(email: string, password: string): Promise<{user: User, token: string} | {error: string}> {
-    try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/process-login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ email, password }),
-        });
-        if (res.status === 200) {
-            console.log("Login successful!");
-            return res.json();
-        } else {
-            console.error("Login failed!");
-            const data = await res.json();
-            return {error: data.error ?? "Unknown error occurred."};
-        }
-    } catch (err) {
-        console.error(`Error fetching the API: ${err}`);
-        return {error: "Failed to connect to the server. Please try again later."};
+export async function LogIn (
+  email: string,
+  password: string
+): Promise<{ token: string } | { error: string }> {
+  try {
+    const res = await api.post('/process-login', { email, password })
+    console.log('Login successful!')
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || "Unknown error occurred." };
     }
+    // Otherwise, return a generic error
+    return { error: "Failed to connect to the server. Please try again later." };
+  }
 }

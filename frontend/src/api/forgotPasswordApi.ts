@@ -1,17 +1,16 @@
-export async function ForgotPassword(email: string): Promise<void> {
-    try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/forgot-password`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ email }),
-        });
-        if (res.status === 200) {
-            console.log("Email sent successfully");
-        }
-    } catch (err) {
-        console.error(`Error sending email ${err}`);
+import axios from 'axios'
+import { api } from './apiService'
+
+export async function ForgotPassword (email: string): Promise<void | { error: string }> {
+  try {
+    await api.post('/forgot-password', { email })
+    console.log('Email sent successfully')
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
+  }
 }

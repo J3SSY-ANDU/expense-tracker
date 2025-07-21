@@ -42,7 +42,7 @@ const sendEmailVerification = async (email, user_id) => {
         return token; // Return the token for further use
     } catch (err) {
         console.error(`Error sending email: ${err}`);
-        return null;
+        throw err;
     }
 }
 
@@ -51,7 +51,7 @@ const forgotPasswordEmail = async (email) => {
         const token = await getForgotPasswordToken(email);
         if (!token) {
             console.log("Token not found.");
-            return null;
+            throw new Error("TOKEN_NOT_FOUND");
         }
 
         const resetUrl = `${process.env.CLIENT_URL}/reset-forgot-password?token=${token}`;
@@ -72,7 +72,7 @@ const forgotPasswordEmail = async (email) => {
         console.log("Email sent successfully!");
     } catch (err) {
         console.error(`Error sending email: ${err}`);
-        return null;
+        throw err;
     }
 }
 
@@ -101,7 +101,7 @@ const deleteAccountEmail = async (name, email) => {
         console.log("Email sent successfully!");
     } catch (err) {
         console.error(`Error sending email: ${err}`);
-        return null;
+        throw err;
     }
 }
 

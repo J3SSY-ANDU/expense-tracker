@@ -1,14 +1,16 @@
-const { connectionPool } = require("./db");
-const dotenv = require("dotenv").config({
+const { connectionPool } = require('./db')
+const dotenv = require('dotenv').config({
   path:
-    process.env.NODE_ENV === "production"
-      ? ".env.production"
-      : ".env.development",
-});
-const bcrypt = require("bcrypt");
-const { v4: uuidv4 } = require("uuid");
+    process.env.NODE_ENV === 'production'
+      ? '.env.production'
+      : '.env.development'
+})
+const bcrypt = require('bcrypt')
+const { v4: uuidv4 } = require('uuid')
+const { deleteAccountEmail } = require('../emails')
 
-(async () => {
+
+;(async () => {
   await connectionPool.query(`
         CREATE TABLE IF NOT EXISTS users (
             id VARCHAR(100) PRIMARY KEY NOT NULL,
@@ -19,166 +21,148 @@ const { v4: uuidv4 } = require("uuid");
             password VARCHAR(255) NOT NULL,
             is_verified INT NOT NULL DEFAULT 0
         );
-    `);
-  console.log("Table created successfully!");
-})();
+    `)
+  console.log('Table created successfully!')
+})()
 
 const createUser = async (firstname, lastname, email, password) => {
-  try {
-    const userByEmail = await getUserByEmail(email);
-    if (userByEmail) {
-      console.log("User already exists.");
-      throw new Error("USER_EXISTS");
-    }
-    const id = uuidv4(); // Generate a unique ID
-    const fullname = `${firstname} ${lastname}`;
-    await connectionPool.query(
-      `INSERT INTO users (id, firstname, lastname, fullname, email, password) VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, firstname, lastname, fullname, email, password]
-    );
-    const user = await getUserById(id);
-    if (!user) {
-      console.log(`Failed. Try again.`);
-      throw new Error("USER_CREATION_FAILED");
-    }
-    console.log("User created successfully!");
-    return user;
-  } catch (err) {
-    console.error(`Error creating user: ${err}`);
-    throw err;
+  const userByEmail = await getUserByEmail(email)
+  if (userByEmail) {
+    console.log('User already exists.')
+    throw new Error('USER_EXISTS')
   }
-};
+  const id = uuidv4() // Generate a unique ID
+  const fullname = `${firstname} ${lastname}`
+  await connectionPool.query(
+    `INSERT INTO users (id, firstname, lastname, fullname, email, password) VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, firstname, lastname, fullname, email, password]
+  )
+  const user = await getUserById(id)
+  if (!user) {
+    console.log(`Failed. Try again.`)
+    throw new Error('USER_CREATION_FAILED')
+  }
+  console.log('User created successfully!')
+  return user
+}
 
-const getUserById = async (id) => {
-  try {
-    if (!id) {
-      console.log("User ID is invalid.");
-      return null;
-    }
-    const [user] = await connectionPool.query(
-      `SELECT * FROM users WHERE id = ?`,
-      [id]
-    );
-    if (!user) return null;
-    return user[0];
-  } catch (err) {
-    console.error(`Error getting user by id: ${err}`);
-  }
-};
+const getUserById = async id => {
+  const [user] = await connectionPool.query(
+    `SELECT * FROM users WHERE id = ?`,
+    [id]
+  )
+  if (!user) return null
+  return user[0]
+}
 
-const getUserByEmail = async (email) => {
-  try {
-    const [user] = await connectionPool.query(
-      `SELECT * FROM users WHERE email = ?`,
-      [email]
-    );
-    if (!user) return null;
-    return user[0];
-  } catch (err) {
-    console.error(`Error getting user by email: ${err}`);
-    return null;
-  }
-};
+const getUserByEmail = async email => {
+  const [user] = await connectionPool.query(
+    `SELECT * FROM users WHERE email = ?`,
+    [email]
+  )
+  if (!user) return null
+  return user[0]
+}
 
 const authenticateUser = async (email, password) => {
-  try {
-    const user = await getUserByEmail(email);
-    if (!user) {
-      console.log("User not found.");
-      throw new Error("USER_NOT_FOUND");
-    }
-    const match = await bcrypt.compare(password, user.password);
-    if (match) {
-      return user;
-    } else {
-      console.log("Invalid credentials.");
-      throw new Error("INVALID_CREDENTIALS");
-    }
-  } catch (err) {
-    console.error(`Error authenticating user: ${err}`);
-    throw err;
+  const user = await getUserByEmail(email)
+  if (!user) {
+    console.log('User not found.')
+    throw new Error('USER_NOT_FOUND')
   }
-};
+  const match = await bcrypt.compare(password, user.password)
+  if (match) {
+    return user
+  } else {
+    console.log('Invalid credentials.')
+    throw new Error('INVALID_CREDENTIALS')
+  }
+}
 
-const deleteUser = async (id) => {
+const deleteUser = async id => {
   try {
-    await connectionPool.query(`DELETE FROM users WHERE id = ?`, [id]);
-    console.log(`User deleted successfully!`);
+    const user = await getUserById(id)
+    if (!user) throw new Error('USER_NOT_FOUND')
+    let connection
+    connection = await connectionPool.getConnection()
+    await connection.beginTransaction()
+
+    await connection.query(`DELETE FROM expenses WHERE user_id = ?`, [id])
+    await connection.query(`DELETE FROM categories WHERE user_id = ?`, [id])
+    await connection.query(`DELETE FROM history WHERE user_id = ?`, [id])
+    const [deleteResult] = await connection.query(
+      `DELETE FROM users WHERE id = ?`,
+      [id]
+    )
+    if (deleteResult.affectedRows === 0) throw new Error('USER_DELETION_FAILED')
+
+    await deleteAccountEmail(user.firstname, user.email) // Throw error if email deletion fails
+
+    await connection.commit()
+    connection.release()
     return true;
-  } catch (err) {
-    console.error(`Error deleting user: ${err}`);
-    return false;
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+      connection.release();
+    }
+    throw error;
   }
-};
+}
 
 const updatePassword = async (id, newPassword) => {
-  try {
-    await connectionPool.query(`UPDATE users SET password = ? WHERE id = ?`, [
-      newPassword,
-      id,
-    ]);
+  await connectionPool.query(`UPDATE users SET password = ? WHERE id = ?`, [
+    newPassword,
+    id
+  ])
 
-    const user = await getUserById(id);
-    if (newPassword !== user.password) {
-      console.log(`Failed to update password. Try again.`);
-      return null;
-    }
-    console.log(`Password updated successfully!`);
-    return user;
-  } catch (err) {
-    console.error(`Error updating user: ${err}`);
-    return null;
+  const user = await getUserById(id)
+  if (newPassword !== user.password) {
+    console.log(`Password update failed.`)
+    return null
   }
-};
+  console.log(`Password updated successfully!`)
+  return user
+}
 
 const updateName = async (id, newFirstname, newLastname) => {
-  try {
-    await connectionPool.query(
-      `UPDATE users SET firstname = ?, lastname = ?, fullname = ? WHERE id = ?`,
-      [newFirstname, newLastname, `${newFirstname} ${newLastname}`, id]
-    );
-    const user = await getUserById(id);
-    if (newFirstname !== user.firstname || newLastname !== user.lastname) {
-      console.log(`Failed to update name. Try again.`);
-      return null;
-    }
-    console.log(`Name updated successfully!`);
-    return user;
-  } catch (err) {
-    console.error(`Error updating user: ${err}`);
-    return null;
+  await connectionPool.query(
+    `UPDATE users SET firstname = ?, lastname = ?, fullname = ? WHERE id = ?`,
+    [newFirstname, newLastname, `${newFirstname} ${newLastname}`, id]
+  )
+  const user = await getUserById(id)
+  if (newFirstname !== user.firstname || newLastname !== user.lastname) {
+    console.log(`Failed to update name. Try again.`)
+    return null
   }
-};
+  console.log(`Name updated successfully!`)
+  return user
+}
 
-const userIsVerified = async (id) => {
-  try {
-    const [user] = await connectionPool.query(
-      `
+const userIsVerified = async id => {
+  const [user] = await connectionPool.query(
+    `
       SELECT is_verified FROM users WHERE id = ?`,
-      [id]
-    );
-    if (!user[0].is_verified) {
-      return false;
-    }
-    return true;
-  } catch (err) {
-    console.error(`Error checking if user is verified: ${err}`);
-    throw new Error("USER_VERIFICATION_ERROR");
+    [id]
+  )
+  if (!user[0].is_verified) {
+    return false
   }
-};
+  return true
+}
 
-const verifyUser = async (id) => {
+const verifyUser = async id => {
   try {
     await connectionPool.query(
       `
       UPDATE users SET is_verified = 1 WHERE id = ?`,
       [id]
-    );
-    console.log(`User verified successfully!`);
+    )
+    console.log(`User verified successfully!`)
   } catch (err) {
-    console.error(`Error verifying user: ${err}`);
+    console.error(`Error verifying user: ${err}`)
   }
-};
+}
 
 module.exports = {
   createUser,
@@ -190,4 +174,4 @@ module.exports = {
   deleteUser,
   updatePassword,
   updateName
-};
+}

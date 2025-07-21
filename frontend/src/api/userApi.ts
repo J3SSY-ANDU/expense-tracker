@@ -1,113 +1,70 @@
-import { User } from "../types";
-import { } from "react-router-dom";
+import { User } from '../types'
+import {} from 'react-router-dom'
+import { api } from './apiService'
+import axios from 'axios'
 
-const token = localStorage.getItem("authToken");
-export async function FetchUserData(): Promise<User | null> {
+export async function FetchUserData (): Promise<User | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/user-data`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    if (res.status === 200) {
-      const userData: User = await res.json(); // Make sure that the response is of type User
-      return userData;
+    const res = await api.get('/user-data')
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error fetching user data ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return null;
 }
 
-export async function GetUserVerificationStatus(id: string): Promise<string | null> {
-  try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-user-creation?id=${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    if (res.status === 200) {
-      console.log("User creation verified");
-      window.location.href = "/login";
-      return 'Verified';
-    } else if (res.status === 401) {
-      console.log("User creation not verified");
-      return 'Not Verified';
-    } else if (res.status === 404) {
-      console.log("User not found");
-      window.location.href = "/signup";
-      return 'Not Found';
-    }
-  } catch (err) {
-    console.error(`Error verifying user creation ${err}`);
-  }
-  return null;
-}
-
-export async function ChangePassword(
+export async function ChangePassword (
   oldPassword: string,
   newPassword: string
-): Promise<boolean> {
+): Promise<{ message: string } | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/change-password`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ oldPassword, newPassword }),
-    });
-    if (res.status === 200) {
-      return true;
+    const res = await api.post('/change-password', { oldPassword, newPassword })
+    console.log(res.data.message)
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error changing password ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false;
 }
 
-export async function ChangeName(newFirstname: string, newLastname: string): Promise<boolean> {
+export async function ChangeName (
+  newFirstname: string,
+  newLastname: string
+): Promise<{ message: string } | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/change-name`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ newFirstname, newLastname }),
-    });
-    if (res.status === 200) {
-      return true;
+    const res = await api.post('/change-name', { newFirstname, newLastname })
+    console.log(res.data.message)
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error changing name ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false;
 }
 
-export async function DeleteUser(): Promise<boolean> {
+export async function DeleteUser (): Promise<void | { error: string }> {
   try {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/delete-user`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
-    if (res.status === 200) {
-      window.location.href = "/signup";
-      return true;
+    const res = await api.delete('/delete-user')
+    localStorage.removeItem('authToken')
+    window.location.href = '/signup'
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
     }
-  } catch (err) {
-    console.error(`Error deleting user ${err}`);
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
   }
-  return false;
 }

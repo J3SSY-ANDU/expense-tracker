@@ -4,132 +4,123 @@ import {
   Card,
   CardContent,
   Grid2,
-  Button,
-} from "@mui/material";
-import { useEffect, useState, useRef, useCallback } from "react";
+  Button
+} from '@mui/material'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import {
   Category,
   NewCategory,
   User,
   Expense,
-  History as MonthlyHistory,
-} from "../types";
-import {
-  AddCategory,
-  DeleteCategory,
-  DeleteExpense,
-  UpdateCategoryDescription,
-  UpdateCategoryName,
-} from "../api";
-import { CategoryCard } from "./index";
+  History as MonthlyHistory
+} from '../types'
+import apiService from '../api/apiService'
+import { CategoryCard } from './index'
 
-export function Categories({
+export function Categories ({
   user,
   categories,
   setCategories,
   expenses,
   setExpenses,
   setHistory,
-  handleUpdateData,
+  handleUpdateData
 }: {
-  user: User | null;
-  categories: Category[] | null;
-  setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
-  expenses: Expense[] | null;
-  setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
-  setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
-  handleUpdateData: (updatedExpense: Expense) => Promise<void>; // Function to update expense data
+  user: User | null
+  categories: Category[] | null
+  setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>
+  expenses: Expense[] | null
+  setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>
+  setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>
+  handleUpdateData: (updatedExpense: Expense) => Promise<void> // Function to update expense data
 }) {
   const [newExpensesByCategory, setNewExpensesByCategory] = useState<
     Expense[] | null
-  >(null); // State for new expenses by category
-  const [loading, setLoading] = useState<boolean>(true); // State for loading
-  const [newCategory, setNewCategory] = useState<boolean>(false); // State for new category
-  const [newCategoryName, setNewCategoryName] = useState<string>(""); // State for category name
-  const newCategoryRef = useRef<HTMLInputElement | null>(null); // Reference to the new category DOM element
-  const [openCategory, setOpenCategory] = useState<boolean>(false); // State for backdrop
+  >(null) // State for new expenses by category
+  const [loading, setLoading] = useState<boolean>(true) // State for loading
+  const [newCategory, setNewCategory] = useState<boolean>(false) // State for new category
+  const [newCategoryName, setNewCategoryName] = useState<string>('') // State for category name
+  const newCategoryRef = useRef<HTMLInputElement | null>(null) // Reference to the new category DOM element
+  const [openCategory, setOpenCategory] = useState<boolean>(false) // State for backdrop
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
-  ); // State for selected category
+  ) // State for selected category
   useEffect(() => {
     if (selectedCategory) {
       const filteredExpenses =
         expenses?.filter(
-          (expense) => expense.category_id === selectedCategory.id
-        ) || []; // Ensure it's always an array
+          expense => expense.category_id === selectedCategory.id
+        ) || [] // Ensure it's always an array
 
-      setNewExpensesByCategory(filteredExpenses);
+      setNewExpensesByCategory(filteredExpenses)
     }
-  }, [expenses, selectedCategory]);
+  }, [expenses, selectedCategory])
 
   useEffect(() => {
-    if (!newExpensesByCategory || !expenses) return;
+    if (!newExpensesByCategory || !expenses) return
 
-    const updatedMap = new Map(newExpensesByCategory.map(e => [e.id, e]));
-    let hasChanged = false;
+    const updatedMap = new Map(newExpensesByCategory.map(e => [e.id, e]))
+    let hasChanged = false
 
     const newParentExpenses = expenses.map(exp => {
       if (updatedMap.has(exp.id)) {
-        const updatedExp = updatedMap.get(exp.id);
+        const updatedExp = updatedMap.get(exp.id)
         if (
           updatedExp &&
-          (
-            exp.name !== updatedExp.name ||
+          (exp.name !== updatedExp.name ||
             exp.amount !== updatedExp.amount ||
             exp.category_id !== updatedExp.category_id ||
             exp.date !== updatedExp.date ||
-            exp.notes !== updatedExp.notes
-          )
+            exp.notes !== updatedExp.notes)
         ) {
-          hasChanged = true;
-          return { ...updatedExp };
+          hasChanged = true
+          return { ...updatedExp }
         }
       }
-      return exp;
-    });
+      return exp
+    })
 
     if (hasChanged) {
-      setExpenses(newParentExpenses);
+      setExpenses(newParentExpenses)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newExpensesByCategory]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newExpensesByCategory])
 
   const handleSaveCategory = useCallback(async () => {
     if (!user) {
-      return;
+      return
     }
     const newCategoryData: NewCategory = {
       name: newCategoryName,
-      user_id: user.id,
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
       total_expenses: 0,
-      description: "",
-    };
+      description: ''
+    }
     if (newCategoryName) {
       // Save category
 
-      const createdCategory: Category | null = await AddCategory(
-        newCategoryData
-      );
-      if (!createdCategory) {
-        return;
+      const createdCategory = await apiService.addCategory(newCategoryData)
+      if (!createdCategory || 'error' in createdCategory) {
+        console.error('Failed to create category:', createdCategory)
+        // Add any additional error handling here if needed
+        return
       }
-      setCategories((prev) => {
-        return prev ? [...prev, createdCategory] : [createdCategory];
-      });
-      setNewCategory(false);
-      setNewCategoryName("");
+      setCategories(prev => {
+        return prev ? [...prev, createdCategory] : [createdCategory]
+      })
+      setNewCategory(false)
+      setNewCategoryName('')
     } else {
-      console.log("Category name cannot be empty.");
-      setNewCategory(false);
-      setNewCategoryName("");
+      console.log('Category name cannot be empty.')
+      setNewCategory(false)
+      setNewCategoryName('')
     }
-  }, [newCategoryName, user, setCategories]);
+  }, [newCategoryName, user, setCategories])
 
   useEffect(() => {
     if (categories) {
-      setLoading(false);
+      setLoading(false)
     }
 
     // Handle clicking outside or pressing Enter
@@ -138,150 +129,158 @@ export function Categories({
         newCategoryRef.current &&
         !newCategoryRef.current.contains(event.target as Node)
       ) {
-        handleSaveCategory();
+        handleSaveCategory()
       }
-    };
+    }
 
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === "Enter") {
-        handleSaveCategory();
+      if (event.key === 'Enter') {
+        handleSaveCategory()
       }
-    };
+    }
 
     if (newCategory) {
-      document.addEventListener("mousedown", handleOutsideClick);
-      document.addEventListener("keydown", handleKeyPress);
+      document.addEventListener('mousedown', handleOutsideClick)
+      document.addEventListener('keydown', handleKeyPress)
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [categories, newCategory, handleSaveCategory]);
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('keydown', handleKeyPress)
+    }
+  }, [categories, newCategory, handleSaveCategory])
 
   const handleChangeName = async () => {
-    if (!selectedCategory) return;
+    if (!selectedCategory) return
 
     const currentCategory = categories?.find(
-      (category) => category.id === selectedCategory.id
-    );
+      category => category.id === selectedCategory.id
+    )
 
     // Check if the name has changed
     if (currentCategory && currentCategory.name === selectedCategory.name) {
-      console.log("No changes detected in name.");
-      return;
+      console.log('No changes detected in name.')
+      return
     }
 
-    const updatedCategory = await UpdateCategoryName(
+    const updatedCategory = await apiService.updateCategoryName(
       selectedCategory.id,
       selectedCategory.name
-    );
-    if (updatedCategory) {
-      setCategories((prev) => {
-        return prev
-          ? prev.map((category) =>
+    )
+    if (!updatedCategory || 'error' in updatedCategory) {
+      console.error(`Error updating category name: ${updatedCategory?.error}`)
+      // Add any additional error handling here if needed
+
+      return
+    }
+    setCategories(prev => {
+      return prev
+        ? prev.map(category =>
             category.id === updatedCategory.id ? updatedCategory : category
           )
-          : null;
-      });
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Name updated successfully.");
-    } else {
-      console.log("Failed to update name.");
+        : null
+    })
+    const activeElement = document.activeElement as HTMLElement
+    if (activeElement) {
+      activeElement.blur()
     }
-  };
+    console.log('Name updated successfully.')
+  }
 
   const handleChangeDescription = async () => {
-    if (!selectedCategory) return;
+    if (!selectedCategory) return
 
     const currentCategory = categories?.find(
-      (category) => category.id === selectedCategory.id
-    );
+      category => category.id === selectedCategory.id
+    )
 
     // Check if the description has changed
     if (
       currentCategory &&
       currentCategory.description === selectedCategory.description
     ) {
-      console.log("No changes detected in description.");
-      return;
+      console.log('No changes detected in description.')
+      return
     }
 
-    const updatedCategory = await UpdateCategoryDescription(
+    const updatedCategory = await apiService.updateCategoryDescription(
       selectedCategory.id,
       selectedCategory.description
-    );
-    if (updatedCategory) {
-      setCategories((prev) => {
-        return prev
-          ? prev.map((category) =>
+    )
+    if (!updatedCategory || 'error' in updatedCategory) {
+      console.error(
+        `Error updating category description: ${updatedCategory?.error}`
+      )
+      // Add any additional error handling here if needed
+      return
+    }
+    setCategories(prev => {
+      return prev
+        ? prev.map(category =>
             category.id === updatedCategory.id ? updatedCategory : category
           )
-          : null;
-      });
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement) {
-        activeElement.blur();
-      }
-      console.log("Description updated successfully.");
-    } else {
-      console.log("Failed to update description.");
+        : null
+    })
+    const activeElement = document.activeElement as HTMLElement
+    if (activeElement) {
+      activeElement.blur()
     }
-  };
+    console.log('Description updated successfully.')
+  }
 
   const handleDeleteCategory = async () => {
-    if (!selectedCategory) return;
+    if (!selectedCategory) return
     if (expenses) {
       const expenseDeletions = expenses
-        .filter((expense) => expense.category_id === selectedCategory.id)
-        .map(async (expense) => {
-          const deleted = await DeleteExpense(expense.id);
+        .filter(expense => expense.category_id === selectedCategory.id)
+        .map(async expense => {
+          const deleted = await apiService.deleteExpense(expense.id)
           if (deleted) {
-            setExpenses((prev) => {
-              return prev ? prev.filter((exp) => exp.id !== expense.id) : null;
-            });
+            setExpenses(prev => {
+              return prev ? prev.filter(exp => exp.id !== expense.id) : null
+            })
           }
-        });
+        })
 
       // Wait for all expense deletions to complete
-      await Promise.all(expenseDeletions);
+      await Promise.all(expenseDeletions)
     }
-    const isDeleted: boolean = await DeleteCategory(selectedCategory.id);
-    if (isDeleted) {
-      setCategories((prev) => {
-        return prev
-          ? prev.filter((category) => category.id !== selectedCategory.id)
-          : null;
-      });
-      setSelectedCategory(null);
-      setOpenCategory(false);
+    const isDeleted = await apiService.deleteCategory(selectedCategory.id)
+    if (isDeleted && typeof isDeleted === 'object' && 'error' in isDeleted) {
+      console.error(`Error deleting category: ${isDeleted.error}`)
+      // Add any additional error handling here if needed
+      return
     }
-  };
+    setCategories(prev => {
+      return prev
+        ? prev.filter(category => category.id !== selectedCategory.id)
+        : null
+    })
+    setSelectedCategory(null)
+    setOpenCategory(false)
+  }
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   return (
     <Box>
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1rem",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1rem'
         }}
       >
-        <Typography fontSize={20} fontWeight={"600"}>
+        <Typography fontSize={20} fontWeight={'600'}>
           Categories
         </Typography>
         <Button
-          variant="contained"
-          color="primary"
-          size="small"
+          variant='contained'
+          color='primary'
+          size='small'
           onClick={() => setNewCategory(true)}
         >
           New Category
@@ -289,57 +288,57 @@ export function Categories({
       </Box>
       <Box sx={{ flexGrow: 1 }}>
         <Grid2 container spacing={4}>
-          {categories?.map((category) => {
+          {categories?.map(category => {
             return (
               <Grid2 key={category.id} size={3}>
                 <Card
                   sx={{
-                    background: "#f5f5f5",
-                    cursor: "pointer",
+                    background: '#f5f5f5',
+                    cursor: 'pointer'
                   }}
                   elevation={0}
                   onClick={() => {
-                    setOpenCategory(true);
-                    setSelectedCategory(category);
+                    setOpenCategory(true)
+                    setSelectedCategory(category)
                   }}
                 >
                   <CardContent>
                     <Typography
                       fontSize={16}
-                      fontWeight={"600"}
-                      marginBottom={"1rem"}
+                      fontWeight={'600'}
+                      marginBottom={'1rem'}
                     >
                       {category.name}
                     </Typography>
-                    <Typography fontSize={14} fontWeight={"400"}>
+                    <Typography fontSize={14} fontWeight={'400'}>
                       ${category.total_expenses}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid2>
-            );
+            )
           })}
           {newCategory && (
             <Grid2 size={3}>
-              <Card sx={{ background: "#f5f5f5" }}>
+              <Card sx={{ background: '#f5f5f5' }}>
                 <CardContent>
                   <input
-                    type="text"
-                    placeholder="Enter category name"
-                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    type='text'
+                    placeholder='Enter category name'
+                    onChange={e => setNewCategoryName(e.target.value)}
                     autoFocus
                     style={{
-                      background: "transparent",
-                      border: "none",
-                      outline: "none",
-                      width: "100%",
-                      marginBottom: "1rem",
-                      fontSize: "16px",
-                      fontWeight: "600",
+                      background: 'transparent',
+                      border: 'none',
+                      outline: 'none',
+                      width: '100%',
+                      marginBottom: '1rem',
+                      fontSize: '16px',
+                      fontWeight: '600'
                     }}
                     ref={newCategoryRef}
                   />
-                  <Typography fontSize={14} fontWeight={"400"}>
+                  <Typography fontSize={14} fontWeight={'400'}>
                     $0.00
                   </Typography>
                 </CardContent>
@@ -366,5 +365,5 @@ export function Categories({
         />
       </Box>
     </Box>
-  );
+  )
 }
