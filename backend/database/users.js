@@ -7,6 +7,8 @@ const dotenv = require('dotenv').config({
 })
 const bcrypt = require('bcrypt')
 const { v4: uuidv4 } = require('uuid')
+const { deleteAccountEmail } = require('../emails')
+
 
 ;(async () => {
   await connectionPool.query(`
@@ -78,14 +80,34 @@ const authenticateUser = async (email, password) => {
 }
 
 const deleteUser = async id => {
-    await connectionPool.query(`DELETE FROM users WHERE id = ?`, [id])
-    console.log(`User deleted successfully!`)
+  try {
     const user = await getUserById(id)
-    if (user) {
-      console.log(`Failed to delete user. Try again.`)
-      return false
+    if (!user) throw new Error('USER_NOT_FOUND')
+    let connection
+    connection = await connectionPool.getConnection()
+    await connection.beginTransaction()
+
+    await connection.query(`DELETE FROM expenses WHERE user_id = ?`, [id])
+    await connection.query(`DELETE FROM categories WHERE user_id = ?`, [id])
+    await connection.query(`DELETE FROM history WHERE user_id = ?`, [id])
+    const [deleteResult] = await connection.query(
+      `DELETE FROM users WHERE id = ?`,
+      [id]
+    )
+    if (deleteResult.affectedRows === 0) throw new Error('USER_DELETION_FAILED')
+
+    await deleteAccountEmail(user.firstname, user.email) // Throw error if email deletion fails
+
+    await connection.commit()
+    connection.release()
+    return true;
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+      connection.release();
     }
-    return true
+    throw error;
+  }
 }
 
 const updatePassword = async (id, newPassword) => {

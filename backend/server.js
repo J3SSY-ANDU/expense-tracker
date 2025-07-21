@@ -9,7 +9,6 @@ const dotenv = require('dotenv').config({
 const cors = require('cors')
 const bcrypt = require('bcrypt')
 const path = require('path')
-const { connectionPool } = require('./database/db')
 
 const app = express()
 const {
@@ -47,7 +46,6 @@ const {
   changeForgotPassword
 } = require('./database/forgotPassword')
 const { getHistoryByUser } = require('./database/history')
-const { deleteAccountEmail } = require('./emails')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -88,16 +86,14 @@ app.get('/user-data', authenticateToken, async (req, res) => {
       return res.status(401).json({ error: 'User not found!' })
     }
     // EXCLUDE PASSWORD FROM RESPONSE
-    res
-      .status(200)
-      .json({
-        user_id: user.id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        fullname: user.fullname,
-        email: user.email,
-        is_verified: user.is_verified
-      })
+    res.status(200).json({
+      user_id: user.id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      fullname: user.fullname,
+      email: user.email,
+      is_verified: user.is_verified
+    })
   } catch (error) {
     console.error('Error fetching user data:', error)
     res.status(500).json({ error: 'Failed to fetch user data.' })
@@ -483,43 +479,20 @@ app.delete(
 )
 
 app.delete('/delete-user', authenticateToken, async (req, res) => {
-  let connection;
   try {
-    connection = await connectionPool.getConnection();
-
-    const user = await getUserById(req.user.id);
-    if (!user) {
-      connection.release();
-      return res.status(404).json({ error: 'User not found!' });
-    }
-
-    await connection.beginTransaction();
-
-    await connection.query(`DELETE FROM expenses WHERE user_id = ?`, [req.user.id]);
-    await connection.query(`DELETE FROM categories WHERE user_id = ?`, [req.user.id]);
-    await connection.query(`DELETE FROM history WHERE user_id = ?`, [req.user.id]);
-    const [deleteResult] = await connection.query(`DELETE FROM users WHERE id = ?`, [req.user.id]);
-    if (deleteResult.affectedRows === 0) {
-      await connection.rollback();
-      connection.release();
-      return res.status(500).json({ error: 'Account deletion failed!' });
-    }
-
-    await deleteAccountEmail(user.firstname, user.email); // If this fails, catch will handle rollback
-
-    await connection.commit();
-    connection.release();
-    console.log('User deleted successfully!');
-    res.status(204).send();
+    await deleteUser(req.user.id)
+    console.log('User deleted successfully!')
+    res.status(204).send()
   } catch (error) {
-    if (connection) {
-      await connection.rollback();
-      connection.release();
+    if (error.message === 'USER_NOT_FOUND') {
+      return res.status(404).json({ error: 'User not found!' })
+    } else if (error.message === 'USER_DELETION_FAILED') {
+      return res.status(500).json({ error: 'User deletion failed!' })
     }
-    console.error('Error deleting user:', error);
-    return res.status(500).json({ error: 'Failed to delete user.' });
+    console.error('Error deleting user:', error)
+    return res.status(500).json({ error: 'Failed to delete user.' })
   }
-});
+})
 
 app.post('/change-password', authenticateToken, async (req, res) => {
   try {
