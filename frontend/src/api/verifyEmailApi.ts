@@ -3,7 +3,7 @@ import axios from "axios";
 
 export async function VerifyEmail(token: string): Promise<{ message?: string; token?: string; error?: string }> {
   try {
-    const res = await api.get(`/verify-email?token=${encodeURIComponent(token)}`)
+    const res = await api.get(`/verify-email/${encodeURIComponent(token)}`);
     return res.data;
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present

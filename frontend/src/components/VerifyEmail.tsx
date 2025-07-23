@@ -20,23 +20,28 @@ export function VerifyEmail() {
 
   useEffect(() => {
     async function verifyEmail() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenParam = urlParams.get("token");
-      setToken(tokenParam);
+      const tokenParam = window.location.pathname.split("/").pop();
+      setToken(tokenParam ?? null);
+      console.log("Token from URL:", tokenParam);
 
-      if (!tokenParam) {
+      if (!tokenParam ||tokenParam === "verify-email") {
         console.error("Token not found");
         return;
       } else if (tokenParam) {
-        const result = await apiService.verifyEmail(tokenParam);
+        const result: { message?: string; token?: string; error?: string } = await apiService.verifyEmail(tokenParam);
         if (result.error) {
           console.error("Email verification failed:", result.error);
+          // Handle error appropriately
           navigate("/signup");
         } else {
-          console.log("Email verified successfully");
-          if (result.token) {
-            localStorage.setItem("authToken", result.token);
-            window.location.replace("/");
+          console.log(result.message);
+          if (result.message && !result.token) {
+            navigate("/login");
+          } else {
+            if (result.token) {
+              localStorage.setItem("authToken", result.token);
+              window.location.replace("/");
+            }
           }
         }
       }

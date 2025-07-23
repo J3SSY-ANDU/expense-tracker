@@ -14,10 +14,10 @@ const { deleteAccountEmail } = require('../emails')
   await connectionPool.query(`
         CREATE TABLE IF NOT EXISTS users (
             id VARCHAR(100) PRIMARY KEY NOT NULL,
-            firstname VARCHAR(25) NOT NULL,
-            lastname VARCHAR(25) NOT NULL,
+            firstname VARCHAR(50) NOT NULL,
+            lastname VARCHAR(50) NOT NULL,
             fullname VARCHAR(50) NOT NULL,
-            email VARCHAR(50) NOT NULL UNIQUE,
+            email VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
             is_verified INT NOT NULL DEFAULT 0
         );
@@ -161,6 +161,7 @@ const verifyUser = async id => {
     console.log(`User verified successfully!`)
   } catch (err) {
     console.error(`Error verifying user: ${err}`)
+    throw new Error('USER_VERIFICATION_FAILED')
   }
 }
 
