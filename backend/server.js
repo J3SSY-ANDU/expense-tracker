@@ -165,12 +165,15 @@ app.get('/verify-email/:token', async (req, res) => {
 
 // Needs to be fixed
 app.post('/resend-verification-email', async (req, res) => {
-  const user = await getUserById(id)
-  if (!user) {
-    return res.status(401).send('User not found!')
+  try {
+    const { id } = req.body
+    const user = await getUserById(id)
+    await sendEmailVerification(user.email, id)
+    res.status(200).json({ message: 'Verification email sent!' })
+  } catch (error) {
+    console.error('Error resending verification email:', error)
+    return res.status(500).json({ error: 'Failed to resend verification email.' })
   }
-  await sendEmailVerification(user.email, id)
-  res.status(200).send('Verification email sent!')
 })
 
 app.post('/process-login', async (req, res) => {

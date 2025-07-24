@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import apiService from "../api/apiService";
 
 export function VerifyEmail() {
@@ -17,14 +17,14 @@ export function VerifyEmail() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     async function verifyEmail() {
       const tokenParam = window.location.pathname.split("/").pop();
       setToken(tokenParam ?? null);
-      console.log("Token from URL:", tokenParam);
 
-      if (!tokenParam ||tokenParam === "verify-email") {
+      if (!tokenParam || tokenParam === "verify-email") {
         console.error("Token not found");
         return;
       } else if (tokenParam) {
@@ -49,6 +49,22 @@ export function VerifyEmail() {
 
     verifyEmail();
   }, []);
+
+  const handleResendVerificationEmail = async () => {
+    const id = searchParams.get("uid");
+    if (!id) {
+      console.error("User ID not found in query parameters");
+      return;
+    }
+    setResendingEmail(true);
+    const result: { message: string } | { error: string } = await apiService.resendVerificationEmail(id);
+    setResendingEmail(false);
+    if ("error" in result) {
+      console.error(result.error);
+    } else {
+      console.log(result.message);
+    }
+  }
 
   return (
     <Paper
@@ -87,9 +103,7 @@ export function VerifyEmail() {
         variant="contained"
         color="primary"
         onClick={() => {
-          setLoading(true);
-          apiService.resendVerificationEmail(token!).then(() => {
-            setResendingEmail(false);
+          handleResendVerificationEmail().then(() => {
             setShowSnackbar(true);
           });
         }}
@@ -103,8 +117,11 @@ export function VerifyEmail() {
       </Button>
       <Snackbar
         open={showSnackbar}
-        onClose={() => setShowSnackbar(false)}
         autoHideDuration={5000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') return;
+          setShowSnackbar(false);
+        }}
       >
         <Alert
           onClose={() => setShowSnackbar(false)}

@@ -20,11 +20,15 @@ const crypto = require('crypto');
 })()
 
 const getEmailVerificationToken = async email => {
-  const [token] = await connectionPool.query(
+  const [verification] = await connectionPool.query(
     `SELECT token FROM emailVerification WHERE email = ?`,
     [email]
   )
-  return token
+  if (verification.length === 0) {
+    console.log('No token found for this email.')
+    return null // No token found for the email
+  }
+  return verification[0].token
 }
 
 const validateEmailVerificationToken = async token => {
@@ -40,6 +44,11 @@ const validateEmailVerificationToken = async token => {
 }
 
 const createEmailVerificationToken = async email => {
+  const existingToken = await getEmailVerificationToken(email);
+  if (existingToken) {
+    console.log('Token already exists for this email, deleting the old token.')
+    await deleteEmailVerificationToken(existingToken)
+  }
   const token = encodeURIComponent(crypto.randomBytes(48).toString('base64url')); // 64 chars, url-safe
   const expires_at = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
