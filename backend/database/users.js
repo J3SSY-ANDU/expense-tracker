@@ -9,7 +9,6 @@ const bcrypt = require('bcrypt')
 const { v4: uuidv4 } = require('uuid')
 const { deleteAccountEmail } = require('../emails')
 
-
 ;(async () => {
   await connectionPool.query(`
         CREATE TABLE IF NOT EXISTS users (
@@ -100,13 +99,13 @@ const deleteUser = async id => {
 
     await connection.commit()
     connection.release()
-    return true;
+    return true
   } catch (error) {
     if (connection) {
-      await connection.rollback();
-      connection.release();
+      await connection.rollback()
+      connection.release()
     }
-    throw error;
+    throw error
   }
 }
 
@@ -152,17 +151,12 @@ const userIsVerified = async id => {
 }
 
 const verifyUser = async id => {
-  try {
-    await connectionPool.query(
-      `
+  await connectionPool.query(
+    `
       UPDATE users SET is_verified = 1 WHERE id = ?`,
-      [id]
-    )
-    console.log(`User verified successfully!`)
-  } catch (err) {
-    console.error(`Error verifying user: ${err}`)
-    throw new Error('USER_VERIFICATION_FAILED')
-  }
+    [id]
+  )
+  console.log(`User verified successfully!`)
 }
 
 module.exports = {

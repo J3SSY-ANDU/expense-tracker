@@ -15,9 +15,18 @@ export async function VerifyEmail(token: string): Promise<{ message?: string; to
   }
 }
 
-export async function ResendVerificationEmail (id: string): Promise<{message: string} | { error: string }> {
+export async function ResendVerificationEmail (id?: string, token?: string, email?: string): Promise<{message: string} | { error: string }> {
   try {
-    await api.post('/resend-verification-email', { id })
+    if (!id && !token && !email) {
+      return { error: 'User ID, token, or email is required to resend verification email.' }
+    }
+    // Pick only the one that is defined
+    const payload: { id?: string; token?: string, email?: string } = {};
+    if (id) payload.id = id;
+    else if (token) payload.token = token;
+    else if (email) payload.email = email;
+
+    await api.post('/resend-verification-email', payload)
     console.log('Email verification resent successfully')
     return { message: 'Verification email resent successfully!' }
   } catch (err: any) {

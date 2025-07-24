@@ -23,7 +23,6 @@ const {
   updatePassword
 } = require('./database/users')
 const {
-  getExpensesByUser,
   createExpense,
   deleteExpense,
   updateExpense,
@@ -32,7 +31,6 @@ const {
 } = require('./database/expenses')
 const {
   createCategory,
-  getCategoriesByUser,
   deleteCategory,
   updateCategoryDescription,
   updateCategoryName,
@@ -46,7 +44,7 @@ const {
   changeForgotPassword
 } = require('./database/forgotPassword')
 const { getHistoryByUser } = require('./database/history')
-const { validateEmailVerificationToken, deleteEmailVerificationToken } = require('./database/emailVerification')
+const { validateEmailVerificationToken, invalidateTokensByEmail } = require('./database/emailVerification')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -134,13 +132,13 @@ app.get('/verify-email/:token', async (req, res) => {
     }
     const user = await getUserByEmail(email);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' })
+      return res.status(404).json({ error: 'Verification email could not be sent' })
     }
     if (user.is_verified) {
       return res.status(200).json({ message: 'Email already verified! Please log in.' })
     } else {
       await verifyUser(user.id)
-      await deleteEmailVerificationToken(token)
+      await invalidateTokensByEmail(email)
       await createDefaultCategories(user.id)
 
       const authToken = jwt.sign(
@@ -166,9 +164,29 @@ app.get('/verify-email/:token', async (req, res) => {
 // Needs to be fixed
 app.post('/resend-verification-email', async (req, res) => {
   try {
-    const { id } = req.body
-    const user = await getUserById(id)
-    await sendEmailVerification(user.email, id)
+    const { id, token, email } = req.body;
+    let user;
+
+    if (id) {
+      user = await getUserById(id);
+    } else if (token) {
+      // Lookup email by token, even if expired, then get the user by email
+      const email = await getEmailByVerificationToken(token);
+      if (!email) {
+        return res.status(400).json({ error: 'Invalid token.' });
+      }
+      user = await getUserByEmail(email);
+    } else if (email) {
+      user = await getUserByEmail(email);
+    } else {
+      return res.status(400).json({ error: 'User ID, token or email required.' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'Verification email could not be resent.' });
+    }
+
+    await sendEmailVerification(user.email, user.id);
     res.status(200).json({ message: 'Verification email sent!' })
   } catch (error) {
     console.error('Error resending verification email:', error)
