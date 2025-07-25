@@ -3,8 +3,10 @@ import {
   Box,
   Button,
   CircularProgress,
+  Input,
   Paper,
   Snackbar,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -13,16 +15,24 @@ import apiService from "../api/apiService";
 
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
+  const [id, setId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isValidEmail = (email: string | null) => /\S+@\S+\.\S+/.test(email ?? "");
 
   useEffect(() => {
+    const tokenParam = window.location.pathname.split("/").pop();
+    setToken(tokenParam && tokenParam !== "verify-email" ? tokenParam : null);
+    const userId = searchParams.get("uid");
+    setId(userId ?? null);
+    const emailParam = searchParams.get("email");
+    setEmail(emailParam ?? null);
+
     async function verifyEmail() {
-      const tokenParam = window.location.pathname.split("/").pop();
-      setToken(tokenParam ?? null);
 
       if (!tokenParam || tokenParam === "verify-email") {
         console.error("Token not found");
@@ -32,7 +42,7 @@ export function VerifyEmail() {
         if (result.error) {
           console.error("Email verification failed:", result.error);
           // Handle error appropriately
-          navigate("/signup");
+          // navigate("/signup");
         } else {
           console.log(result.message);
           if (result.message && !result.token) {
@@ -51,14 +61,16 @@ export function VerifyEmail() {
   }, []);
 
   const handleResendVerificationEmail = async () => {
-    const id = searchParams.get("uid");
-    if (!id) {
-      console.error("User ID not found in query parameters");
+    if (!id && !token && !email) {
+      console.error("No identifier provided for resend.");
       return;
     }
     setResendingEmail(true);
-    const result: { message: string } | { error: string } = await apiService.resendVerificationEmail(id);
+
+    const result = await apiService.resendVerificationEmail(id, token, email);
+
     setResendingEmail(false);
+    setEmail("");
     if ("error" in result) {
       console.error(result.error);
     } else {
@@ -99,6 +111,25 @@ export function VerifyEmail() {
         We have sent you an email with a verification link. Please click on the
         link to verify your email.
       </Typography>
+      {(!id && !token) && (
+        <TextField
+          type="email"
+          name="email"
+          label="Email"
+          value={email ?? ""}
+          size="small"
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{
+            width: "100%",
+            "& .MuiInputBase-input": {
+              fontSize: "0.8rem", // Font size for the input text
+            },
+            "& .MuiInputLabel-root": {
+              fontSize: "0.8rem", // Font size for the label text
+            },
+          }}
+        />
+      )}
       <Button
         variant="contained"
         color="primary"
@@ -107,6 +138,7 @@ export function VerifyEmail() {
             setShowSnackbar(true);
           });
         }}
+        disabled={resendingEmail || (!id && !token && !isValidEmail(email))}
         sx={{ fontSize: "0.8rem", width: "50%" }}
       >
         {resendingEmail ? (

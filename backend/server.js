@@ -44,7 +44,7 @@ const {
   changeForgotPassword
 } = require('./database/forgotPassword')
 const { getHistoryByUser } = require('./database/history')
-const { validateEmailVerificationToken, invalidateTokensByEmail } = require('./database/emailVerification')
+const { validateEmailVerificationToken, invalidateTokensByEmail, getEmailByVerificationToken } = require('./database/emailVerification')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -184,6 +184,9 @@ app.post('/resend-verification-email', async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: 'Verification email could not be resent.' });
+    }
+    if (user.is_verified) {
+      return res.status(400).json({ error: 'Email is already verified.' });
     }
 
     await sendEmailVerification(user.email, user.id);
