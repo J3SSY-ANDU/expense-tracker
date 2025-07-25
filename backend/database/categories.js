@@ -6,6 +6,7 @@ const dotenv = require('dotenv').config({
       : '.env.development'
 })
 const { v4: uuidv4 } = require('uuid')
+const { categoriesData } = require('./categoriesData')
 
 ;(async () => {
   await connectionPool.query(`
@@ -33,27 +34,45 @@ const createCategory = async (
   total_expenses,
   description
 ) => {
-  try {
-    if (await getCategoryByMonthYear(name, user_id, month, year)) {
-      console.log(`Category already exists.`)
-      return null
-    }
-    const id = uuidv4()
-    await connectionPool.query(
-      `INSERT INTO categories (id, user_id, name, month, year, total_expenses, description) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, user_id, name, month, year, total_expenses, description]
-    )
-    const category = await getCategoryById(id)
-    if (!category) {
-      console.log(`Failed. Try again.`)
-      return null
-    }
-    console.log('Category created successfully!')
-    return category
-  } catch (err) {
-    console.error(`Error creating category: ${err}`)
+  if (await getCategoryByMonthYear(name, user_id, month, year)) {
+    console.log(`Category already exists.`)
     return null
   }
+  const id = uuidv4()
+  await connectionPool.query(
+    `INSERT INTO categories (id, user_id, name, month, year, total_expenses, description) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, user_id, name, month, year, total_expenses, description]
+  )
+  const category = await getCategoryById(id)
+  if (!category) {
+    console.log(`Failed. Try again.`)
+    return null
+  }
+  console.log('Category created successfully!')
+  return category
+}
+
+const createDefaultCategories = async user_id => {
+  const date = new Date()
+  const month = date.getMonth() + 1
+  const year = date.getFullYear()
+  // Prepare values for bulk insert
+  const values = categoriesData.map(category => [
+    uuidv4(),
+    user_id,
+    category.name,
+    month,
+    year,
+    category.total_expenses,
+    category.description
+  ])
+  // Insert all categories in one query
+  await connectionPool.query(
+    `INSERT IGNORE INTO categories (id, user_id, name, month, year, total_expenses, description)
+     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
+    values.flat()
+  )
+  console.log('Default categories created successfully!')
 }
 
 const getCategoriesByUser = async user_id => {
@@ -197,6 +216,7 @@ const deleteCategory = async id => {
 
 module.exports = {
   createCategory,
+  createDefaultCategories,
   getCategoryById,
   getCategoryByName,
   getCategoriesByUser,

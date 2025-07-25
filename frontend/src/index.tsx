@@ -20,6 +20,7 @@ root.render(
       <Route path="/" element={<App />} />
       <Route path="/signup" element={<SignupForm />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPasswordForm />} />
       <Route

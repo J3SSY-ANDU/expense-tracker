@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer");
-const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv").config({
     path:
         process.env.NODE_ENV === "production"
@@ -8,6 +7,7 @@ const dotenv = require("dotenv").config({
 });
 const { getForgotPasswordToken } = require("./database/forgotPassword");
 const { getUserById } = require("./database/users");
+const { createEmailVerificationToken } = require("./database/emailVerification");
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -17,13 +17,11 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const sendEmailVerification = async (email, user_id) => {
+const sendEmailVerification = async (email) => {
     try {
-        const token = jwt.sign({ id: user_id, purpose: "verify_email" }, process.env.EMAIL_SECRET, {
-            expiresIn: "15m",
-        });
+        const token = await createEmailVerificationToken(email);
 
-        const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${token}`;
+        const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${token}`;
 
         const mailOptions = {
             from: process.env.EMAIL,
@@ -39,7 +37,6 @@ const sendEmailVerification = async (email, user_id) => {
 
         await transporter.sendMail(mailOptions);
         console.log("Email sent successfully!");
-        return token; // Return the token for further use
     } catch (err) {
         console.error(`Error sending email: ${err}`);
         throw err;

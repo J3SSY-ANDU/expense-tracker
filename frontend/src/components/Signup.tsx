@@ -104,7 +104,7 @@ export function SignupForm() {
       if ("user_id" in data && "emailSent" in data && data.emailSent) {
         setLoading(false);
         emptyFields();
-        navigate("/verify-email");
+        navigate("/verify-email?uid=" + data.user_id);
       } else if ("error" in data) {
         setError({ ...error, failed: data.error });
         setLoading(false);

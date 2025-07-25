@@ -15,8 +15,7 @@ import {
 } from "./expenseApi";
 import { FetchUserData, DeleteUser, ChangePassword, ChangeName } from "./userApi";
 import { SignUp } from "./signupApi";
-import { VerifyEmail } from "./verifyEmailApi";
-import { ResendVerificationEmail } from "./resendVerificationEmailApi";
+import { VerifyEmail, ResendVerificationEmail } from "./verifyEmailApi";
 import { ForgotPassword } from "./forgotPasswordApi";
 import { ResetForgotPassword } from "./resetForgotPassword";
 import { FetchHistoryData } from "./historyApi";

@@ -3,40 +3,55 @@ import {
   Box,
   Button,
   CircularProgress,
+  Input,
   Paper,
   Snackbar,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import apiService from "../api/apiService";
 
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
+  const [id, setId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [resendingEmail, setResendingEmail] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isValidEmail = (email: string | null) => /\S+@\S+\.\S+/.test(email ?? "");
 
   useEffect(() => {
-    async function verifyEmail() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenParam = urlParams.get("token");
-      setToken(tokenParam);
+    const tokenParam = window.location.pathname.split("/").pop();
+    setToken(tokenParam && tokenParam !== "verify-email" ? tokenParam : null);
+    const userId = searchParams.get("uid");
+    setId(userId ?? null);
+    const emailParam = searchParams.get("email");
+    setEmail(emailParam ?? null);
 
-      if (!tokenParam) {
+    async function verifyEmail() {
+
+      if (!tokenParam || tokenParam === "verify-email") {
         console.error("Token not found");
         return;
       } else if (tokenParam) {
-        const result = await apiService.verifyEmail(tokenParam);
+        const result: { message?: string; token?: string; error?: string } = await apiService.verifyEmail(tokenParam);
         if (result.error) {
           console.error("Email verification failed:", result.error);
-          navigate("/signup");
+          // Handle error appropriately
+          // navigate("/signup");
         } else {
-          console.log("Email verified successfully");
-          if (result.token) {
-            localStorage.setItem("authToken", result.token);
-            window.location.replace("/");
+          console.log(result.message);
+          if (result.message && !result.token) {
+            navigate("/login");
+          } else {
+            if (result.token) {
+              localStorage.setItem("authToken", result.token);
+              window.location.replace("/");
+            }
           }
         }
       }
@@ -44,6 +59,24 @@ export function VerifyEmail() {
 
     verifyEmail();
   }, []);
+
+  const handleResendVerificationEmail = async () => {
+    if (!id && !token && !email) {
+      console.error("No identifier provided for resend.");
+      return;
+    }
+    setResendingEmail(true);
+
+    const result = await apiService.resendVerificationEmail(id, token, email);
+
+    setResendingEmail(false);
+    setEmail("");
+    if ("error" in result) {
+      console.error(result.error);
+    } else {
+      console.log(result.message);
+    }
+  }
 
   return (
     <Paper
@@ -78,16 +111,34 @@ export function VerifyEmail() {
         We have sent you an email with a verification link. Please click on the
         link to verify your email.
       </Typography>
+      {(!id && !token) && (
+        <TextField
+          type="email"
+          name="email"
+          label="Email"
+          value={email ?? ""}
+          size="small"
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{
+            width: "100%",
+            "& .MuiInputBase-input": {
+              fontSize: "0.8rem", // Font size for the input text
+            },
+            "& .MuiInputLabel-root": {
+              fontSize: "0.8rem", // Font size for the label text
+            },
+          }}
+        />
+      )}
       <Button
         variant="contained"
         color="primary"
         onClick={() => {
-          setLoading(true);
-          apiService.resendVerificationEmail(token!).then(() => {
-            setResendingEmail(false);
+          handleResendVerificationEmail().then(() => {
             setShowSnackbar(true);
           });
         }}
+        disabled={resendingEmail || (!id && !token && !isValidEmail(email))}
         sx={{ fontSize: "0.8rem", width: "50%" }}
       >
         {resendingEmail ? (
@@ -98,8 +149,11 @@ export function VerifyEmail() {
       </Button>
       <Snackbar
         open={showSnackbar}
-        onClose={() => setShowSnackbar(false)}
         autoHideDuration={5000}
+        onClose={(event, reason) => {
+          if (reason === 'clickaway') return;
+          setShowSnackbar(false);
+        }}
       >
         <Alert
           onClose={() => setShowSnackbar(false)}

@@ -23,7 +23,6 @@ const {
   updatePassword
 } = require('./database/users')
 const {
-  getExpensesByUser,
   createExpense,
   deleteExpense,
   updateExpense,
@@ -32,20 +31,20 @@ const {
 } = require('./database/expenses')
 const {
   createCategory,
-  getCategoriesByUser,
   deleteCategory,
   updateCategoryDescription,
   updateCategoryName,
   getOrderedCategories,
-  getCategoryById
+  getCategoryById,
+  createDefaultCategories
 } = require('./database/categories')
-const { categoriesData } = require('./database/categoriesData')
 const { sendEmailVerification, forgotPasswordEmail } = require('./emails')
 const {
   createForgotPassword,
   changeForgotPassword
 } = require('./database/forgotPassword')
 const { getHistoryByUser } = require('./database/history')
+const { validateEmailVerificationToken, invalidateTokensByEmail, getEmailByVerificationToken } = require('./database/emailVerification')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -105,7 +104,7 @@ app.post('/process-signup', async (req, res) => {
     const { firstname, lastname, email, password } = req.body
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await createUser(firstname, lastname, email, hashedPassword)
-    await sendEmailVerification(user.email, user.id)
+    await sendEmailVerification(user.email)
     // EXCLUDE PASSWORD FROM RESPONSE
     res.status(200).json({ user_id: user.id, emailSent: true })
   } catch (error) {
@@ -121,39 +120,27 @@ app.post('/process-signup', async (req, res) => {
 })
 
 // Needs to be fixed
-app.get('/verify-email', async (req, res) => {
-  const { token } = req.query
-  let id
+app.get('/verify-email/:token', async (req, res) => {
+  const { token } = req.params
+  if (!token) {
+    return res.status(400).json({ error: 'Token is required' })
+  }
   try {
-    const decoded = jwt.verify(token, process.env.EMAIL_SECRET)
-    id = decoded.id
-    if (!id) {
-      return res.status(401).json({ error: 'INVALID_TOKEN' })
+    const email = await validateEmailVerificationToken(token);
+    if (!email) {
+      return res.status(401).json({ error: 'Invalid or expired token' })
     }
-    const user = await getUserById(id)
+    const user = await getUserByEmail(email);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' })
+      return res.status(404).json({ error: 'Verification email could not be sent' })
     }
     if (user.is_verified) {
-      return res.status(200).json({ message: 'Email already verified!' })
+      return res.status(200).json({ message: 'Email already verified! Please log in.' })
     } else {
-      await verifyUser(id)
-      const date = new Date()
-      const month = date.getMonth() + 1
-      const year = date.getFullYear()
-      // Wait for all categories to be created before continuing
-      await Promise.all(
-        categoriesData.map(category =>
-          createCategory(
-            category.name,
-            id,
-            month,
-            year,
-            category.total_expenses,
-            category.description
-          )
-        )
-      )
+      await verifyUser(user.id)
+      await invalidateTokensByEmail(email)
+      await createDefaultCategories(user.id)
+
       const authToken = jwt.sign(
         { id: user.id, purpose: 'authentication' },
         process.env.AUTH_SECRET,
@@ -167,18 +154,47 @@ app.get('/verify-email', async (req, res) => {
     }
   } catch (err) {
     console.error('Error verifying token or user:', err)
+    if (err.message === 'USER_VERIFICATION_FAILED') {
+      return res.status(500).json({ error: 'User verification failed!' })
+    }
     return res.status(401).json({ error: 'Email verification failed!' })
   }
 })
 
 // Needs to be fixed
 app.post('/resend-verification-email', async (req, res) => {
-  const user = await getUserById(id)
-  if (!user) {
-    return res.status(401).send('User not found!')
+  try {
+    const { id, token, email } = req.body;
+    let user;
+
+    if (id) {
+      user = await getUserById(id);
+    } else if (token) {
+      // Lookup email by token, even if expired, then get the user by email
+      const email = await getEmailByVerificationToken(token);
+      if (!email) {
+        return res.status(400).json({ error: 'Invalid token.' });
+      }
+      user = await getUserByEmail(email);
+    } else if (email) {
+      user = await getUserByEmail(email);
+    } else {
+      return res.status(400).json({ error: 'User ID, token or email required.' });
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'Verification email could not be resent.' });
+    }
+    if (user.is_verified) {
+      return res.status(400).json({ error: 'Email is already verified.' });
+    }
+
+    await sendEmailVerification(user.email, user.id);
+    res.status(200).json({ message: 'Verification email sent!' })
+  } catch (error) {
+    console.error('Error resending verification email:', error)
+    return res.status(500).json({ error: 'Failed to resend verification email.' })
   }
-  await sendEmailVerification(user.email, id)
-  res.status(200).send('Verification email sent!')
 })
 
 app.post('/process-login', async (req, res) => {

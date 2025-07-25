@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import apiService from "../api/apiService";
 import "../styles/login.css";
-import { User } from "../types";
 
 export function Login() {
   const [email, setEmail] = useState("");
