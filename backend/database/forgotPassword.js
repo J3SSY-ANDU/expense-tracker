@@ -11,7 +11,7 @@ const { updatePassword, getUserByEmail } = require("./users");
 
 (async () => {
   await connectionPool.query(`
-          CREATE TABLE IF NOT EXISTS forgotPassword (
+          CREATE TABLE IF NOT EXISTS forgot_password (
               email VARCHAR(100) NOT NULL,
               token VARCHAR(255) NOT NULL,
               expires_at DATETIME NOT NULL, 
@@ -31,7 +31,7 @@ const createForgotPassword = async (email) => {
     expires_at.setMinutes(expires_at.getMinutes() + 30);
     await connectionPool.query(
       `
-            INSERT INTO forgotPassword (email, token, expires_at) VALUES (?, ?, ?)
+            INSERT INTO forgot_password (email, token, expires_at) VALUES (?, ?, ?)
             `,
       [email, token, expires_at]
     );
@@ -45,7 +45,7 @@ const getForgotPasswordToken = async (email) => {
   try {
     const [result] = await connectionPool.query(
       `
-            SELECT token FROM forgotPassword WHERE email = ?
+            SELECT token FROM forgot_password WHERE email = ?
             `,
       [email]
     );
@@ -65,7 +65,7 @@ const changeForgotPassword = async (token, new_password) => {
     const email = decoded.email;
     const [result] = await connectionPool.query(
       `
-          SELECT * FROM forgotPassword WHERE email = ? AND token = ?
+          SELECT * FROM forgot_password WHERE email = ? AND token = ?
           `,
       [email, token]
     );
@@ -97,7 +97,7 @@ const deleteForgotPassword = async (email) => {
     }
     await connectionPool.query(
       `
-          DELETE FROM forgotPassword WHERE email = ?
+          DELETE FROM forgot_password WHERE email = ?
           `,
       [email]
     );
