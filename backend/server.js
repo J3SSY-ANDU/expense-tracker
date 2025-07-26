@@ -368,7 +368,7 @@ app.post('/add-category', authenticateToken, async (req, res) => {
       description
     )
     if (!category) {
-      return res.status(401).json({ error: 'Category creation failed!' })
+      return res.status(400).json({ error: 'Category creation failed!' })
     }
     res.status(201).json(category)
   } catch (error) {
