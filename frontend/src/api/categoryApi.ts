@@ -54,7 +54,8 @@ export async function AddCategory (
   category: NewCategory
 ): Promise<Category | { error: string }> {
   try {
-    const res = await api.post('/add-category', { category })
+    const { name, month, year, total_expenses, description } = category
+    const res = await api.post('/add-category', { name, month, year, total_expenses, description })
     return res.data
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present

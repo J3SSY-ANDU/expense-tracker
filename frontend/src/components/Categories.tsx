@@ -176,8 +176,8 @@ export function Categories ({
     setCategories(prev => {
       return prev
         ? prev.map(category =>
-            category.id === updatedCategory.id ? updatedCategory : category
-          )
+          category.id === updatedCategory.id ? updatedCategory : category
+        )
         : null
     })
     const activeElement = document.activeElement as HTMLElement
@@ -217,8 +217,8 @@ export function Categories ({
     setCategories(prev => {
       return prev
         ? prev.map(category =>
-            category.id === updatedCategory.id ? updatedCategory : category
-          )
+          category.id === updatedCategory.id ? updatedCategory : category
+        )
         : null
     })
     const activeElement = document.activeElement as HTMLElement
@@ -231,19 +231,20 @@ export function Categories ({
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return
     if (expenses) {
-      const expenseDeletions = expenses
+      // Collect IDs to delete
+      const expenseIdsToDelete = expenses
         .filter(expense => expense.category_id === selectedCategory.id)
-        .map(async expense => {
-          const deleted = await apiService.deleteExpense(expense.id)
-          if (deleted) {
-            setExpenses(prev => {
-              return prev ? prev.filter(exp => exp.id !== expense.id) : null
-            })
-          }
-        })
+        .map(expense => expense.id);
 
-      // Wait for all expense deletions to complete
-      await Promise.all(expenseDeletions)
+      // Delete all expenses in backend
+      await Promise.all(
+        expenseIdsToDelete.map(id => apiService.deleteExpense(id))
+      );
+
+      // Filter out all deleted expenses in one go
+      setExpenses(prev =>
+        prev ? prev.filter(exp => !expenseIdsToDelete.includes(exp.id)) : null
+      );
     }
     const isDeleted = await apiService.deleteCategory(selectedCategory.id)
     if (isDeleted && typeof isDeleted === 'object' && 'error' in isDeleted) {

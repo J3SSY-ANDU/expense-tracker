@@ -115,7 +115,7 @@ export function ExpensesTable({
       if (!createdExpense || "error" in createdExpense) {
         console.error("Error creating expense");
         // Add any additional error handling here if needed
-        
+
         setCreatingExpense(false);
         return;
       }
@@ -256,90 +256,92 @@ export function ExpensesTable({
 
   const handleDeleteExpense = async () => {
     if (!selectedExpense) return;
-    const isDeleted = await apiService.deleteExpense(selectedExpense.id);
-    if (isDeleted) {
-      // If mode is "category", call the handleDeleteExpenseByCategory function
-      // to update the expenses in the parent component
-      if (mode === "category" && handleDeleteExpenseByCategory) {
-        handleDeleteExpenseByCategory(selectedExpense.id);
-      }
-
-      const month = new Date(selectedExpense.date).getMonth() + 1;
-      const year = new Date(selectedExpense.date).getFullYear();
-
-      if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
-        setHistory((prev) => {
-          if (!prev) return prev;
-          // Find the MonthlyHistory for this month/year
-          const historyIndex = prev.findIndex(
-            (history) => history.month === month && history.year === year
-          );
-          if (historyIndex === -1) return prev;
-
-          const oldHistory = prev[historyIndex];
-
-          // Remove the expense from the expenses array
-          const newExpenses = oldHistory.expenses.filter(
-            (expense) => expense.id !== selectedExpense.id
-          );
-
-          // Update the category's total_expenses
-          const newCategories = oldHistory.categories.map((cat) =>
-            cat.id === selectedExpense.category_id
-              ? {
-                ...cat,
-                total_expenses: (
-                  Number(cat.total_expenses) - Number(selectedExpense.amount)
-                ).toFixed(2),
-              }
-              : cat
-          );
-
-          // Remove category if its total_expenses becomes 0
-          const filteredCategories = newCategories.filter(
-            (cat) => Number(cat.total_expenses) > 0
-          );
-
-          // Update total_expenses for the month
-          const newTotalExpenses =
-            Number(oldHistory.total_expenses) - Number(selectedExpense.amount);
-
-          const newHistory: MonthlyHistory = {
-            ...oldHistory,
-            expenses: newExpenses,
-            categories: filteredCategories,
-            total_expenses: newTotalExpenses,
-          };
-
-          // If there are no expenses left, remove the history entry
-          if (newExpenses.length === 0) {
-            return prev.filter((_, idx) => idx !== historyIndex);
-          }
-
-          // Otherwise, update the history entry
-          return prev.map((h, i) => (i === historyIndex ? newHistory : h));
-        });
-      }
-      setExpenses((prev) => {
-        return prev
-          ? prev.filter((expense) => expense.id !== selectedExpense.id)
-          : null;
-      });
-      setCategories((prev) => {
-        if (!prev) return prev;
-        const category = prev.find(
-          (category) => category.id === selectedExpense?.category_id
-        );
-        if (!category) return prev;
-        category.total_expenses = (
-          Number(category.total_expenses) - Number(selectedExpense.amount)
-        ).toFixed(2);
-        return prev;
-      });
-
-      setSelectedExpense(null);
-      setOpenExpense(false);
+    const isDeleted: void | { error: string } = await apiService.deleteExpense(selectedExpense.id);
+    if (isDeleted && "error" in isDeleted) {
+      console.error(`Error deleting expense: ${isDeleted.error}`);
+      return;
     }
+    // If mode is "category", call the handleDeleteExpenseByCategory function
+    // to update the expenses in the parent component
+    if (mode === "category" && handleDeleteExpenseByCategory) {
+      handleDeleteExpenseByCategory(selectedExpense.id);
+    }
+
+    const month = new Date(selectedExpense.date).getMonth() + 1;
+    const year = new Date(selectedExpense.date).getFullYear();
+
+    if (month !== new Date().getMonth() + 1 || year !== new Date().getFullYear()) {
+      setHistory((prev) => {
+        if (!prev) return prev;
+        // Find the MonthlyHistory for this month/year
+        const historyIndex = prev.findIndex(
+          (history) => history.month === month && history.year === year
+        );
+        if (historyIndex === -1) return prev;
+
+        const oldHistory = prev[historyIndex];
+
+        // Remove the expense from the expenses array
+        const newExpenses = oldHistory.expenses.filter(
+          (expense) => expense.id !== selectedExpense.id
+        );
+
+        // Update the category's total_expenses
+        const newCategories = oldHistory.categories.map((cat) =>
+          cat.id === selectedExpense.category_id
+            ? {
+              ...cat,
+              total_expenses: (
+                Number(cat.total_expenses) - Number(selectedExpense.amount)
+              ).toFixed(2),
+            }
+            : cat
+        );
+
+        // Remove category if its total_expenses becomes 0
+        const filteredCategories = newCategories.filter(
+          (cat) => Number(cat.total_expenses) > 0
+        );
+
+        // Update total_expenses for the month
+        const newTotalExpenses =
+          Number(oldHistory.total_expenses) - Number(selectedExpense.amount);
+
+        const newHistory: MonthlyHistory = {
+          ...oldHistory,
+          expenses: newExpenses,
+          categories: filteredCategories,
+          total_expenses: newTotalExpenses,
+        };
+
+        // If there are no expenses left, remove the history entry
+        if (newExpenses.length === 0) {
+          return prev.filter((_, idx) => idx !== historyIndex);
+        }
+
+        // Otherwise, update the history entry
+        return prev.map((h, i) => (i === historyIndex ? newHistory : h));
+      });
+    }
+    setExpenses((prev) => {
+      return prev
+        ? prev.filter((expense) => expense.id !== selectedExpense.id)
+        : null;
+    });
+    setCategories((prev) => {
+      if (!prev) return prev;
+      const category = prev.find(
+        (category) => category.id === selectedExpense?.category_id
+      );
+      if (!category) return prev;
+      category.total_expenses = (
+        Number(category.total_expenses) - Number(selectedExpense.amount)
+      ).toFixed(2);
+      return prev;
+    });
+
+    setSelectedExpense(null);
+    setOpenExpense(false);
   };
 
   return (

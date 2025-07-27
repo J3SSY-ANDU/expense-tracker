@@ -1,125 +1,114 @@
 # Expense Tracker
 
+A modern full-stack web application for managing personal finances. Expense Tracker empowers users to record, categorize, and analyze their spending with an intuitive interface and insightful visualizations.
+
+---
+
 ## Table of Contents
 - [Overview](#overview)
+- [How It Works](#how-it-works)
 - [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Deployment Status](#deployment-status)
-- [Future Enhancements](#future-enhancements)
+- [Technology Stack](#technology-stack)
+- [Live Deployment](#live-deployment)
+- [Planned Enhancements](#planned-enhancements)
+- [Contributing](#contributing)
 - [License](#license)
-- [Contributions](#contributions)
 
 ---
 
 ## Overview
-Expense Tracker is a **full-stack web application** designed to help users manage their personal finances. It provides a clean and intuitive interface to organize expenses into categories, track monthly spending, and gain insights into financial habits.
+
+**Expense Tracker** is designed to make personal finance management accessible and insightful. Whether you're budgeting for daily expenses or analyzing monthly trends, the app provides tools to help users stay on top of their financial goals. The platform emphasizes security, usability, and meaningful data presentation.
+
+---
+
+## How It Works
+
+1. **Account Creation & Email Verification**  
+   Users sign up with their email, receive a verification link, and activate their account for secure access.
+
+2. **Personalized Dashboard**  
+   After logging in, users are greeted with a dashboard summarizing their financial activity, including categorized expenses and monthly trends.
+
+3. **Expense & Category Management**  
+   - **Add Expenses:** Record spending with details such as amount, category, date, and notes.
+   - **Edit/Delete:** Update or remove expenses as needed.
+   - **Categories:** Organize expenses using default or custom categories for clearer insights.
+
+4. **Monthly History & Insights**  
+   View spending breakdowns by month and analyze patterns over time to make informed financial decisions.
+
+5. **Responsive Design**  
+   The interface is optimized for both desktop and mobile use, ensuring accessibility anywhere.
 
 ---
 
 ## Features
-- **User Authentication**: Secure login and registration with email verification.
-- **Expense Management**:
-  - Add, update, delete expenses.
-  - Categorize expenses.
-  - Track monthly expense summaries.
-- **Category Management**: Organize spending into custom categories.
-- **Monthly History**: View expenses grouped by month for detailed analysis.
-- **Responsive Design**: Works seamlessly on desktops and mobile devices.
+
+- **Secure User Authentication**  
+  Email/password sign-up with email verification for enhanced security.
+
+- **Expense Tracking**  
+  Log, edit, and delete expenses with full control and flexibility.
+
+- **Category Management**  
+  Use built-in or custom categories to organize your spending.
+
+- **Monthly Summaries**  
+  Instantly see how much you've spent and in which categories each month.
+
+- **Historical Analysis**  
+  Browse previous months' data to identify trends and adjust habits.
+
+- **User-Friendly Interface**  
+  Clean, intuitive design using Material-UI for a seamless experience.
 
 ---
 
-## Technologies Used
-### Frontend
-- **React**: For building a responsive and dynamic user interface.
-- **MUI (Material-UI)**: For styled components and consistent design.
-  
-### Backend
-- **Node.js**: Server runtime environment.
-- **Express.js**: Web framework for API routing.
-- **MySQL**: Relational database for storing user and expense data.
-- **jsonwebtoken**: For secure user authentication and session management.
-- **bcrypt**: For password hashing.
-- **dotenv**: For environment variable management.
+## Technology Stack
+
+**Frontend:**  
+- React  
+- Material-UI (MUI)
+
+**Backend:**  
+- Node.js  
+- Express.js  
+- MySQL  
+- JWT & bcrypt for authentication and security
+
+**DevOps & Hosting:**  
+- **Frontend:** [Vercel](https://vercel.com)  
+- **Backend:** [Render](https://render.com)  
+- **Database:** [Railway](https://railway.app)
 
 ---
 
-## Installation
-Follow these steps to set up the project locally:
+## Live Deployment
 
-### Prerequisites
-- **Node.js** (v18 or later)
-- **MySQL** database
+- **Frontend:** [Expense Tracker on Vercel](https://expense-tracker-gules-pi.vercel.app)
+- **Backend API:** Hosted on Render
 
-### Steps
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/expense-tracker.git
-   cd expense-tracker
-   ```
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Set up environment variables: Create a .env file in the root directory with the following**:
-   ```env
-   DB_HOST=your-db-host
-   DB_USER=your-db-username
-   DB_PASSWORD=your-db-password
-   DB_NAME=your-database-name
-   SESSION_SECRET=your-session-secret
-   ```
-4. **Run the application locally**:
-   - **Backend**:
-   ```bash
-   node server.js
-   ```
-   - **Frontend**:
-   ```bash
-   npm start
-   ```
-5. **Access the app: Visit http://localhost:4000 (or the port configured in .env).**
+---
 
-## Usage
-1. **Sign Up**:
-   - Register a new account with email verification.
-2. **Log In**:
-   - Access your dashboard to manage expenses.
-3. **Manage Expenses**:
-   - Add, edit, or delete expenses by category.
-4. **View History**:
-   - Explore monthly transaction summaries.
-5. **Track Categories**:
-   - Organize and monitor total spending by category.
-  
-## API Endpoints
-### User Endpoints
-  - POST `/process-signup`: Create a new user.
-  - POST `/process-login`: Log in to the system.
-### Expense Endpoints
-  - GET `/all-expenses`: Fetch all expenses for a user.
-  - POST `/create-expense`: Add a new expense.
-  - POST `/update-expense-name`: Update the name of an expense.
-  - POST `/delete-expense`: Remove an expense.
-### Category Endpoints
-  - GET `/all-categories`: Fetch all categories for a user.
-  - POST `/add-category`: Create a new category.
-### History Endpoints
-  - GET `/history`: Fetch the history of expenses by month.
+## Planned Enhancements
 
-## Deployment Status
-### Local Deployment
-The application is fully functional locally. It uses Node.js for the backend, MySQL as the database, and React for the frontend.
-### AWS Deployment
-The AWS deployment is currently in progress. The backend will be hosted using AWS Elastic Beanstalk, and the MySQL database will be set up on Amazon RDS. Static assets may also be delivered through AWS S3 and CloudFront.
+- **Visual Analytics**: Integrate interactive charts for spending overview and trends.
+- **Budgeting Tools**: Allow users to set and track monthly budgets for each category.
+- **Recurring Expenses**: Support for automatic logging of regular expenses.
+- **Dark Mode**: Theme toggle for enhanced accessibility and appearance.
+- **Improved Notifications**: Email or in-app notifications for budget limits, upcoming bills, etc.
 
-## Future Enhancements
-  - Complete AWS deployment for global accessibility.
+---
+
+## Contributing
+
+Contributions are welcome! If you have suggestions or want to help with a feature, feel free to open an issue or submit a pull request.  
+For major changes, please open a discussion first to talk about what you would like to change.
+
+---
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/J3SSY-ANDU/expense-tracker?tab=MIT-1-ov-file) file for details.
 
-## Contributions
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/J3SSY-ANDU/expense-tracker/issues) or submit a pull request.   
+This project is licensed under the MIT License.  
+See the [LICENSE](./LICENSE) file for details.
