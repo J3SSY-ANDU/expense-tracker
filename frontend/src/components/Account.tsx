@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { User } from "../types";
 import { useState } from "react";
-import apiService, { api } from "../api/apiService";
+import apiService from "../api/apiService";
 
 export function Account({
   user,
@@ -65,6 +65,10 @@ export function Account({
       setConfirmPassword("");
     }
   };
+
+  if (!user) {
+    return <div>Loading...</div>; // or a loading state
+  }
 
   return (
     <Box sx={{ display: "flex", justifyContent: "right", gap: "1rem" }}>

@@ -1,15 +1,13 @@
-import "./App.css";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import { Category, Expense, User, History as MonthlyHistory } from "./types";
 import { useNavigate } from "react-router-dom";
 import { Categories, ExpensesTable, Account, History } from "./components";
-import expense_tracker from "./expense-tracker.svg";
+// import expense_tracker from "./expense-tracker.svg";
 import apiService from "./api/apiService";
 
-export default function App() {
-  const [user, setUser] = useState<User | null>(null);
+export default function Expenses() {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
   const [history, setHistory] = useState<MonthlyHistory[] | null>(null);
@@ -24,20 +22,18 @@ export default function App() {
       setErrors(null);
       try {
         // Fetch all data
-        const [userData, categoriesData, expensesData, historyData] = await Promise.all([
-          apiService.getUserData(),
+        const [categoriesData, expensesData, historyData] = await Promise.all([
           apiService.getCategoriesData(),
           apiService.getExpensesData(),
           apiService.getHistoryData()
         ]);
   
-        if ((!userData || "error" in userData) || (!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData)) {
+        if ((!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData)) {
           setErrors("Failed to fetch data.");
           navigate("/login");
           return;
         }
   
-        setUser(userData);
         setCategories(categoriesData);
         setExpenses(expensesData);
         setHistory(historyData);
@@ -94,13 +90,12 @@ export default function App() {
     <Box
       className="App"
       sx={{
-        padding: "2rem 4rem",
+        paddingX: "4rem",
         display: "flex",
         flexDirection: "column",
         gap: "3rem",
       }}
     >
-      <Account user={user} setUser={setUser} />
       {/* <Box
         sx={{
           display: "flex",
@@ -114,7 +109,7 @@ export default function App() {
           Welcome to my Expense Tracker Project!
         </Typography>
       </Box> */}
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -130,9 +125,8 @@ export default function App() {
         <Typography fontSize={32} fontWeight={"bold"}>
           Expense Tracker
         </Typography>
-      </Box>
+      </Box> */}
       <Categories
-        user={user}
         categories={categories}
         setCategories={setCategories}
         expenses={expenses}
@@ -141,7 +135,6 @@ export default function App() {
         handleUpdateData={handleUpdateData}
       />
       <ExpensesTable
-        user={user}
         expenses={expenses}
         setExpenses={setExpenses}
         categories={categories}
@@ -151,7 +144,7 @@ export default function App() {
         mode="monthly"
         title={"Monthly Expenses"}
       />
-      <History history={history} setHistory={setHistory} user={user} handleUpdateData={handleUpdateData} />
+      <History history={history} setHistory={setHistory} handleUpdateData={handleUpdateData} />
     </Box>
   );
 }
