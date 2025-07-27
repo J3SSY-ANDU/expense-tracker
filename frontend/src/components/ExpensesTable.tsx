@@ -13,7 +13,6 @@ import { useState, useEffect } from "react";
 import {
   Category,
   Expense,
-  User,
   NewExpense,
   History as MonthlyHistory,
 } from "../types";
@@ -24,7 +23,6 @@ import { NewExpenseCard } from "./NewExpenseCard";
 
 type ExpenseTableModeValues = "monthly" | "history" | "category";
 export function ExpensesTable({
-  user,
   expenses,
   setExpenses,
   categories,
@@ -35,7 +33,6 @@ export function ExpensesTable({
   handleDeleteExpenseByCategory, // keep in props for now, but will only use if mode === "category"
   handleUpdateData, // Optional prop for updating history
 }: {
-  user: User | null;
   expenses: Expense[] | null;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
   categories: Category[] | null;
@@ -93,11 +90,6 @@ export function ExpensesTable({
 
   const handleSave = async () => {
     setCreatingExpense(true);
-    if (!user) {
-      console.error("User not found");
-      setNewExpense(false);
-      return;
-    }
 
     const newExpenseData: NewExpense = {
       name: newExpenseName,

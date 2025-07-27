@@ -1,16 +1,14 @@
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import { Category, Expense, History as MonthlyHistory, User } from "../types";
+import { Category, Expense, History as MonthlyHistory } from "../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 
 export function History({
-  user,
   history,
   setHistory,
   handleUpdateData,
 }: {
-  user: User | null;
   history: MonthlyHistory[] | null;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
   handleUpdateData: (
@@ -86,7 +84,6 @@ export function History({
             <AccordionDetails>
               {!loading ? (
                 <ExpensesTable
-                  user={user}
                   expenses={expenses}
                   setExpenses={setExpenses}
                   categories={categories}

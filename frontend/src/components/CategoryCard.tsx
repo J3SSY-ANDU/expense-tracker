@@ -14,13 +14,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ExpensesTable } from "./ExpensesTable";
 import { useState } from "react";
-import { Category, Expense, User, History as MonthlyHistory } from "../types";
+import { Category, Expense, History as MonthlyHistory } from "../types";
 
 export function CategoryCard({
   newExpensesByCategory,
   setNewExpensesByCategory,
   setExpenses,
-  user,
   categories,
   setCategories,
   setHistory,
@@ -38,7 +37,6 @@ export function CategoryCard({
     React.SetStateAction<Expense[] | null>
   >;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
-  user: User | null;
   categories: Category[] | null;
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
@@ -158,7 +156,6 @@ export function CategoryCard({
           </Box>
           {newExpensesByCategory && newExpensesByCategory.length > 0 && (
             <ExpensesTable
-              user={user}
               expenses={newExpensesByCategory}
               setExpenses={setNewExpensesByCategory}
               handleDeleteExpenseByCategory={

@@ -1,7 +1,6 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
+import Expenses from "./Expenses";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import {
   SignupForm,
@@ -10,6 +9,10 @@ import {
   ForgotPasswordForm,
   ResetForgotPasswordForm,
 } from "./components";
+import Layout from "./Layout";
+import Dashboard from "./Dashboard";
+import Stats from "./Stats";
+import Settings from "./Settings";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -17,7 +20,6 @@ const root = ReactDOM.createRoot(
 root.render(
   <Router>
     <Routes>
-      <Route path="/" element={<App />} />
       <Route path="/signup" element={<SignupForm />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
@@ -27,6 +29,12 @@ root.render(
         path="/reset-forgot-password"
         element={<ResetForgotPasswordForm />}
       />
+      <Route element={<Layout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/expenses" element={<Expenses />} />
+        <Route path="/stats" element={<Stats />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
       <Route path="*" element={<h1>Not Found</h1>} />
     </Routes>
   </Router>

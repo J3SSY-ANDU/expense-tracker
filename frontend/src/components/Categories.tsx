@@ -10,7 +10,6 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import {
   Category,
   NewCategory,
-  User,
   Expense,
   History as MonthlyHistory
 } from '../types'
@@ -18,7 +17,6 @@ import apiService from '../api/apiService'
 import { CategoryCard } from './index'
 
 export function Categories ({
-  user,
   categories,
   setCategories,
   expenses,
@@ -26,7 +24,6 @@ export function Categories ({
   setHistory,
   handleUpdateData
 }: {
-  user: User | null
   categories: Category[] | null
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>
   expenses: Expense[] | null
@@ -87,9 +84,6 @@ export function Categories ({
   }, [newExpensesByCategory])
 
   const handleSaveCategory = useCallback(async () => {
-    if (!user) {
-      return
-    }
     const newCategoryData: NewCategory = {
       name: newCategoryName,
       month: new Date().getMonth() + 1,
@@ -116,7 +110,7 @@ export function Categories ({
       setNewCategory(false)
       setNewCategoryName('')
     }
-  }, [newCategoryName, user, setCategories])
+  }, [newCategoryName, setCategories])
 
   useEffect(() => {
     if (categories) {
@@ -351,7 +345,6 @@ export function Categories ({
           newExpensesByCategory={newExpensesByCategory}
           setNewExpensesByCategory={setNewExpensesByCategory}
           setExpenses={setExpenses}
-          user={user}
           categories={categories}
           setCategories={setCategories}
           setHistory={setHistory}
