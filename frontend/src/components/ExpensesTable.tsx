@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import {
   Category,
   Expense,
+  ExampleExpense,
   NewExpense,
   History as MonthlyHistory,
 } from "../types";
@@ -20,6 +21,80 @@ import { Dayjs } from "dayjs";
 import apiService from "../api/apiService";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
+import Tooltip from '@mui/material/Tooltip';
+
+export const exampleExpenses: ExampleExpense[] = [
+  {
+    name: "Grocery Shopping",
+    amount: "54.99",
+    category_name: "Food & Groceries",
+    date: new Date("07/01/2025"),
+    notes: "Weekly groceries at supermarket",
+  },
+  {
+    name: "Electricity Bill",
+    amount: "82.50",
+    category_name: "Bills & Utilities",
+    date: new Date("07/02/2025"),
+    notes: "Monthly power bill",
+  },
+  {
+    name: "Netflix Subscription",
+    amount: "15.99",
+    category_name: "Entertainment",
+    date: new Date("07/05/2025"),
+    notes: "Streaming service",
+  },
+  {
+    name: "Bus Pass",
+    amount: "40.00",
+    category_name: "Transportation",
+    date: new Date("07/01/2025"),
+    notes: "Monthly city bus pass",
+  },
+  {
+    name: "Gym Membership",
+    amount: "29.99",
+    category_name: "Health & Fitness",
+    date: new Date("07/10/2025"),
+    notes: "Fitness club fee",
+  },
+  {
+    name: "Lunch at Cafe",
+    amount: "12.75",
+    category_name: "Food & Groceries",
+    date: new Date("07/21/2025"),
+    notes: "Sandwich and coffee",
+  },
+  {
+    name: "Movie Night",
+    amount: "18.00",
+    category_name: "Entertainment",
+    date: new Date("07/12/2025"),
+    notes: "Cinema ticket",
+  },
+  {
+    name: "Water Bill",
+    amount: "23.60",
+    category_name: "Bills & Utilities",
+    date: new Date("07/07/2025"),
+    notes: "Monthly water service",
+  },
+  {
+    name: "School Supplies",
+    amount: "37.20",
+    category_name: "Education",
+    date: new Date("07/09/2025"),
+    notes: "Notebooks and pens",
+  },
+  {
+    name: "Taxi Ride",
+    amount: "16.50",
+    category_name: "Transportation",
+    date: new Date("07/18/2025"),
+    notes: "Airport to home",
+  },
+];
 
 type ExpenseTableModeValues = "monthly" | "history" | "category";
 export function ExpensesTable({
@@ -58,6 +133,7 @@ export function ExpensesTable({
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null); // State for selected expense
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // State for save loading
+  const [exampleExpense, setExampleExpense] = useState<ExampleExpense | null>(null);
 
   useEffect(() => {
     if (categories && expenses) {
@@ -72,7 +148,12 @@ export function ExpensesTable({
           }));
         }
       }
+      setExampleExpense(null);
       setLoading(false);
+    }
+
+    if (expenses?.length === 0) {
+      setExampleExpense(exampleExpenses[Math.floor(Math.random() * exampleExpenses.length)]);
     }
   }, [categories, expenses]);
 
@@ -398,6 +479,34 @@ export function ExpensesTable({
                 <TableCell>{expense.notes}</TableCell>
               </TableRow>
             ))}
+            {exampleExpense && (
+              <Tooltip title="This is just an example expense">
+                <TableRow
+                  key={exampleExpense.name}
+                  sx={{
+                    fontStyle: "italic", color: "#6B7A90", opacity: 0.8,
+                  }}
+                >
+                  <TableCell
+                    sx={{
+                      display: "flex",
+                      gap: "3rem",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      color: "#6B7A90"
+                    }}
+                  >
+                    {exampleExpense.name}
+                  </TableCell>
+                  <TableCell sx={{ color: "#6B7A90" }}>${exampleExpense.amount}</TableCell>
+                  <TableCell sx={{ color: "#6B7A90" }}>{exampleExpense.category_name}</TableCell>
+                  <TableCell sx={{ color: "#6B7A90" }}>
+                    {new Date(exampleExpense.date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell sx={{ color: "#6B7A90" }}>{exampleExpense.notes}</TableCell>
+                </TableRow>
+              </Tooltip>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
