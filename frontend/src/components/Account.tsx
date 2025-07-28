@@ -92,7 +92,7 @@ export function Account({
             {user?.firstname[0]}
           </Typography>
         </Box>
-        <Typography variant="h6" fontSize={20}>
+        <Typography variant="h6" fontSize={20} color="#ffffff">
           {user?.fullname}
         </Typography>
         <Paper

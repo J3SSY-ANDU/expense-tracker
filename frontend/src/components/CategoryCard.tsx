@@ -13,10 +13,11 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ExpensesTable } from "./ExpensesTable";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { Category, Expense, History as MonthlyHistory } from "../types";
 
 export function CategoryCard({
+  categoryIcon,
   newExpensesByCategory,
   setNewExpensesByCategory,
   setExpenses,
@@ -32,6 +33,7 @@ export function CategoryCard({
   handleDeleteCategory,
   handleUpdateData,
 }: {
+  categoryIcon: (categoryName: string, size?: number) => JSX.Element | null;
   newExpensesByCategory: Expense[] | null;
   setNewExpensesByCategory: React.Dispatch<
     React.SetStateAction<Expense[] | null>
@@ -85,8 +87,25 @@ export function CategoryCard({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              marginBottom: "1rem",
             }}
           >
+            {categoryIcon(selectedCategory?.name ?? "", 48)}
+            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer", alignSelf: "start" }}
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <DeleteIcon
+                sx={{ fontSize: 20 }}
+                color="action"
+              />
+              <Typography
+                fontWeight={"600"}
+              >
+                Delete
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <input
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSelectedCategory((prev) => {
@@ -115,17 +134,18 @@ export function CategoryCard({
               title="name"
               placeholder="Add name..."
             />
-            <DeleteIcon
-              onClick={() => setShowDeleteDialog(true)}
-              color="action"
-              sx={{ cursor: "pointer" }}
-            />
-          </Box>
-          <Typography fontSize={16} fontWeight={"400"}>
-            Total expenses: ${selectedCategory?.total_expenses}
-          </Typography>
-          <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <Typography>Description: </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography fontSize={16} fontWeight={"400"} sx={{ minWidth: "120px" }}>
+                Total expenses
+              </Typography>
+              <span style={{
+                width: "100%",
+                backgroundColor: "#d3d3d3",
+                padding: "0.3rem",
+                borderRadius: "3px",
+              }}>${selectedCategory?.total_expenses}
+              </span>
+            </Box>
             <input
               type="text"
               title="description"
@@ -147,10 +167,15 @@ export function CategoryCard({
               }}
               style={{
                 all: "unset",
+                color: "#6B7A90",
                 width: "100%",
-                backgroundColor: "#d3d3d3",
-                padding: "0.3rem",
-                borderRadius: "3px",
+                fontWeight: "400",
+                fontStyle: "italic",
+                fontSize: "1rem",
+                borderRadius: "4px",
+                padding: "0.3rem 0.5rem",
+                cursor: "text",
+                marginBottom: "1rem",
               }}
             />
           </Box>

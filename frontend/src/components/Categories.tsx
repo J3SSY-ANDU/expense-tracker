@@ -1,3 +1,4 @@
+import React, { JSX } from 'react'
 import {
   Box,
   Typography,
@@ -15,8 +16,16 @@ import {
 } from '../types'
 import apiService from '../api/apiService'
 import { CategoryCard } from './index'
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import SchoolIcon from '@mui/icons-material/School'
+import MovieIcon from '@mui/icons-material/Movie'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag'
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus'
+import WorkIcon from '@mui/icons-material/Work'
 
-export function Categories ({
+export function Categories({
   categories,
   setCategories,
   expenses,
@@ -42,6 +51,30 @@ export function Categories ({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   ) // State for selected category
+
+  const categoryIcon = (categoryName: string, size?: number): JSX.Element | null => {
+    switch (categoryName.trim().toLocaleLowerCase().replace(/\s/g, '_')) {
+      case 'bills_&_utilities':
+        return <WaterDropIcon sx={{ fontSize: size || 24 }} />
+      case 'education':
+        return <SchoolIcon sx={{ fontSize: size || 24 }} />
+      case 'entertainment':
+        return <MovieIcon sx={{ fontSize: size || 24 }} />
+      case 'food_&_groceries':
+        return <RestaurantIcon sx={{ fontSize: size || 24 }} />
+      case 'health_&_fitness':
+        return <MonitorHeartIcon sx={{ fontSize: size || 24 }} />
+      case 'shopping':
+        return <ShoppingBagIcon sx={{ fontSize: size || 24 }} />
+      case 'transportation':
+        return <DirectionsBusIcon sx={{ fontSize: size || 24 }} />
+      case 'travel':
+        return <WorkIcon sx={{ fontSize: size || 24 }} />
+      default:
+        return null
+    }
+  }
+
   useEffect(() => {
     if (selectedCategory) {
       const filteredExpenses =
@@ -298,13 +331,16 @@ export function Categories ({
                   }}
                 >
                   <CardContent>
-                    <Typography
-                      fontSize={16}
-                      fontWeight={'600'}
-                      marginBottom={'1rem'}
-                    >
-                      {category.name}
-                    </Typography>
+                    <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                      {categoryIcon(category.name)}
+                      <Typography
+                        fontSize={16}
+                        fontWeight={'600'}
+                        marginBottom={'1rem'}
+                      >
+                        {category.name}
+                      </Typography>
+                    </Box>
                     <Typography fontSize={14} fontWeight={'400'}>
                       ${category.total_expenses}
                     </Typography>
@@ -342,6 +378,7 @@ export function Categories ({
           )}
         </Grid2>
         <CategoryCard
+          categoryIcon={categoryIcon}
           newExpensesByCategory={newExpensesByCategory}
           setNewExpensesByCategory={setNewExpensesByCategory}
           setExpenses={setExpenses}

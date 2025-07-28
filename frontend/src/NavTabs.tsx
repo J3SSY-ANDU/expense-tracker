@@ -28,10 +28,23 @@ export default function NavTabs() {
       variant="fullWidth"
       indicatorColor="primary"
       textColor="primary"
-      sx={{ width: '40%', minWidth: 600 }} // Add some space below tabs
+      sx={{ width: '40%', minWidth: 600,
+        '& .MuiTabs-indicator': {
+          backgroundColor: '#50A9E3', // Change indicator (bottom border) color
+        }
+      }}
     >
-      {tabConfig.map(tab => (
-        <Tab key={tab.path} label={tab.label} />
+      {tabConfig.map((tab, idx) => (
+        <Tab
+          key={tab.path}
+          label={tab.label}
+          sx={{
+            color: '#ffffff',
+            '&.Mui-selected': {
+              color: '#ffffff', // Change selected tab text color
+            },
+          }}
+        />
       ))}
     </Tabs>
   );

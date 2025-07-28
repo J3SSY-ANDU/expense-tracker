@@ -33,7 +33,7 @@ export default function Layout() {
 
     return (
         <div>
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem 4rem 1rem 4rem', marginBottom: '3rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem 4rem 1rem 4rem', marginBottom: '3rem', background: '#1E2A38' }}>
                 <Account user={user} setUser={setUser} />
                 <NavTabs />
             </div>
