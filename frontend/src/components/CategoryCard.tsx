@@ -91,7 +91,7 @@ export function CategoryCard({
             }}
           >
             {categoryIcon(selectedCategory?.name ?? "", 48)}
-            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer", alignSelf: "start" }}
+            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
               onClick={() => setShowDeleteDialog(true)}
             >
               <DeleteIcon

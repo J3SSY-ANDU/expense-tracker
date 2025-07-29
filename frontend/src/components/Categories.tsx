@@ -331,29 +331,40 @@ export function Categories({
               <Grid2 key={category.id} size={3}>
                 <Card
                   sx={{
-                    background: '#f5f5f5',
-                    cursor: 'pointer'
+                  background: openCategory && selectedCategory?.id === category.id
+                    ? '#e0e0e0'
+                    : '#f5f5f5',
+                  cursor: 'pointer',
+                  borderRadius: '12px',
+                  transition: 'background-color 0.3s, box-shadow 0.3s, transform 0.3s',
+                  "&:hover": {
+                    boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
+                    transform: 'scale(1.01)',
+                  },
+                  "&:active": {
+                    backgroundColor: '#e0e0e0',
+                  }
                   }}
                   elevation={0}
                   onClick={() => {
-                    setOpenCategory(true)
-                    setSelectedCategory(category)
+                  setOpenCategory(true)
+                  setSelectedCategory(category)
                   }}
                 >
                   <CardContent>
-                    <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-                      {categoryIcon(category.name)}
-                      <Typography
-                        fontSize={16}
-                        fontWeight={'600'}
-                        marginBottom={'1rem'}
-                      >
-                        {category.name}
-                      </Typography>
-                    </Box>
-                    <Typography fontSize={14} fontWeight={'400'}>
-                      ${category.total_expenses}
+                  <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                    {categoryIcon(category.name)}
+                    <Typography
+                    fontSize={16}
+                    fontWeight={'600'}
+                    marginBottom={'1rem'}
+                    >
+                    {category.name}
                     </Typography>
+                  </Box>
+                  <Typography fontSize={14} fontWeight={'400'}>
+                    ${category.total_expenses}
+                  </Typography>
                   </CardContent>
                 </Card>
               </Grid2>
@@ -361,7 +372,7 @@ export function Categories({
           })}
           {newCategory && (
             <Grid2 size={3}>
-              <Card sx={{ background: '#f5f5f5' }}>
+              <Card sx={{ background: '#f5f5f5', borderRadius: '12px' }}>
                 <CardContent>
                   <input
                     type='text'

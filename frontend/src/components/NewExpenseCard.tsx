@@ -11,6 +11,8 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
+  Box,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -59,67 +61,79 @@ export function NewExpenseCard({
     >
       <Card
         sx={{
-          width: "400px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
+          width: "50%",
+          padding: '1rem',
+          overflow: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <CardContent>
-          <TextField
-            label="Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newExpenseName}
-            onChange={(e) => setNewExpenseName(e.target.value)}
-          />
-          <FormControl fullWidth variant="filled">
-            <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
-            <FilledInput
-              value={newExpenseAmount}
-              onChange={(e) => setNewExpenseAmount(e.target.value)}
-              id="filled-adornment-amount"
-              startAdornment={
-                <InputAdornment position="start">$</InputAdornment>
-              }
-            />
-          </FormControl>
-            <FormControl fullWidth>
-            <InputLabel id="category">Select Category</InputLabel>
-            <Select
-              fullWidth
-              labelId="category"
-              id="category"
+        <CardContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.5rem",
+          }}
+        >
+          <Typography sx={{ width: "100%", fontSize: "2rem", fontWeight: "700", padding: 0, margin: 0 }}>
+            New Expense
+          </Typography>
+          <Box sx={{ display: "flex", gap: "1rem" }}>
+            <TextField
+              label="Name"
               variant="outlined"
-              value={selectedCategory?.id || ""}
-              label="Select Category"
-              onChange={(e) => {
-              const selectedId = e.target.value;
-              const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
-              setSelectedCategory(selectedCat);
-            }}
-            >
-              {categories?.map((category) => (
-              <MenuItem
-                key={category.id}
-                value={category.id}
-              >
-                {category.name}
-              </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date"
-              value={selectedDate}
-              onChange={(newValue) => setSelectedDate(newValue)}
-              maxDate={dayjs()}
-              slotProps={{ textField: { fullWidth: true } }}
+              fullWidth
+              margin="normal"
+              value={newExpenseName}
+              onChange={(e) => setNewExpenseName(e.target.value)}
             />
-          </LocalizationProvider>
+            <FormControl fullWidth variant="filled" sx={{ marginTop: "1rem" }}>
+              <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
+              <FilledInput
+                value={newExpenseAmount}
+                onChange={(e) => setNewExpenseAmount(e.target.value)}
+                id="filled-adornment-amount"
+                startAdornment={
+                  <InputAdornment position="start">$</InputAdornment>
+                }
+              />
+            </FormControl>
+          </Box>
+          <Box sx={{ display: "flex", gap: "1rem" }}>
+            <FormControl fullWidth>
+              <InputLabel id="category">Select Category</InputLabel>
+              <Select
+                fullWidth
+                labelId="category"
+                id="category"
+                variant="outlined"
+                value={selectedCategory?.id || ""}
+                label="Select Category"
+                onChange={(e) => {
+                  const selectedId = e.target.value;
+                  const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
+                  setSelectedCategory(selectedCat);
+                }}
+              >
+                {categories?.map((category) => (
+                  <MenuItem
+                    key={category.id}
+                    value={category.id}
+                  >
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Date"
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+                maxDate={dayjs()}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          </Box>
           <TextField
             label="Notes"
             variant="outlined"
@@ -128,13 +142,29 @@ export function NewExpenseCard({
             value={newExpenseNotes}
             onChange={(e) => setNewExpenseNotes(e.target.value)}
           />
-          <Button variant="contained" color="primary" onClick={handleSave}>
-            {creatingExpense ? (
-              <CircularProgress size={20} sx={{ color: "white" }} />
-            ) : (
-              "Save"
-            )}
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: '1rem', marginTop: "5rem", paddingTop: "1rem", borderTop: "1px solid #d3d3d3" }}>
+            <Button variant="outlined" color="primary" onClick={() => {
+              setNewExpense(false);
+              setNewExpenseName("");
+              setNewExpenseAmount("");
+              setSelectedCategory(null);
+              setSelectedDate(null);
+              setNewExpenseNotes("");
+            }}>
+              Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleSave}
+            >
+              {creatingExpense ? (
+                <CircularProgress size={20} />
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     </Backdrop>
