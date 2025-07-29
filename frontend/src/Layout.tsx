@@ -29,6 +29,7 @@ export default function Layout() {
 
                 if ((!userData || "error" in userData) || (!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData)) {
                     setErrors("Failed to fetch data.");
+                    navigate("/login");
                     return;
                 }
                 
@@ -49,8 +50,8 @@ export default function Layout() {
     }, []);
 
     return (
-        <div>
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem 4rem 1rem 4rem', marginBottom: '3rem', background: '#1E2A38' }}>
+        <div style={{ paddingBottom: '5rem'}}>
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem 4rem 1rem 4rem', marginBottom: '3rem', background: '#1E2A38', gap: '1rem' }}>
                 <Account user={user} setUser={setUser} />
                 <NavTabs />
             </div>

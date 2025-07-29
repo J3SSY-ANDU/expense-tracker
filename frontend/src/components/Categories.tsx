@@ -24,6 +24,8 @@ import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag'
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus'
 import WorkIcon from '@mui/icons-material/Work'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 export function Categories({
   categories,
@@ -51,6 +53,11 @@ export function Categories({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   ) // State for selected category
+  const MAX_VISIBLE_CATEGORIES = 8;
+  const [showAll, setShowAll] = useState<boolean>(true) // State to toggle showing all categories
+  const visibleCategories = showAll
+    ? categories?.slice(0, MAX_VISIBLE_CATEGORIES)
+    : categories;
 
   const categoryIcon = (categoryName: string, size?: number): JSX.Element | null => {
     switch (categoryName.trim().toLocaleLowerCase().replace(/\s/g, '_')) {
@@ -309,14 +316,17 @@ export function Categories({
           variant='contained'
           color='primary'
           size='small'
-          onClick={() => setNewCategory(true)}
+          onClick={() => {
+            setShowAll(false)
+            setNewCategory(true)
+          }}
         >
           New Category
         </Button>
       </Box>
       <Box sx={{ flexGrow: 1 }}>
         <Grid2 container spacing={4}>
-          {categories?.map(category => {
+          {visibleCategories?.map(category => {
             return (
               <Grid2 key={category.id} size={3}>
                 <Card
@@ -377,6 +387,39 @@ export function Categories({
             </Grid2>
           )}
         </Grid2>
+        {categories && categories.length > MAX_VISIBLE_CATEGORIES && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+            <Button
+              onClick={() => setShowAll(v => !v)}
+              sx={{
+              textTransform: 'none',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'background-color 0.3s, opacity 0.3s',
+              opacity: 0.5,
+              color: 'inherit',
+              '&:hover': {
+                backgroundColor: 'inherit',
+                opacity: 1,
+              }
+              }}
+              disableRipple
+              disableElevation
+            >
+              {showAll ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography fontSize={14}>See more</Typography>
+                <ExpandMoreIcon fontSize='small' />
+              </Box>
+              ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <ExpandLessIcon fontSize='small' />
+                <Typography fontSize={14}>See less</Typography>
+              </Box>
+              )}
+            </Button>
+          </Box>
+        )}
         <CategoryCard
           categoryIcon={categoryIcon}
           newExpensesByCategory={newExpensesByCategory}

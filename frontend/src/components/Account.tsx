@@ -17,6 +17,10 @@ import {
 import { User } from "../types";
 import { useState } from "react";
 import apiService from "../api/apiService";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 export function Account({
   user,
@@ -71,96 +75,66 @@ export function Account({
   }
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "right", gap: "1rem" }}>
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem" }}>
+      <h3 style={{ color: '#ffffff', fontSize: '1.6rem', margin: 0, padding: 0 }}>EXPENSE TRACKER</h3>
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           gap: "0.5rem",
           position: "relative",
+          cursor: "pointer",
         }}
         onClick={() => setOpen(!open)}
       >
         <Box
           sx={{
-            padding: "2px 10px",
-            borderRadius: "4px",
-            background: "black",
+            padding: "6px 7px",
+            borderRadius: "100%",
+            background: "#50a8e38e",
           }}
         >
-          <Typography variant="h6" fontSize={20} sx={{ color: "#ffffff" }}>
-            {user?.firstname[0]}
+          <Typography variant="h6" fontSize={18} fontWeight={400} sx={{ color: "#ffffff", padding: "0 2px" }}>
+            {user?.firstname[0] + user?.lastname[0]}
           </Typography>
         </Box>
-        <Typography variant="h6" fontSize={20} color="#ffffff">
-          {user?.fullname}
+        <Typography variant="h6" fontSize={18} fontWeight={400} sx={{ color: "#ffffff", padding: "0 2px" }}>
+          {user.fullname}
         </Typography>
+        {open ? (
+          <ExpandLessIcon sx={{ color: "#ffffff", marginLeft: "-4px" }} />
+        ) : (
+          <ExpandMoreIcon sx={{ color: "#ffffff", marginLeft: "-4px" }} />
+        )}
         <Paper
           sx={{
             background: "#f5f5f5",
             position: "absolute",
             top: "100%",
-            right: "-50%",
-            width: "200%",
+            width: "100%",
             display: open ? "block" : "none",
             zIndex: 100,
             textAlign: "center",
-            paddingTop: "1rem",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <Box
-            sx={{
-              display: "inline-block",
-              padding: "2px 10px",
-              borderRadius: "4px",
-              background: "black",
-              marginBottom: "0.5rem",
-            }}
-          >
-            <Typography variant="h6" fontSize={20} sx={{ color: "#ffffff" }}>
-              {user?.firstname[0]}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h6" fontSize={18}>
-              {user?.fullname}
-            </Typography>
-          </Box>
-          <Box>
-            <Typography variant="h6" fontSize={14}>
-              {user?.email}
-            </Typography>
-          </Box>
-          <Divider sx={{ marginTop: "1rem" }} />
           <MenuList>
             <MenuItem
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-              onClick={() => {
-                setOpen(false);
-                setEditPassword(true);
-              }}
+            sx={{ padding: '0.8rem' }}
             >
-              Edit password
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setOpen(false);
-                setShowDialog(true);
-              }}
-            >
-              Delete Account
+              <PersonIcon sx={{ marginRight: '0.5rem' }} />
+              <Typography>
+                Profile
+              </Typography>
             </MenuItem>
             <MenuItem
               onClick={() => {
                 handleLogout();
               }}
+              sx={{ padding: '0.8rem'}}
             >
-              Logout
+              <LogoutIcon sx={{ marginRight: '0.5rem', color: "var(--color-error)" }} />
+              Sign Out
             </MenuItem>
           </MenuList>
         </Paper>
