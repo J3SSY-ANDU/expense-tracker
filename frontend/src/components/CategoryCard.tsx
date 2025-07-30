@@ -15,9 +15,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { ExpensesTable } from "./ExpensesTable";
 import { JSX, useState } from "react";
 import { Category, Expense, History as MonthlyHistory } from "../types";
+import { MuiIconPicker } from "./MuiIconPicker";
+import { iconMap } from "./icons";
+import React from "react";
 
 export function CategoryCard({
-  categoryIcon,
   newExpensesByCategory,
   setNewExpensesByCategory,
   setExpenses,
@@ -33,7 +35,6 @@ export function CategoryCard({
   handleDeleteCategory,
   handleUpdateData,
 }: {
-  categoryIcon: (categoryName: string, size?: number) => JSX.Element | null;
   newExpensesByCategory: Expense[] | null;
   setNewExpensesByCategory: React.Dispatch<
     React.SetStateAction<Expense[] | null>
@@ -52,6 +53,8 @@ export function CategoryCard({
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
+  const [selectedIcon, setSelectedIcon] = useState<{ icon: string }>({ icon: '' }); // State for selected icon
+
 
   // Function to handle deleting an expense by category globally
   const handleDeleteExpenseByCategory = (expenseId: string) => {
@@ -90,7 +93,21 @@ export function CategoryCard({
               marginBottom: "1rem",
             }}
           >
-            {categoryIcon(selectedCategory?.name ?? "", 48)}
+            {selectedCategory?.icon ? (
+              React.createElement(iconMap[selectedCategory.icon], { style: { fontSize: 48 } })
+            ) : (
+              <MuiIconPicker
+                value={selectedCategory?.icon || ""}
+                onChange={(icon) => {
+                  setSelectedCategory((prev) => {
+                    if (prev) {
+                      return { ...prev, icon };
+                    }
+                    return prev;
+                  });
+                }}
+              />
+            )}
             <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
               onClick={() => setShowDeleteDialog(true)}
             >

@@ -16,16 +16,9 @@ import {
 } from '../types'
 import apiService from '../api/apiService'
 import { CategoryCard } from './index'
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import SchoolIcon from '@mui/icons-material/School'
-import MovieIcon from '@mui/icons-material/Movie'
-import RestaurantIcon from '@mui/icons-material/Restaurant'
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag'
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus'
-import WorkIcon from '@mui/icons-material/Work'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { iconMap } from './icons'
 
 export function Categories({
   categories,
@@ -58,29 +51,6 @@ export function Categories({
   const visibleCategories = showAll
     ? categories?.slice(0, MAX_VISIBLE_CATEGORIES)
     : categories;
-
-  const categoryIcon = (categoryName: string, size?: number): JSX.Element | null => {
-    switch (categoryName.trim().toLocaleLowerCase().replace(/\s/g, '_')) {
-      case 'bills_&_utilities':
-        return <WaterDropIcon sx={{ fontSize: size || 24 }} />
-      case 'education':
-        return <SchoolIcon sx={{ fontSize: size || 24 }} />
-      case 'entertainment':
-        return <MovieIcon sx={{ fontSize: size || 24 }} />
-      case 'food_&_groceries':
-        return <RestaurantIcon sx={{ fontSize: size || 24 }} />
-      case 'health_&_fitness':
-        return <MonitorHeartIcon sx={{ fontSize: size || 24 }} />
-      case 'shopping':
-        return <ShoppingBagIcon sx={{ fontSize: size || 24 }} />
-      case 'transportation':
-        return <DirectionsBusIcon sx={{ fontSize: size || 24 }} />
-      case 'travel':
-        return <WorkIcon sx={{ fontSize: size || 24 }} />
-      default:
-        return null
-    }
-  }
 
   useEffect(() => {
     if (selectedCategory) {
@@ -129,7 +99,8 @@ export function Categories({
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
       total_expenses: 0,
-      description: ''
+      description: '',
+      icon: ''
     }
     if (newCategoryName) {
       // Save category
@@ -331,40 +302,44 @@ export function Categories({
               <Grid2 key={category.id} size={3}>
                 <Card
                   sx={{
-                  background: openCategory && selectedCategory?.id === category.id
-                    ? '#e0e0e0'
-                    : '#f5f5f5',
-                  cursor: 'pointer',
-                  borderRadius: '12px',
-                  transition: 'background-color 0.3s, box-shadow 0.3s, transform 0.3s',
-                  "&:hover": {
-                    boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
-                    transform: 'scale(1.01)',
-                  },
-                  "&:active": {
-                    backgroundColor: '#e0e0e0',
-                  }
+                    background: openCategory && selectedCategory?.id === category.id
+                      ? '#e0e0e0'
+                      : '#f5f5f5',
+                    cursor: 'pointer',
+                    borderRadius: '12px',
+                    transition: 'background-color 0.3s, box-shadow 0.3s, transform 0.3s',
+                    "&:hover": {
+                      boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
+                      transform: 'scale(1.01)',
+                    },
+                    "&:active": {
+                      backgroundColor: '#e0e0e0',
+                    }
                   }}
                   elevation={0}
                   onClick={() => {
-                  setOpenCategory(true)
-                  setSelectedCategory(category)
+                    setOpenCategory(true)
+                    setSelectedCategory(category)
                   }}
                 >
                   <CardContent>
-                  <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-                    {categoryIcon(category.name)}
-                    <Typography
-                    fontSize={16}
-                    fontWeight={'600'}
-                    marginBottom={'1rem'}
-                    >
-                    {category.name}
+                    <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                      {iconMap[category.icon] ? (
+                        React.createElement(iconMap[category.icon], {
+                          style: { fontSize: 24 }
+                        })
+                      ) : null}
+                      <Typography
+                        fontSize={16}
+                        fontWeight={'600'}
+                        marginBottom={'1rem'}
+                      >
+                        {category.name}
+                      </Typography>
+                    </Box>
+                    <Typography fontSize={14} fontWeight={'400'}>
+                      ${category.total_expenses}
                     </Typography>
-                  </Box>
-                  <Typography fontSize={14} fontWeight={'400'}>
-                    ${category.total_expenses}
-                  </Typography>
                   </CardContent>
                 </Card>
               </Grid2>
@@ -403,36 +378,35 @@ export function Categories({
             <Button
               onClick={() => setShowAll(v => !v)}
               sx={{
-              textTransform: 'none',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'background-color 0.3s, opacity 0.3s',
-              opacity: 0.5,
-              color: 'inherit',
-              '&:hover': {
-                backgroundColor: 'inherit',
-                opacity: 1,
-              }
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'background-color 0.3s, opacity 0.3s',
+                opacity: 0.5,
+                color: 'inherit',
+                '&:hover': {
+                  backgroundColor: 'inherit',
+                  opacity: 1,
+                }
               }}
               disableRipple
               disableElevation
             >
               {showAll ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography fontSize={14}>See more</Typography>
-                <ExpandMoreIcon fontSize='small' />
-              </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Typography fontSize={14}>See more</Typography>
+                  <ExpandMoreIcon fontSize='small' />
+                </Box>
               ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <ExpandLessIcon fontSize='small' />
-                <Typography fontSize={14}>See less</Typography>
-              </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <ExpandLessIcon fontSize='small' />
+                  <Typography fontSize={14}>See less</Typography>
+                </Box>
               )}
             </Button>
           </Box>
         )}
         <CategoryCard
-          categoryIcon={categoryIcon}
           newExpensesByCategory={newExpensesByCategory}
           setNewExpensesByCategory={setNewExpensesByCategory}
           setExpenses={setExpenses}

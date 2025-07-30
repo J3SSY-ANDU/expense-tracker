@@ -214,6 +214,7 @@ export function ExpensesTable({
               total_expenses: createdExpense.amount,
               description: "",
               order: 0,
+              icon: selectedCategory?.icon || "", // Provide a default or fallback icon
             };
 
           if (existingHistoryIndex !== -1) {

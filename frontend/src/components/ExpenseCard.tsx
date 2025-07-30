@@ -165,7 +165,7 @@ export function ExpenseCard({
           </Box>
           <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <TextField
-              label="Notes"
+              label="Note"
               variant="outlined"
               fullWidth
               margin="normal"

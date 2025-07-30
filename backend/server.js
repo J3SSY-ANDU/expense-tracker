@@ -44,7 +44,11 @@ const {
   changeForgotPassword
 } = require('./database/forgotPassword')
 const { getHistoryByUser } = require('./database/history')
-const { validateEmailVerificationToken, invalidateTokensByEmail, getEmailByVerificationToken } = require('./database/emailVerification')
+const {
+  validateEmailVerificationToken,
+  invalidateTokensByEmail,
+  getEmailByVerificationToken
+} = require('./database/emailVerification')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -126,16 +130,20 @@ app.get('/verify-email/:token', async (req, res) => {
     return res.status(400).json({ error: 'Token is required' })
   }
   try {
-    const email = await validateEmailVerificationToken(token);
+    const email = await validateEmailVerificationToken(token)
     if (!email) {
       return res.status(401).json({ error: 'Invalid or expired token' })
     }
-    const user = await getUserByEmail(email);
+    const user = await getUserByEmail(email)
     if (!user) {
-      return res.status(404).json({ error: 'Verification email could not be sent' })
+      return res
+        .status(404)
+        .json({ error: 'Verification email could not be sent' })
     }
     if (user.is_verified) {
-      return res.status(200).json({ message: 'Email already verified! Please log in.' })
+      return res
+        .status(200)
+        .json({ message: 'Email already verified! Please log in.' })
     } else {
       await verifyUser(user.id)
       await invalidateTokensByEmail(email)
@@ -164,36 +172,42 @@ app.get('/verify-email/:token', async (req, res) => {
 // Needs to be fixed
 app.post('/resend-verification-email', async (req, res) => {
   try {
-    const { id, token, email } = req.body;
-    let user;
+    const { id, token, email } = req.body
+    let user
 
     if (id) {
-      user = await getUserById(id);
+      user = await getUserById(id)
     } else if (token) {
       // Lookup email by token, even if expired, then get the user by email
-      const email = await getEmailByVerificationToken(token);
+      const email = await getEmailByVerificationToken(token)
       if (!email) {
-        return res.status(400).json({ error: 'Invalid token.' });
+        return res.status(400).json({ error: 'Invalid token.' })
       }
-      user = await getUserByEmail(email);
+      user = await getUserByEmail(email)
     } else if (email) {
-      user = await getUserByEmail(email);
+      user = await getUserByEmail(email)
     } else {
-      return res.status(400).json({ error: 'User ID, token or email required.' });
+      return res
+        .status(400)
+        .json({ error: 'User ID, token or email required.' })
     }
 
     if (!user) {
-      return res.status(404).json({ error: 'Verification email could not be resent.' });
+      return res
+        .status(404)
+        .json({ error: 'Verification email could not be resent.' })
     }
     if (user.is_verified) {
-      return res.status(400).json({ error: 'Email is already verified.' });
+      return res.status(400).json({ error: 'Email is already verified.' })
     }
 
-    await sendEmailVerification(user.email, user.id);
+    await sendEmailVerification(user.email, user.id)
     res.status(200).json({ message: 'Verification email sent!' })
   } catch (error) {
     console.error('Error resending verification email:', error)
-    return res.status(500).json({ error: 'Failed to resend verification email.' })
+    return res
+      .status(500)
+      .json({ error: 'Failed to resend verification email.' })
   }
 })
 
@@ -278,7 +292,8 @@ app.get('/generate-default-categories', authenticateToken, async (req, res) => {
         month,
         year,
         category.total_expenses,
-        category.description
+        category.description,
+        category.icon
       )
     }
     res.status(200).json({ message: 'Default categories created!' })
@@ -353,9 +368,28 @@ app.post(
   }
 )
 
+app.post('/update-category-icon', authenticateToken, async (req, res) => {
+  try {
+    const { category_id, icon } = req.body
+    if (!category_id || !icon) {
+      return res
+        .status(400)
+        .json({ error: 'category_id and icon are required.' })
+    }
+    const updatedCategory = await updateCategoryIcon(category_id, icon)
+    if (!updatedCategory) {
+      return res.status(401).json({ error: 'Category icon update failed!' })
+    }
+    res.status(200).json(updatedCategory)
+  } catch (error) {
+    console.error('Error updating category icon:', error)
+    res.status(500).json({ error: 'Failed to update category icon.' })
+  }
+})
+
 app.post('/add-category', authenticateToken, async (req, res) => {
   try {
-    const { name, month, year, total_expenses, description } = req.body
+    const { name, month, year, total_expenses, description, icon } = req.body
     if (!name || !month || !year || total_expenses === undefined) {
       return res.status(400).json({ error: 'All fields are required.' })
     }
@@ -365,7 +399,8 @@ app.post('/add-category', authenticateToken, async (req, res) => {
       month,
       year,
       total_expenses,
-      description
+      description,
+      icon
     )
     if (!category) {
       return res.status(400).json({ error: 'Category creation failed!' })

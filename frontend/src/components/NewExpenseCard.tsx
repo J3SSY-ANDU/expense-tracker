@@ -135,7 +135,7 @@ export function NewExpenseCard({
             </LocalizationProvider>
           </Box>
           <TextField
-            label="Notes"
+            label="Note"
             variant="outlined"
             fullWidth
             margin="normal"
