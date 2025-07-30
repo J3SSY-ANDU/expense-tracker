@@ -418,6 +418,11 @@ export function ExpensesTable({
     setOpenExpense(false);
   };
 
+  function truncateText(text: string, maxLength: number) {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '…';
+  }
+
   return (
     <Box>
       {mode === "monthly" && (
@@ -441,7 +446,7 @@ export function ExpensesTable({
         </Box>
       )}
       <TableContainer component={Box}>
-        <Table sx={{ margin: "auto", width: "100%", minWidth: "700px" }}>
+        <Table sx={{ margin: "auto", width: "100%" }}>
           <TableHead>
             <TableRow>
               <TableCell>NAME</TableCell>
@@ -464,20 +469,25 @@ export function ExpensesTable({
               >
                 <TableCell
                   sx={{
-                    display: "flex",
-                    gap: "3rem",
-                    alignItems: "center",
-                    justifyContent: "space-between",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: 100,
                   }}
                 >
-                  <Typography>{expense.name}</Typography>
+                  <Typography fontSize={14}>{truncateText(expense.name, 20)}</Typography>
                 </TableCell>
-                <TableCell>${expense.amount}</TableCell>
-                <TableCell>{categoriesNames[expense.category_id]}</TableCell>
-                <TableCell>
-                  {new Date(expense.date).toLocaleDateString()}
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>${expense.amount}</Typography></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{truncateText(categoriesNames[expense.category_id], 20)}</Typography></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography sx={{ fontSize: 14 }}>{new Date(expense.date).toLocaleDateString()}</Typography>
                 </TableCell>
-                <TableCell>{expense.notes}</TableCell>
+                <TableCell sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth: 200
+                }}><Typography sx={{ fontSize: 14 }}>{truncateText(expense.notes, 20)}</Typography></TableCell>
               </TableRow>
             ))}
             {exampleExpense && (

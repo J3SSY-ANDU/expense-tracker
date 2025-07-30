@@ -84,6 +84,7 @@ export function NewExpenseCard({
               fullWidth
               margin="normal"
               value={newExpenseName}
+              inputProps={{ maxLength: 25 }}
               onChange={(e) => setNewExpenseName(e.target.value)}
             />
             <FormControl fullWidth variant="filled" sx={{ marginTop: "1rem" }}>
@@ -140,6 +141,7 @@ export function NewExpenseCard({
             fullWidth
             margin="normal"
             value={newExpenseNotes}
+            inputProps={{ maxLength: 100 }}
             onChange={(e) => setNewExpenseNotes(e.target.value)}
           />
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: '1rem', marginTop: "5rem", paddingTop: "1rem", borderTop: "1px solid #d3d3d3" }}>
