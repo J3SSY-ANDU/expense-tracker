@@ -31,8 +31,27 @@ export function MuiIconPicker({ value, onChange, selectedCategory }: MuiIconPick
                 </IconButton>
             </Tooltip>
             <Dialog open={open} onClose={() => setOpen(false)}>
-                <DialogTitle>Pick an Icon</DialogTitle>
-                <Grid container spacing={2} padding={2}>
+                <DialogTitle
+                    sx={{
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    Pick an Icon
+                    <Tooltip title="Clear icon">
+                        <IconButton
+                            aria-label="Clear icon"
+                            onClick={() => onChange("")}
+                            size="small"
+                        sx={{ ml: 2 }}
+                    >
+                        <span style={{ fontSize: 18 }}>✕</span>
+                    </IconButton>
+                    </Tooltip>
+                </DialogTitle>
+                <Grid container sx={{ padding: '1rem', paddingTop: 0, justifyContent: 'center' }} spacing={2}>
                     {icons.map((name) => {
                         const IconComponent = iconMap[name];
                         return (

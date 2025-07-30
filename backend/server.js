@@ -372,10 +372,10 @@ app.post(
 app.post('/update-category-icon', authenticateToken, async (req, res) => {
   try {
     const { category_id, icon } = req.body
-    if (!category_id || !icon) {
+    if (!category_id) {
       return res
         .status(400)
-        .json({ error: 'category_id and icon are required.' })
+        .json({ error: 'category_id is required.' })
     }
     const updatedCategory = await updateCategoryIcon(category_id, icon)
     if (!updatedCategory) {
