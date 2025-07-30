@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Button, Dialog, DialogTitle, Grid, IconButton } from "@mui/material";
+import { Dialog, DialogTitle, Grid, IconButton, Tooltip } from "@mui/material";
 import { iconMap, icons } from "./icons";
-import CategoryIcon from '@mui/icons-material/Category';
+import AddIcon from "@mui/icons-material/Add";
 
 interface MuiIconPickerProps {
     value: string;
     onChange: (name: string) => void;
+    selectedCategory: { icon: string } | null;
 }
 
-export function MuiIconPicker({ value, onChange }: MuiIconPickerProps) {
+export function MuiIconPicker({ value, onChange, selectedCategory }: MuiIconPickerProps) {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (name: string) => {
@@ -16,16 +17,19 @@ export function MuiIconPicker({ value, onChange }: MuiIconPickerProps) {
         setOpen(false);
     };
 
-    const SelectedIcon = iconMap[value];
+    const SelectedIcon = selectedCategory?.icon ? iconMap[selectedCategory.icon] : AddIcon;
 
     return (
         <>
-            <IconButton
-                onClick={() => setOpen(true)}
-                sx={{ color: 'var(--color-text-primary)' }}
-            >
-                <CategoryIcon fontSize={"large"}/>
-            </IconButton>
+            <Tooltip title="Pick an icon">
+                <IconButton
+                    onClick={() => setOpen(true)}
+                    sx={{ color: 'var(--color-primary)' }}
+                    aria-label="Pick an icon"
+                >
+                    <SelectedIcon sx={{ fontSize: 48 }} />
+                </IconButton>
+            </Tooltip>
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <DialogTitle>Pick an Icon</DialogTitle>
                 <Grid container spacing={2} padding={2}>

@@ -3,49 +3,49 @@ const categoriesData = [
     name: "Bills & Utilities",
     total_expenses: 0,
     description: "Electricity, water, gas, internet, phone, etc.",
-    icon: "bills_&_utilities",
+    icon: "WaterDrop",
   },
   {
     name: "Education",
     total_expenses: 0,
     description: "Tuition, books, supplies, etc.",
-    icon: "education",
+    icon: "School",
   },
   {
     name: "Entertainment",
     total_expenses: 0,
     description: "Movies, concerts, games, etc.",
-    icon: "entertainment",
+    icon: "Movie",
   },
   {
     name: "Food & Groceries",
     total_expenses: 0,
     description: "Eating out, groceries, snacks, etc.",
-    icon: "food_&_groceries",
+    icon: "Restaurant",
   },
   {
     name: "Health & Fitness",
     total_expenses: 0,
     description: "Gym, doctor, dentist, pharmacy, etc.",
-    icon: "health_&_fitness",
+    icon: "MonitorHeart",
   },
   {
     name: "Shopping",
     total_expenses: 0,
     description: "Clothes, shoes, accessories, etc.",
-    icon: "shopping",
+    icon: "ShoppingCart",
   },
   {
     name: "Transportation",
     total_expenses: 0,
     description: "Gas, public transportation, parking, etc.",
-    icon: "transportation",
+    icon: "DirectionsBus",
   },
   {
     name: "Travel",
     total_expenses: 0,
     description: "Flights, hotels, car rentals, etc.",
-    icon: "travel",
+    icon: "Work",
   }
 ];
 

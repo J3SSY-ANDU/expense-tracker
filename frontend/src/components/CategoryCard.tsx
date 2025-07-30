@@ -32,6 +32,7 @@ export function CategoryCard({
   setOpenCategory,
   handleChangeName,
   handleChangeDescription,
+  handleChangeIcon,
   handleDeleteCategory,
   handleUpdateData,
 }: {
@@ -49,11 +50,11 @@ export function CategoryCard({
   setOpenCategory: React.Dispatch<React.SetStateAction<boolean>>;
   handleChangeName: () => Promise<void>;
   handleChangeDescription: () => Promise<void>;
+  handleChangeIcon: (iconName: string) => void;
   handleDeleteCategory: () => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
-  const [selectedIcon, setSelectedIcon] = useState<{ icon: string }>({ icon: '' }); // State for selected icon
 
 
   // Function to handle deleting an expense by category globally
@@ -93,21 +94,13 @@ export function CategoryCard({
               marginBottom: "1rem",
             }}
           >
-            {selectedCategory?.icon ? (
-              React.createElement(iconMap[selectedCategory.icon], { style: { fontSize: 48 } })
-            ) : (
-              <MuiIconPicker
-                value={selectedCategory?.icon || ""}
-                onChange={(icon) => {
-                  setSelectedCategory((prev) => {
-                    if (prev) {
-                      return { ...prev, icon };
-                    }
-                    return prev;
-                  });
-                }}
-              />
-            )}
+            <MuiIconPicker
+              value={selectedCategory?.icon || ""}
+              onChange={(icon) => {
+                handleChangeIcon(icon);
+              }}
+              selectedCategory={selectedCategory}
+            />
             <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
               onClick={() => setShowDeleteDialog(true)}
             >

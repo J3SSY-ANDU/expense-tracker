@@ -233,6 +233,40 @@ export function Categories({
     console.log('Description updated successfully.')
   }
 
+  const handleChangeIcon = async (iconName: string) => {
+    if (!selectedCategory) return
+
+    setSelectedCategory((prev) => {
+      if (prev) {
+        return { ...prev, icon: iconName };
+      }
+      return prev;
+    });
+
+    const updatedCategory = await apiService.updateCategoryIcon(
+      selectedCategory.id,
+      iconName
+    )
+    if (!updatedCategory || 'error' in updatedCategory) {
+      console.error(`Error updating category icon: ${updatedCategory?.error}`)
+      // Add any additional error handling here if needed
+      return
+    }
+
+    setCategories(prev => {
+      return prev
+        ? prev.map(category =>
+          category.id === updatedCategory.id ? updatedCategory : category
+        )
+        : null
+    })
+    const activeElement = document.activeElement as HTMLElement
+    if (activeElement) {
+      activeElement.blur()
+    }
+    console.log('Icon updated successfully.')
+  }
+
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return
     if (expenses) {
@@ -419,6 +453,7 @@ export function Categories({
           setOpenCategory={setOpenCategory}
           handleChangeName={handleChangeName}
           handleChangeDescription={handleChangeDescription}
+          handleChangeIcon={handleChangeIcon}
           handleDeleteCategory={handleDeleteCategory}
           handleUpdateData={handleUpdateData}
         />

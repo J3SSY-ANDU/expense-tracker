@@ -240,6 +240,7 @@ module.exports = {
   updateCategoryName,
   updateCategoryDescription,
   updateCategoryTotalExpenses,
+  updateCategoryIcon,
   deleteCategory,
   getOrderedCategories,
   getCategoryByMonthYear

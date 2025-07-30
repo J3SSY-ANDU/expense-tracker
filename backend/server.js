@@ -34,6 +34,7 @@ const {
   deleteCategory,
   updateCategoryDescription,
   updateCategoryName,
+  updateCategoryIcon,
   getOrderedCategories,
   getCategoryById,
   createDefaultCategories
