@@ -5,6 +5,7 @@ import {
   GenerateCategoryData,
   UpdateCategoryDescription,
   UpdateCategoryName,
+  UpdateCategoryIcon,
   GetCategory,
 } from "./categoryApi";
 import {
@@ -37,6 +38,7 @@ export {
   GenerateCategoryData,
   UpdateCategoryDescription,
   UpdateCategoryName,
+  UpdateCategoryIcon,
   UpdateExpense,
   DeleteUser, 
   ChangePassword,

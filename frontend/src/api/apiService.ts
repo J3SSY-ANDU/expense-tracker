@@ -20,6 +20,7 @@ import {
   SignUp,
   UpdateCategoryDescription,
   UpdateCategoryName,
+  UpdateCategoryIcon,
   UpdateExpense,
   VerifyEmail
 } from './'
@@ -86,7 +87,8 @@ const apiService = {
   createExpense: CreateExpense,
   updateExpense: UpdateExpense,
   deleteExpense: DeleteExpense,
-  getHistoryData: FetchHistoryData
+  getHistoryData: FetchHistoryData,
+  updateCategoryIcon: UpdateCategoryIcon
 }
 
 export default apiService

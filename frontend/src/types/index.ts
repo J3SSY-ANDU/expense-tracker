@@ -1,4 +1,4 @@
 export * from "./Category";
-export { Expense, NewExpense } from "./Expense";
+export { Expense, NewExpense, ExampleExpense } from "./Expense";
 export * from "./User";
 export * from "./History";

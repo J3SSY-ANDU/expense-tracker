@@ -1,16 +1,14 @@
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import { Category, Expense, History as MonthlyHistory, User } from "../types";
+import { Category, Expense, History as MonthlyHistory } from "../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 
 export function History({
-  user,
   history,
   setHistory,
   handleUpdateData,
 }: {
-  user: User | null;
   history: MonthlyHistory[] | null;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
   handleUpdateData: (
@@ -59,50 +57,58 @@ export function History({
     }
   };
 
+  const isCurrentMonth = (monthlyHistory: MonthlyHistory) =>
+    monthlyHistory.month === new Date().getMonth() + 1 &&
+    monthlyHistory.year === new Date().getFullYear();
+
   if (!history || !history[0]) {
     console.log("history:", history);
     return;
   }
 
+  // Filter out the current month
+  const pastHistory = history.filter((monthlyHistory: MonthlyHistory) => !isCurrentMonth(monthlyHistory));
+
+  if (pastHistory.length === 0) {
+    return null; // No past history to show
+  }
+
   return (
     <div>
       <h2>History</h2>
-      {history.map((monthlyHistory: MonthlyHistory) => {
-        return (
-          <Accordion
-            key={monthlyHistory.id}
-            expanded={expandedAccordion === monthlyHistory.id}
-            elevation={0}
-            sx={{ zIndex: 0 }}
-            onChange={() =>
-              handleAccordionToggle(
-                monthlyHistory.id,
-              )
-            }
-          >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <h3>{monthlyHistory.name}</h3>
-            </AccordionSummary>
-            <AccordionDetails>
-              {!loading ? (
-                <ExpensesTable
-                  user={user}
-                  expenses={expenses}
-                  setExpenses={setExpenses}
-                  categories={categories}
-                  setCategories={setCategories}
-                  setHistory={setHistory}
-                  handleUpdateData={handleUpdateData}
-                  mode="history"
-                  title=""
-                />
-              ) : (
-                <div>Loading...</div>
-              )}
-            </AccordionDetails>
-          </Accordion>
-        );
-      })}
+      {pastHistory.map((monthlyHistory: MonthlyHistory) => (
+        <Accordion
+          key={monthlyHistory.id}
+          expanded={expandedAccordion === monthlyHistory.id}
+          elevation={0}
+          sx={{ zIndex: 0 }}
+          onChange={() =>
+            handleAccordionToggle(
+              monthlyHistory.id,
+            )
+          }
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <h3>{monthlyHistory.name}</h3>
+          </AccordionSummary>
+          <AccordionDetails>
+            {!loading ? (
+              <ExpensesTable
+                expenses={expenses}
+                setExpenses={setExpenses}
+                categories={categories}
+                setCategories={setCategories}
+                setHistory={setHistory}
+                handleUpdateData={handleUpdateData}
+                mode="history"
+                title=""
+              />
+            ) : (
+              <div>Loading...</div>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      ))}
     </div>
   );
 }

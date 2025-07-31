@@ -13,14 +13,16 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ExpensesTable } from "./ExpensesTable";
-import { useState } from "react";
-import { Category, Expense, User, History as MonthlyHistory } from "../types";
+import { JSX, useState } from "react";
+import { Category, Expense, History as MonthlyHistory } from "../types";
+import { MuiIconPicker } from "./MuiIconPicker";
+import { iconMap } from "./icons";
+import React from "react";
 
 export function CategoryCard({
   newExpensesByCategory,
   setNewExpensesByCategory,
   setExpenses,
-  user,
   categories,
   setCategories,
   setHistory,
@@ -30,6 +32,7 @@ export function CategoryCard({
   setOpenCategory,
   handleChangeName,
   handleChangeDescription,
+  handleChangeIcon,
   handleDeleteCategory,
   handleUpdateData,
 }: {
@@ -38,7 +41,6 @@ export function CategoryCard({
     React.SetStateAction<Expense[] | null>
   >;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
-  user: User | null;
   categories: Category[] | null;
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
@@ -48,10 +50,12 @@ export function CategoryCard({
   setOpenCategory: React.Dispatch<React.SetStateAction<boolean>>;
   handleChangeName: () => Promise<void>;
   handleChangeDescription: () => Promise<void>;
+  handleChangeIcon: (iconName: string) => void;
   handleDeleteCategory: () => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
+
 
   // Function to handle deleting an expense by category globally
   const handleDeleteExpenseByCategory = (expenseId: string) => {
@@ -87,8 +91,31 @@ export function CategoryCard({
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              marginBottom: "1rem",
             }}
           >
+            <MuiIconPicker
+              value={selectedCategory?.icon || ""}
+              onChange={(icon) => {
+                handleChangeIcon(icon);
+              }}
+              selectedCategory={selectedCategory}
+            />
+            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <DeleteIcon
+                sx={{ fontSize: 20 }}
+                color="action"
+              />
+              <Typography
+                fontWeight={"600"}
+              >
+                Delete
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             <input
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSelectedCategory((prev) => {
@@ -117,17 +144,18 @@ export function CategoryCard({
               title="name"
               placeholder="Add name..."
             />
-            <DeleteIcon
-              onClick={() => setShowDeleteDialog(true)}
-              color="action"
-              sx={{ cursor: "pointer" }}
-            />
-          </Box>
-          <Typography fontSize={16} fontWeight={"400"}>
-            Total expenses: ${selectedCategory?.total_expenses}
-          </Typography>
-          <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <Typography>Description: </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography fontSize={16} fontWeight={"400"} sx={{ minWidth: "120px" }}>
+                Total expenses
+              </Typography>
+              <span style={{
+                width: "100%",
+                backgroundColor: "#d3d3d3",
+                padding: "0.3rem",
+                borderRadius: "3px",
+              }}>${selectedCategory?.total_expenses}
+              </span>
+            </Box>
             <input
               type="text"
               title="description"
@@ -149,16 +177,20 @@ export function CategoryCard({
               }}
               style={{
                 all: "unset",
+                color: "#6B7A90",
                 width: "100%",
-                backgroundColor: "#d3d3d3",
-                padding: "0.3rem",
-                borderRadius: "3px",
+                fontWeight: "400",
+                fontStyle: "italic",
+                fontSize: "1rem",
+                borderRadius: "4px",
+                padding: "0.3rem 0.5rem",
+                cursor: "text",
+                marginBottom: "1rem",
               }}
             />
           </Box>
           {newExpensesByCategory && newExpensesByCategory.length > 0 && (
             <ExpensesTable
-              user={user}
               expenses={newExpensesByCategory}
               setExpenses={setNewExpensesByCategory}
               handleDeleteExpenseByCategory={
