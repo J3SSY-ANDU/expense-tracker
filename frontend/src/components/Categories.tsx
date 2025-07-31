@@ -1,3 +1,4 @@
+import React, { JSX } from 'react'
 import {
   Box,
   Typography,
@@ -15,8 +16,11 @@ import {
 } from '../types'
 import apiService from '../api/apiService'
 import { CategoryCard } from './index'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { iconMap } from './icons'
 
-export function Categories ({
+export function Categories({
   categories,
   setCategories,
   expenses,
@@ -42,6 +46,12 @@ export function Categories ({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
     null
   ) // State for selected category
+  const MAX_VISIBLE_CATEGORIES = 8;
+  const [showAll, setShowAll] = useState<boolean>(true) // State to toggle showing all categories
+  const visibleCategories = showAll
+    ? categories?.slice(0, MAX_VISIBLE_CATEGORIES)
+    : categories;
+
   useEffect(() => {
     if (selectedCategory) {
       const filteredExpenses =
@@ -89,7 +99,8 @@ export function Categories ({
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
       total_expenses: 0,
-      description: ''
+      description: '',
+      icon: ''
     }
     if (newCategoryName) {
       // Save category
@@ -222,6 +233,40 @@ export function Categories ({
     console.log('Description updated successfully.')
   }
 
+  const handleChangeIcon = async (iconName: string) => {
+    if (!selectedCategory) return
+
+    setSelectedCategory((prev) => {
+      if (prev) {
+        return { ...prev, icon: iconName };
+      }
+      return prev;
+    });
+
+    const updatedCategory = await apiService.updateCategoryIcon(
+      selectedCategory.id,
+      iconName
+    )
+    if (!updatedCategory || 'error' in updatedCategory) {
+      console.error(`Error updating category icon: ${updatedCategory?.error}`)
+      // Add any additional error handling here if needed
+      return
+    }
+
+    setCategories(prev => {
+      return prev
+        ? prev.map(category =>
+          category.id === updatedCategory.id ? updatedCategory : category
+        )
+        : null
+    })
+    const activeElement = document.activeElement as HTMLElement
+    if (activeElement) {
+      activeElement.blur()
+    }
+    console.log('Icon updated successfully.')
+  }
+
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return
     if (expenses) {
@@ -276,20 +321,34 @@ export function Categories ({
           variant='contained'
           color='primary'
           size='small'
-          onClick={() => setNewCategory(true)}
+          onClick={() => {
+            setShowAll(false)
+            setNewCategory(true)
+          }}
         >
           New Category
         </Button>
       </Box>
       <Box sx={{ flexGrow: 1 }}>
         <Grid2 container spacing={4}>
-          {categories?.map(category => {
+          {visibleCategories?.map(category => {
             return (
               <Grid2 key={category.id} size={3}>
                 <Card
                   sx={{
-                    background: '#f5f5f5',
-                    cursor: 'pointer'
+                    background: openCategory && selectedCategory?.id === category.id
+                      ? '#e0e0e0'
+                      : '#f5f5f5',
+                    cursor: 'pointer',
+                    borderRadius: '12px',
+                    transition: 'background-color 0.3s, box-shadow 0.3s, transform 0.3s',
+                    "&:hover": {
+                      boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)',
+                      transform: 'scale(1.01)',
+                    },
+                    "&:active": {
+                      backgroundColor: '#e0e0e0',
+                    }
                   }}
                   elevation={0}
                   onClick={() => {
@@ -298,13 +357,20 @@ export function Categories ({
                   }}
                 >
                   <CardContent>
-                    <Typography
-                      fontSize={16}
-                      fontWeight={'600'}
-                      marginBottom={'1rem'}
-                    >
-                      {category.name}
-                    </Typography>
+                    <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                      {iconMap[category.icon] ? (
+                        React.createElement(iconMap[category.icon], {
+                          style: { fontSize: 24 }
+                        })
+                      ) : null}
+                      <Typography
+                        fontSize={16}
+                        fontWeight={'600'}
+                        marginBottom={'1rem'}
+                      >
+                        {category.name}
+                      </Typography>
+                    </Box>
                     <Typography fontSize={14} fontWeight={'400'}>
                       ${category.total_expenses}
                     </Typography>
@@ -315,7 +381,7 @@ export function Categories ({
           })}
           {newCategory && (
             <Grid2 size={3}>
-              <Card sx={{ background: '#f5f5f5' }}>
+              <Card sx={{ background: '#f5f5f5', borderRadius: '12px' }}>
                 <CardContent>
                   <input
                     type='text'
@@ -341,6 +407,39 @@ export function Categories ({
             </Grid2>
           )}
         </Grid2>
+        {categories && categories.length > MAX_VISIBLE_CATEGORIES && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+            <Button
+              onClick={() => setShowAll(v => !v)}
+              sx={{
+                textTransform: 'none',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'background-color 0.3s, opacity 0.3s',
+                opacity: 0.5,
+                color: 'inherit',
+                '&:hover': {
+                  backgroundColor: 'inherit',
+                  opacity: 1,
+                }
+              }}
+              disableRipple
+              disableElevation
+            >
+              {showAll ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <Typography fontSize={14}>See more</Typography>
+                  <ExpandMoreIcon fontSize='small' />
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <ExpandLessIcon fontSize='small' />
+                  <Typography fontSize={14}>See less</Typography>
+                </Box>
+              )}
+            </Button>
+          </Box>
+        )}
         <CategoryCard
           newExpensesByCategory={newExpensesByCategory}
           setNewExpensesByCategory={setNewExpensesByCategory}
@@ -354,6 +453,7 @@ export function Categories ({
           setOpenCategory={setOpenCategory}
           handleChangeName={handleChangeName}
           handleChangeDescription={handleChangeDescription}
+          handleChangeIcon={handleChangeIcon}
           handleDeleteCategory={handleDeleteCategory}
           handleUpdateData={handleUpdateData}
         />

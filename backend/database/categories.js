@@ -18,6 +18,7 @@ const { categoriesData } = require('./categoriesData')
             year INT NOT NULL,
             total_expenses DECIMAL(10,2) NOT NULL,
             description TEXT,
+            icon VARCHAR(50) DEFAULT NULL,
             \`order\` INT AUTO_INCREMENT UNIQUE NOT NULL,
             FOREIGN KEY (user_id) REFERENCES users(id),
             UNIQUE (user_id, name, month, year)
@@ -32,7 +33,8 @@ const createCategory = async (
   month,
   year,
   total_expenses,
-  description
+  description,
+  icon
 ) => {
   if (await getCategoryByMonthYear(name, user_id, month, year)) {
     console.log(`Category already exists.`)
@@ -40,8 +42,8 @@ const createCategory = async (
   }
   const id = uuidv4()
   await connectionPool.query(
-    `INSERT INTO categories (id, user_id, name, month, year, total_expenses, description) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [id, user_id, name, month, year, total_expenses, description]
+    `INSERT INTO categories (id, user_id, name, month, year, total_expenses, description, icon) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, user_id, name, month, year, total_expenses, description, icon]
   )
   const category = await getCategoryById(id)
   if (!category) {
@@ -64,12 +66,13 @@ const createDefaultCategories = async user_id => {
     month,
     year,
     category.total_expenses,
-    category.description
+    category.description,
+    category.icon
   ])
   // Insert all categories in one query
   await connectionPool.query(
-    `INSERT IGNORE INTO categories (id, user_id, name, month, year, total_expenses, description)
-     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
+    `INSERT IGNORE INTO categories (id, user_id, name, month, year, total_expenses, description, icon)
+     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
     values.flat()
   )
   console.log('Default categories created successfully!')
@@ -199,6 +202,25 @@ const updateCategoryTotalExpenses = async (id, amount) => {
   }
 }
 
+const updateCategoryIcon = async (id, icon) => {
+  try {
+    await connectionPool.query(`UPDATE categories SET icon = ? WHERE id = ?`, [
+      icon,
+      id
+    ])
+    const updatedCategory = await getCategoryById(id)
+    if (updatedCategory.icon !== icon) {
+      console.log(`Failed. Try again.`)
+      return null
+    }
+    console.log('Category icon updated successfully!')
+    return updatedCategory
+  } catch (err) {
+    console.error(`Error updating category icon: ${err}`)
+    return null
+  }
+}
+
 const deleteCategory = async id => {
   const category = await getCategoryById(id)
   if (!category) {
@@ -218,6 +240,7 @@ module.exports = {
   updateCategoryName,
   updateCategoryDescription,
   updateCategoryTotalExpenses,
+  updateCategoryIcon,
   deleteCategory,
   getOrderedCategories,
   getCategoryByMonthYear

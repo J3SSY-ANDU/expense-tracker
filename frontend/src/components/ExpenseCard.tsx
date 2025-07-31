@@ -10,10 +10,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FilledInput,
   FormControl,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
+  TextField,
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -70,10 +73,9 @@ export function ExpenseCard({
     >
       <Card
         sx={{
-          width: "400px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
+          width: "50%",
+          padding: "1rem",
+          overflow: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -84,7 +86,6 @@ export function ExpenseCard({
             sx={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
             }}
           >
             <input
@@ -94,38 +95,39 @@ export function ExpenseCard({
               style={{
                 all: "unset",
                 width: "100%",
-                fontSize: "1.5rem",
+                fontSize: "2rem",
                 fontWeight: "700",
               }}
               value={updatedName !== null ? updatedName : selectedExpense?.name || ""}
               title="name"
               placeholder="Add name..."
             />
-            <DeleteIcon
+            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
               onClick={() => setShowDeleteDialog(true)}
-              color="action"
-              sx={{ cursor: "pointer" }}
-            />
+            >
+              <DeleteIcon
+                sx={{ fontSize: 20 }}
+                color="action"
+              />
+              <Typography
+                fontWeight={"600"}
+              >
+                Delete
+              </Typography>
+            </Box>
           </Box>
           <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <Typography>Amount: </Typography>
-            <input
-              type="text"
-              title="amount"
-              placeholder="Add amount..."
-              value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
-              onChange={(e) => {
-                setUpdatedAmount(e.target.value);
-              }}
-              style={{
-                border: "none",
-                outline: "none",
-                width: "100%",
-                backgroundColor: "#d3d3d3",
-                padding: "0.3rem",
-                borderRadius: "3px",
-              }}
-            />
+            <FormControl fullWidth variant="filled" sx={{ marginTop: "1rem" }}>
+              <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
+              <FilledInput
+                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
+                onChange={(e) => setUpdatedAmount(e.target.value)}
+                id="filled-adornment-amount"
+                startAdornment={
+                  <InputAdornment position="start">$</InputAdornment>
+                }
+              />
+            </FormControl>
           </Box>
           <FormControl fullWidth>
             <InputLabel id="new-category">Select Category</InputLabel>
@@ -148,40 +150,30 @@ export function ExpenseCard({
               ))}
             </Select>
           </FormControl>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="Date"
-              value={updatedDate !== null ? updatedDate : (selectedExpense && selectedExpense.date ? dayjs(selectedExpense.date) : null)}
-              onChange={(newValue) => {
-                setUpdatedDate(newValue);
-              }}
-              maxDate={dayjs()}
-              slotProps={{ textField: { fullWidth: true } }}
-            />
-          </LocalizationProvider>
+          <Box sx={{ marginBottom: "-1rem" }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Date"
+                value={updatedDate !== null ? updatedDate : (selectedExpense && selectedExpense.date ? dayjs(selectedExpense.date) : null)}
+                onChange={(newValue) => {
+                  setUpdatedDate(newValue);
+                }}
+                maxDate={dayjs()}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          </Box>
           <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <Typography fontSize={16} fontWeight={"400"}>
-              Notes:
-            </Typography>
-            <input
-              type="text"
-              title="notes"
+            <TextField
+              label="Note"
+              variant="outlined"
+              fullWidth
+              margin="normal"
               value={updatedNotes !== null ? updatedNotes : selectedExpense?.notes || ""}
-              placeholder="Add notes..."
-              style={{
-                border: "none",
-                outline: "none",
-                width: "100%",
-                backgroundColor: "#d3d3d3",
-                padding: "0.3rem",
-                borderRadius: "3px",
-              }}
-              onChange={(e) =>
-                setUpdatedNotes(e.target.value)
-              }
+              onChange={(e) => setUpdatedNotes(e.target.value)}
             />
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "right", gap: "1rem", borderTop: "1px solid #d3d3d3", paddingTop: "1rem" }}>
+          <Box sx={{ display: "flex", justifyContent: "right", gap: "1rem", borderTop: "1px solid #d3d3d3", marginTop: "4rem", paddingTop: "1rem" }}>
             <Button
               variant="outlined"
               color="primary"

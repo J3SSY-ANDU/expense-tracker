@@ -14,3 +14,11 @@ export interface NewExpense {
   date: string;
   notes: string;
 }
+
+export interface ExampleExpense {
+  name: string;
+  amount: number | string;
+  category_name: string;
+  date: Date;
+  notes: string;
+}
