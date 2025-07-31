@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import { Category, Expense, History as MonthlyHistory } from "./types";
 import { useOutletContext } from "react-router-dom";
@@ -8,7 +8,7 @@ import apiService from "./api/apiService";
 
 export default function Expenses() {
   const [updatingDataError, setUpdatingDataError] = useState<string | null>(null);
-  
+
   interface OutletContextType {
     categories: Category[] | null;
     setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
@@ -19,7 +19,6 @@ export default function Expenses() {
   }
 
   const { categories, setCategories, expenses, setExpenses, history, setHistory } = useOutletContext<OutletContextType>();
-
 
   if (!categories || !expenses || !history) {
     return <div>Loading...</div>;

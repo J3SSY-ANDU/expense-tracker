@@ -134,6 +134,7 @@ export function ExpensesTable({
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
   const [saveLoading, setSaveLoading] = useState<boolean>(false); // State for save loading
   const [exampleExpense, setExampleExpense] = useState<ExampleExpense | null>(null);
+  const [total, setTotal] = useState<number>(0);
 
   useEffect(() => {
     if (categories && expenses) {
@@ -156,10 +157,6 @@ export function ExpensesTable({
       setExampleExpense(exampleExpenses[Math.floor(Math.random() * exampleExpenses.length)]);
     }
   }, [categories, expenses]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   function formatDateToYYYYMMDD(date: Date) {
     const year = date.getFullYear();
@@ -397,11 +394,13 @@ export function ExpensesTable({
         return prev.map((h, i) => (i === historyIndex ? newHistory : h));
       });
     }
+
     setExpenses((prev) => {
       return prev
         ? prev.filter((expense) => expense.id !== selectedExpense.id)
         : null;
     });
+
     setCategories((prev) => {
       if (!prev) return prev;
       const category = prev.find(
@@ -419,8 +418,26 @@ export function ExpensesTable({
   };
 
   function truncateText(text: string, maxLength: number) {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + '…';
+    if (text && text.length <= maxLength) return text;
+    return text ? text.slice(0, maxLength) + '…' : '';
+  }
+
+  useEffect(() => {
+    if (mode === 'category') return;
+    // Only recalculate total if expenses changed
+    if (expenses && expenses.length > 0) {
+      let totalExpenses = 0;
+      for (let i = 0; i < expenses.length; i++) {
+        totalExpenses += Number(expenses[i].amount) || 0;
+      }
+      setTotal(totalExpenses);
+    } else {
+      setTotal(0);
+    }
+  }, [expenses, mode]);
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -475,10 +492,10 @@ export function ExpensesTable({
                     maxWidth: 100,
                   }}
                 >
-                  <Typography fontSize={14}>{truncateText(expense.name, 20)}</Typography>
+                  <Typography fontSize={14}>{truncateText(expense?.name, 20)}</Typography>
                 </TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>${expense.amount}</Typography></TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{truncateText(categoriesNames[expense.category_id], 20)}</Typography></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>${expense?.amount}</Typography></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{truncateText(categoriesNames[expense?.category_id], 20)}</Typography></TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography sx={{ fontSize: 14 }}>{new Date(expense.date).toLocaleDateString()}</Typography>
                 </TableCell>
@@ -487,7 +504,7 @@ export function ExpensesTable({
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   maxWidth: 200
-                }}><Typography sx={{ fontSize: 14 }}>{truncateText(expense.notes, 20)}</Typography></TableCell>
+                }}><Typography sx={{ fontSize: 14 }}>{truncateText(expense?.notes, 20)}</Typography></TableCell>
               </TableRow>
             ))}
             {exampleExpense && (
@@ -517,6 +534,16 @@ export function ExpensesTable({
                   <TableCell sx={{ color: "#6B7A90" }}>{exampleExpense.notes}</TableCell>
                 </TableRow>
               </Tooltip>
+            )}
+            {total > 0 && (
+              <TableRow>
+                <TableCell colSpan={5} sx={{ borderBottom: "none" }}>
+                    <Typography variant="body2" sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                      <span style={{ fontWeight: "bold" }}>Total:</span>
+                      <span>${total}</span>
+                    </Typography>
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

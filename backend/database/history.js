@@ -58,7 +58,7 @@ const getHistoryById = async (id) => {
 
 const getHistoryByUser = async (user_id) => {
     const [history] = await connectionPool.query(
-      `SELECT * FROM history WHERE user_id = ? AND (month <> MONTH(CURDATE()) OR year <> YEAR(CURDATE()))`,
+      `SELECT * FROM history WHERE user_id = ?`,
       [user_id]
     );
     return history;
