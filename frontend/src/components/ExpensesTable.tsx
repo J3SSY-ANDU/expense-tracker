@@ -424,6 +424,13 @@ export function ExpensesTable({
     return text ? text.slice(0, maxLength) + '…' : '';
   }
 
+  function formatNumberToCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  }
+
   useEffect(() => {
     if (mode === 'category') return;
     // Only recalculate total if expenses changed
@@ -542,7 +549,7 @@ export function ExpensesTable({
                 <TableCell colSpan={5} sx={{ borderBottom: "none" }}>
                     <Typography variant="body2" sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <span style={{ fontWeight: "bold" }}>Total:</span>
-                      <span>${total}</span>
+                      <span>{formatNumberToCurrency(total)}</span>
                     </Typography>
                 </TableCell>
               </TableRow>
