@@ -150,6 +150,7 @@ export function CategoryCard({
               value={selectedCategory?.name}
               title="name"
               placeholder="Add name..."
+              maxLength={50}
             />
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography fontSize={16} fontWeight={"400"} sx={{ minWidth: "120px" }}>
@@ -207,6 +208,7 @@ export function CategoryCard({
               setCategories={setCategories}
               setHistory={setHistory}
               handleUpdateData={handleUpdateData}
+              handleChangeIcon={handleChangeIcon}
               setOpenCategory={setOpenCategory}
               mode="category"
               title=""

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogTitle, Grid, IconButton, Tooltip } from "@mui/material";
+import { colors, Dialog, DialogTitle, Grid, IconButton, Tooltip } from "@mui/material";
 import { iconMap, icons } from "./icons";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -7,9 +7,10 @@ interface MuiIconPickerProps {
     value: string;
     onChange: (name: string) => void;
     selectedCategory: { icon: string } | null;
+    size?: number;
 }
 
-export function MuiIconPicker({ value, onChange, selectedCategory }: MuiIconPickerProps) {
+export function MuiIconPicker({ value, onChange, selectedCategory, size }: MuiIconPickerProps) {
     const [open, setOpen] = useState(false);
 
     const handleSelect = (name: string) => {
@@ -21,15 +22,19 @@ export function MuiIconPicker({ value, onChange, selectedCategory }: MuiIconPick
 
     return (
         <>
+            {size ? (
+                <SelectedIcon sx={{ fontSize: size, color: selectedCategory?.icon ? 'inherit' : 'transparent' }} />
+            ) : 
             <Tooltip title="Pick an icon">
                 <IconButton
                     onClick={() => setOpen(true)}
                     sx={{ color: 'var(--color-primary)' }}
                     aria-label="Pick an icon"
                 >
-                    <SelectedIcon sx={{ fontSize: 48 }} />
+                    <SelectedIcon sx={{ fontSize: size || 48 }} />
                 </IconButton>
             </Tooltip>
+            }
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <DialogTitle
                     sx={{

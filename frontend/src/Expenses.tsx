@@ -8,6 +8,9 @@ import apiService from "./api/apiService";
 
 export default function Expenses() {
   const [updatingDataError, setUpdatingDataError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+      null
+    ) // State for selected category
 
   interface OutletContextType {
     categories: Category[] | null;
@@ -59,6 +62,40 @@ export default function Expenses() {
     }
   }
 
+  const handleChangeIcon = async (iconName: string) => {
+    if (!selectedCategory) return
+
+    setSelectedCategory((prev) => {
+      if (prev) {
+        return { ...prev, icon: iconName };
+      }
+      return prev;
+    });
+
+    const updatedCategory = await apiService.updateCategoryIcon(
+      selectedCategory.id,
+      iconName
+    )
+    if (!updatedCategory || 'error' in updatedCategory) {
+      console.error(`Error updating category icon: ${updatedCategory?.error}`)
+      // Add any additional error handling here if needed
+      return
+    }
+
+    setCategories(prev => {
+      return prev
+        ? prev.map(category =>
+          category.id === updatedCategory.id ? updatedCategory : category
+        )
+        : null
+    })
+    const activeElement = document.activeElement as HTMLElement
+    if (activeElement) {
+      activeElement.blur()
+    }
+    console.log('Icon updated successfully.')
+  }
+
   return (
     <Box
       className="App"
@@ -105,6 +142,9 @@ export default function Expenses() {
         expenses={expenses}
         setExpenses={setExpenses}
         setHistory={setHistory}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        handleChangeIcon={handleChangeIcon}
         handleUpdateData={handleUpdateData}
       />
       <ExpensesTable
@@ -114,10 +154,11 @@ export default function Expenses() {
         setCategories={setCategories}
         setHistory={setHistory}
         handleUpdateData={handleUpdateData}
+        handleChangeIcon={handleChangeIcon}
         mode="monthly"
         title={"Monthly Expenses"}
       />
-      <History history={history} setHistory={setHistory} handleUpdateData={handleUpdateData} />
+      <History history={history} setHistory={setHistory} handleUpdateData={handleUpdateData} handleChangeIcon={handleChangeIcon} />
     </Box>
   );
 }

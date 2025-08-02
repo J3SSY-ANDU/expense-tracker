@@ -22,6 +22,7 @@ import apiService from "../api/apiService";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
 import Tooltip from '@mui/material/Tooltip';
+import { MuiIconPicker } from "./MuiIconPicker";
 
 export const exampleExpenses: ExampleExpense[] = [
   {
@@ -107,6 +108,7 @@ export function ExpensesTable({
   title,
   handleDeleteExpenseByCategory, // keep in props for now, but will only use if mode === "category"
   handleUpdateData, // Optional prop for updating history
+  handleChangeIcon, // Optional prop for changing category icon
   setOpenCategory, // Optional prop to open category dialog
 }: {
   expenses: Expense[] | null;
@@ -118,10 +120,14 @@ export function ExpensesTable({
   title: string;
   handleDeleteExpenseByCategory?: (expenseId: string) => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>; // Optional prop for updating history
+  handleChangeIcon: (icon: string) => void; // Optional prop for changing category icon
   setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
+    [key: string]: string;
+  }>({});
+  const [categoriesIcons, setCategoriesIcons] = useState<{
     [key: string]: string;
   }>({});
   const [newExpense, setNewExpense] = useState<boolean>(false); // State for new expense
@@ -148,6 +154,10 @@ export function ExpensesTable({
           setCategoriesNames((prev) => ({
             ...prev,
             [expense.category_id]: category.name,
+          }));
+          setCategoriesIcons((prev) => ({
+            ...prev,
+            [expense.category_id]: category.icon || "",
           }));
         }
       }
@@ -504,7 +514,17 @@ export function ExpensesTable({
                   <Typography fontSize={14}>{truncateText(expense?.name, 20)}</Typography>
                 </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{formatNumberToCurrency(Number(expense?.amount))}</Typography></TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{truncateText(categoriesNames[expense?.category_id], 20)}</Typography></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <Typography sx={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <MuiIconPicker
+                      value={categoriesIcons[expense?.category_id] || ""}
+                      onChange={(icon) => handleChangeIcon(icon)}
+                      selectedCategory={categoriesIcons[expense?.category_id] ? { icon: categoriesIcons[expense?.category_id] } : null}
+                      size={20}
+                    />
+                    {truncateText(categoriesNames[expense?.category_id], 20)}
+                  </Typography>
+                </TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography sx={{ fontSize: 14 }}>{new Date(expense.date).toLocaleDateString()}</Typography>
                 </TableCell>
@@ -547,10 +567,10 @@ export function ExpensesTable({
             {total > 0 && (
               <TableRow>
                 <TableCell colSpan={5} sx={{ borderBottom: "none" }}>
-                    <Typography variant="body2" sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                      <span style={{ fontWeight: "bold" }}>Total:</span>
-                      <span>{formatNumberToCurrency(total)}</span>
-                    </Typography>
+                  <Typography variant="body2" sx={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <span style={{ fontWeight: "bold" }}>Total:</span>
+                    <span>{formatNumberToCurrency(total)}</span>
+                  </Typography>
                 </TableCell>
               </TableRow>
             )}
@@ -584,6 +604,7 @@ export function ExpensesTable({
         showDeleteDialog={showDeleteDialog}
         handleDeleteExpense={handleDeleteExpense}
         handleUpdateData={handleUpdateData}
+        handleChangeIcon={handleChangeIcon}
         saveLoading={saveLoading}
         setSaveLoading={setSaveLoading}
         setOpenCategory={setOpenCategory}
