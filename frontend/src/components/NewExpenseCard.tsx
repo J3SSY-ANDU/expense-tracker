@@ -19,6 +19,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Category } from "../types";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import { NumericFormat } from 'react-number-format';
 
 export function NewExpenseCard({
   newExpense,
@@ -89,13 +90,18 @@ export function NewExpenseCard({
             />
             <FormControl fullWidth variant="filled" sx={{ marginTop: "1rem" }}>
               <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
-              <FilledInput
-                value={newExpenseAmount}
-                onChange={(e) => setNewExpenseAmount(e.target.value)}
+              <NumericFormat
                 id="filled-adornment-amount"
-                startAdornment={
-                  <InputAdornment position="start">$</InputAdornment>
-                }
+                customInput={FilledInput}
+                value={newExpenseAmount}
+                onValueChange={(values) => setNewExpenseAmount(values.value)}
+                thousandSeparator
+                decimalScale={2}
+                fixedDecimalScale
+                prefix="$"
+                allowNegative={false}
+                allowLeadingZeros={false}
+                placeholder="0.00"
               />
             </FormControl>
           </Box>

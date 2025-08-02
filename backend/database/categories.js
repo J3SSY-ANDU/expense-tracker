@@ -7,6 +7,8 @@ const dotenv = require('dotenv').config({
 })
 const { v4: uuidv4 } = require('uuid')
 const { categoriesData } = require('./categoriesData')
+const cron = require('node-cron');
+const { getAllUsers } = require('./users')
 
 ;(async () => {
   await connectionPool.query(`
@@ -82,6 +84,14 @@ const getCategoriesByUser = async user_id => {
   const [categories] = await connectionPool.query(
     `SELECT * FROM categories WHERE user_id = ?`,
     [user_id]
+  )
+  return categories
+}
+
+const getCategoriesByMonth = async (user_id, month, year) => {
+  const [categories] = await connectionPool.query(
+    `SELECT * FROM categories WHERE user_id = ? AND month = ? AND year = ?`,
+    [user_id, month, year]
   )
   return categories
 }
@@ -230,6 +240,40 @@ const deleteCategory = async id => {
   await connectionPool.query(`DELETE FROM categories WHERE id = ?`, [id])
   console.log('Category deleted successfully!')
 }
+
+cron.schedule('0 0 * * *', async () => {
+  // Runs every day at midnight
+  const now = new Date();
+  if (now.getDate() !== 1) return; // Only run on the first day of the month
+
+  const month = now.getMonth() + 1; // JS months are 0-indexed
+  const year = now.getFullYear();
+
+  const lastMonth = month === 1 ? 12 : month - 1;
+  const lastYear = month === 1 ? year - 1 : year;
+
+  const users = await getAllUsers(); // implement this function
+
+  for (const user of users) {
+    const categoriesThisMonth = await getCategoriesByMonth(user.id, month, year);
+    if (categoriesThisMonth.length > 0) continue; // Already created
+
+    const categoriesLastMonth = await getCategoriesByMonth(user.id, lastMonth, lastYear);
+
+    for (const cat of categoriesLastMonth) {
+      await createCategory(
+        cat.name,
+        user.id,
+        month,
+        year,
+        0, // reset expenses
+        cat.description,
+        cat.icon
+      );
+    }
+    console.log(`Created categories for user ${user.id} for ${month}/${year}`);
+  }
+});
 
 module.exports = {
   createCategory,

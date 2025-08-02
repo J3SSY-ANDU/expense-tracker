@@ -26,6 +26,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
+import { NumericFormat } from 'react-number-format';
+import { MuiIconPicker } from "./MuiIconPicker";
 
 export function ExpenseCard({
   openExpense,
@@ -37,8 +39,10 @@ export function ExpenseCard({
   showDeleteDialog,
   handleDeleteExpense,
   handleUpdateData,
+  handleChangeIcon,
   saveLoading = false,
   setSaveLoading,
+  setOpenCategory,
 }: {
   openExpense: boolean;
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
@@ -49,8 +53,10 @@ export function ExpenseCard({
   showDeleteDialog: boolean;
   handleDeleteExpense: () => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
+  handleChangeIcon: (icon: string) => void; // Function to change category icon
   saveLoading: boolean;
   setSaveLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [updatedName, setUpdatedName] = useState<string | null>(null);
   const [updatedAmount, setUpdatedAmount] = useState<string | null>(null);
@@ -119,13 +125,18 @@ export function ExpenseCard({
           <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             <FormControl fullWidth variant="filled" sx={{ marginTop: "1rem" }}>
               <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
-              <FilledInput
-                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
-                onChange={(e) => setUpdatedAmount(e.target.value)}
+              <NumericFormat
                 id="filled-adornment-amount"
-                startAdornment={
-                  <InputAdornment position="start">$</InputAdornment>
-                }
+                customInput={FilledInput}
+                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
+                onValueChange={(values) => setUpdatedAmount(values.value)}
+                thousandSeparator
+                decimalScale={2}
+                fixedDecimalScale
+                prefix="$"
+                allowNegative={false}
+                allowLeadingZeros={false}
+                placeholder="0.00"
               />
             </FormControl>
           </Box>
@@ -139,12 +150,26 @@ export function ExpenseCard({
               value={updatedCategory !== null ? updatedCategory : selectedExpense?.category_id || ""}
               label="Select Category"
               onChange={(e) => setUpdatedCategory(e.target.value)}
+              renderValue={(selectedId) => {
+                const selectedCat = categories?.find(cat => cat.id === selectedId);
+                if (!selectedCat) return '';
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <MuiIconPicker value={selectedCat.icon} onChange={() => { }} selectedCategory={{ icon: selectedCat.icon }} size={20} />
+                    {selectedCat.name}
+                  </Box>
+                );
+              }}
             >
               {categories?.map((category) => (
                 <MenuItem
                   key={category.id}
                   value={category.id}
+                  sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
                 >
+                  <MuiIconPicker value={category.icon} onChange={(icon) => {
+                    handleChangeIcon(icon);
+                  }} selectedCategory={category ? { icon: category.icon } : null} size={20} />
                   {category.name}
                 </MenuItem>
               ))}
@@ -207,6 +232,9 @@ export function ExpenseCard({
                 setUpdatedNotes(null);
                 setSelectedExpense(updated);
                 await handleUpdateData(updated);
+                if (setOpenCategory) {
+                  setOpenCategory(false);
+                }
                 setSaveLoading(false);
                 setOpenExpense(false);
               }}

@@ -8,12 +8,14 @@ export function History({
   history,
   setHistory,
   handleUpdateData,
+  handleChangeIcon,
 }: {
   history: MonthlyHistory[] | null;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
   handleUpdateData: (
     updatedExpense: Expense,
   ) => Promise<void>;
+  handleChangeIcon: (icon: string) => void; // Function to change category icon
 }) {
   const [expenses, setExpenses] = useState<Expense[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -100,6 +102,7 @@ export function History({
                 setCategories={setCategories}
                 setHistory={setHistory}
                 handleUpdateData={handleUpdateData}
+                handleChangeIcon={handleChangeIcon}
                 mode="history"
                 title=""
               />
