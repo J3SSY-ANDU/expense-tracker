@@ -503,7 +503,7 @@ export function ExpensesTable({
                 >
                   <Typography fontSize={14}>{truncateText(expense?.name, 20)}</Typography>
                 </TableCell>
-                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>${expense?.amount}</Typography></TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{formatNumberToCurrency(Number(expense?.amount))}</Typography></TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Typography sx={{ fontSize: 14 }}>{truncateText(categoriesNames[expense?.category_id], 20)}</Typography></TableCell>
                 <TableCell sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   <Typography sx={{ fontSize: 14 }}>{new Date(expense.date).toLocaleDateString()}</Typography>
@@ -535,7 +535,7 @@ export function ExpensesTable({
                   >
                     {exampleExpense.name}
                   </TableCell>
-                  <TableCell sx={{ color: "#6B7A90" }}>${exampleExpense.amount}</TableCell>
+                  <TableCell sx={{ color: "#6B7A90" }}>{formatNumberToCurrency(Number(exampleExpense.amount))}</TableCell>
                   <TableCell sx={{ color: "#6B7A90" }}>{exampleExpense.category_name}</TableCell>
                   <TableCell sx={{ color: "#6B7A90" }}>
                     {new Date(exampleExpense.date).toLocaleDateString()}

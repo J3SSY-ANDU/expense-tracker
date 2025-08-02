@@ -300,6 +300,13 @@ export function Categories({
     setOpenCategory(false)
   }
 
+  function formatNumberToCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  }
+
   if (loading) {
     return <div>Loading...</div>
   }
@@ -372,7 +379,7 @@ export function Categories({
                       </Typography>
                     </Box>
                     <Typography fontSize={14} fontWeight={'400'}>
-                      ${category.total_expenses}
+                      {formatNumberToCurrency(Number(category.total_expenses))}
                     </Typography>
                   </CardContent>
                 </Card>

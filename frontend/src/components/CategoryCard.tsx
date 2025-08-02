@@ -68,6 +68,13 @@ export function CategoryCard({
     });
   };
 
+  function formatNumberToCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  }
+
   return (
     <Backdrop
       open={openCategory}
@@ -153,7 +160,7 @@ export function CategoryCard({
                 backgroundColor: "#d3d3d3",
                 padding: "0.3rem",
                 borderRadius: "3px",
-              }}>${selectedCategory?.total_expenses}
+              }}>{formatNumberToCurrency(Number(selectedCategory?.total_expenses))}
               </span>
             </Box>
             <input
