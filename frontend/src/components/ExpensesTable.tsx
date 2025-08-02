@@ -107,6 +107,7 @@ export function ExpensesTable({
   title,
   handleDeleteExpenseByCategory, // keep in props for now, but will only use if mode === "category"
   handleUpdateData, // Optional prop for updating history
+  setOpenCategory, // Optional prop to open category dialog
 }: {
   expenses: Expense[] | null;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
@@ -117,6 +118,7 @@ export function ExpensesTable({
   title: string;
   handleDeleteExpenseByCategory?: (expenseId: string) => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>; // Optional prop for updating history
+  setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
@@ -577,6 +579,7 @@ export function ExpensesTable({
         handleUpdateData={handleUpdateData}
         saveLoading={saveLoading}
         setSaveLoading={setSaveLoading}
+        setOpenCategory={setOpenCategory}
       />
     </Box>
   );

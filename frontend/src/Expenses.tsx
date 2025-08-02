@@ -30,9 +30,7 @@ export default function Expenses() {
       const updated = await apiService.updateExpense(updatedExpense);
       if (updated && "error" in updated) {
         console.error(`Error updating expense: ${updated.error}`);
-        // Add any additional error handling here if needed
-
-
+        setUpdatingDataError(`Error updating expense: ${updated.error}`);
         return;
       }
       // Fetch updated data after successful update
@@ -42,13 +40,17 @@ export default function Expenses() {
         apiService.getHistoryData()
       ]);
 
-      if ((!expensesData || "error" in expensesData) || (!categoriesData || "error" in categoriesData) || (!historyData || "error" in historyData)) {
+      if (
+        (!expensesData || "error" in expensesData) ||
+        (!categoriesData || "error" in categoriesData) ||
+        (!historyData || "error" in historyData)
+      ) {
         console.error("Failed to fetch updated data.");
         setUpdatingDataError("Failed to fetch updated data.");
         return;
       }
       setExpenses(expensesData);
-      setCategories(categoriesData);
+      setCategories(categoriesData); // This will update category totals in the UI
       setHistory(historyData);
     } catch (error) {
       console.error("Error updating expense:", error);

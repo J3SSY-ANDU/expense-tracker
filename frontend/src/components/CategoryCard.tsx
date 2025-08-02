@@ -200,6 +200,7 @@ export function CategoryCard({
               setCategories={setCategories}
               setHistory={setHistory}
               handleUpdateData={handleUpdateData}
+              setOpenCategory={setOpenCategory}
               mode="category"
               title=""
             />

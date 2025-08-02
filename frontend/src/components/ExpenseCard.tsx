@@ -39,6 +39,7 @@ export function ExpenseCard({
   handleUpdateData,
   saveLoading = false,
   setSaveLoading,
+  setOpenCategory,
 }: {
   openExpense: boolean;
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
@@ -51,6 +52,7 @@ export function ExpenseCard({
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
   saveLoading: boolean;
   setSaveLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [updatedName, setUpdatedName] = useState<string | null>(null);
   const [updatedAmount, setUpdatedAmount] = useState<string | null>(null);
@@ -207,6 +209,9 @@ export function ExpenseCard({
                 setUpdatedNotes(null);
                 setSelectedExpense(updated);
                 await handleUpdateData(updated);
+                if (setOpenCategory) {
+                  setOpenCategory(false);
+                }
                 setSaveLoading(false);
                 setOpenExpense(false);
               }}
