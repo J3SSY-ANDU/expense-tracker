@@ -22,6 +22,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { NumericFormat } from 'react-number-format';
 import { useState } from "react";
+import { MuiIconPicker } from "./MuiIconPicker";
 
 export function NewExpenseCard({
   newExpense,
@@ -134,11 +135,6 @@ export function NewExpenseCard({
               }}
               error={!!errors.name}
               helperText={errors.name}
-              sx={{
-                "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-                  borderColor: errors.name ? "var(--color-error)" : "inherit",
-                },
-              }}
             />
             <FormControl
               fullWidth
@@ -146,14 +142,6 @@ export function NewExpenseCard({
               error={!!errors.amount}
               sx={{
                 marginTop: "1rem",
-                "& .MuiFilledInput-root": {
-                  "&:before": {
-                    borderBottomColor: errors.amount ? "var(--color-error)" : "rgba(0, 0, 0, 0.42)",
-                  },
-                  "&:after": {
-                    borderBottomColor: errors.amount ? "var(--color-error)" : "#1976d2",
-                  },
-                },
               }}
             >
               <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
@@ -184,11 +172,6 @@ export function NewExpenseCard({
             <FormControl
               fullWidth
               error={!!errors.category}
-              sx={{
-                "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-                  borderColor: errors.category ? "var(--color-error)" : "inherit",
-                },
-              }}
             >
               <InputLabel id="category">Select Category</InputLabel>
               <Select
@@ -204,13 +187,25 @@ export function NewExpenseCard({
                   const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
                   setSelectedCategory(selectedCat);
                 }}
+                renderValue={(selectedId) => {
+                const selectedCat = categories?.find(cat => cat.id === selectedId);
+                if (!selectedCat) return '';
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <MuiIconPicker value={selectedCat.icon} onChange={() => { }} selectedCategory={{ icon: selectedCat.icon }} size={20} />
+                    {selectedCat.name}
+                  </Box>
+                );
+              }}
                 error={!!errors.category}
               >
                 {categories?.map((category) => (
                   <MenuItem
                     key={category.id}
                     value={category.id}
+                    sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
                   >
+                    <MuiIconPicker value={category.icon} selectedCategory={category} onChange={() => {}} size={20} />
                     {category.name}
                   </MenuItem>
                 ))}
@@ -233,11 +228,6 @@ export function NewExpenseCard({
                     fullWidth: true,
                     error: !!errors.date,
                     helperText: errors.date,
-                    sx: {
-                      "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-                        borderColor: errors.date ? "var(--color-error)" : "inherit",
-                      },
-                    },
                   },
                 }}
               />
