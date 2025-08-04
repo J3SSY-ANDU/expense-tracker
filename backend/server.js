@@ -347,10 +347,10 @@ app.post(
   async (req, res) => {
     try {
       const { category_id, description } = req.body
-      if (!category_id || !description) {
+      if (!category_id) {
         return res
           .status(400)
-          .json({ error: 'category_id and description are required.' })
+          .json({ error: 'category_id is required.' })
       }
       const updatedCategory = await updateCategoryDescription(
         category_id,
