@@ -252,7 +252,8 @@ const updateExpense = async (id, updates) => {
           newMonth,
           newYear,
           parsedAmount,
-          selectedCategory.description
+          selectedCategory.description,
+          selectedCategory.icon
         )
         newCategoryId = createdCategory.id
       } else {
