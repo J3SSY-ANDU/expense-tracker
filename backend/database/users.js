@@ -24,6 +24,11 @@ const { deleteAccountEmail } = require('../emails')
   console.log('Table created successfully!')
 })()
 
+const getAllUsers = async () => {
+  const [users] = await connectionPool.query(`SELECT * FROM users`)
+  return users
+}
+
 const createUser = async (firstname, lastname, email, password) => {
   const userByEmail = await getUserByEmail(email)
   if (userByEmail) {
@@ -160,6 +165,7 @@ const verifyUser = async id => {
 }
 
 module.exports = {
+  getAllUsers,
   createUser,
   getUserById,
   getUserByEmail,

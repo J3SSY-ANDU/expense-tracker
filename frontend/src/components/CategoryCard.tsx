@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
+  TextField,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ExpensesTable } from "./ExpensesTable";
@@ -55,7 +56,19 @@ export function CategoryCard({
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
+  const [errors, setErrors] = useState<{ name: string; }>({ name: "" });
 
+  // Validate fields before saving
+  const validateFields = () => {
+    let valid = true;
+    const newErrors = { name: "" };
+    if (!selectedCategory?.name || selectedCategory.name.trim() === "") {
+      newErrors.name = "Name is required";
+      valid = false;
+    }
+    setErrors(newErrors);
+    return valid;
+  };
 
   // Function to handle deleting an expense by category globally
   const handleDeleteExpenseByCategory = (expenseId: string) => {
@@ -68,11 +81,21 @@ export function CategoryCard({
     });
   };
 
+  function formatNumberToCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  }
+
   return (
     <Backdrop
       open={openCategory}
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
-      onClick={() => setOpenCategory(false)}
+      onClick={() => {
+        setErrors({ name: "" });
+        setOpenCategory(false);
+      }}
     >
       <Card
         sx={{
@@ -101,7 +124,19 @@ export function CategoryCard({
               }}
               selectedCategory={selectedCategory}
             />
-            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
+            <Box
+              sx={{
+                display: "flex",
+                gap: "0.3rem",
+                alignItems: "center",
+                cursor: "pointer",
+                borderRadius: "4px",
+                transition: "background 0.2s",
+                "&:hover": {
+                  background: "#f5f5f5",
+                },
+                padding: "0.5rem",
+              }}
               onClick={() => setShowDeleteDialog(true)}
             >
               <DeleteIcon
@@ -116,35 +151,49 @@ export function CategoryCard({
             </Box>
           </Box>
           <Box sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            <TextField
+              variant="standard"
+              InputProps={{
+                disableUnderline: true,
+                style: { fontSize: "2rem", fontWeight: 700, padding: 0, background: "none" },
+              }}
+              inputProps={{
+                style: { fontSize: "2rem", fontWeight: 700, padding: 0, background: "none" },
+                maxLength: 50,
+              }}
+              sx={{
+                transition: "background 0.2s",
+                borderRadius: "4px",
+                "&:hover": { background: "#f5f5f5" },
+              }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setErrors(prev => ({ ...prev, name: "" }));
                 setSelectedCategory((prev) => {
-                  if (prev) {
-                    return { ...prev, name: e.target.value };
-                  } else {
-                    return null;
-                  }
-                })
-              }
+                  if (prev) return { ...prev, name: e.target.value };
+                  else return null;
+                });
+              }}
               onKeyDown={async (e) => {
                 if (e.key === "Enter") {
-                  await handleChangeName();
+                  if (validateFields()) await handleChangeName();
                 }
               }}
               onBlur={async () => {
-                await handleChangeName();
-              }}
-              style={{
-                all: "unset",
-                width: "100%",
-                fontSize: "1.5rem",
-                fontWeight: "700",
+                if (validateFields()) await handleChangeName();
               }}
               value={selectedCategory?.name}
+              helperText={errors.name}
+              error={!!errors.name}
               title="name"
+              fullWidth
               placeholder="Add name..."
             />
-            <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <Typography fontSize={16} fontWeight={"400"} sx={{ minWidth: "120px" }}>
                 Total expenses
               </Typography>
@@ -153,7 +202,7 @@ export function CategoryCard({
                 backgroundColor: "#d3d3d3",
                 padding: "0.3rem",
                 borderRadius: "3px",
-              }}>${selectedCategory?.total_expenses}
+              }}>{formatNumberToCurrency(Number(selectedCategory?.total_expenses))}
               </span>
             </Box>
             <input
@@ -186,7 +235,10 @@ export function CategoryCard({
                 padding: "0.3rem 0.5rem",
                 cursor: "text",
                 marginBottom: "1rem",
+                transition: "background 0.2s",
               }}
+              onMouseOver={e => (e.currentTarget.style.background = "#f5f5f5")}
+              onMouseOut={e => (e.currentTarget.style.background = "none")}
             />
           </Box>
           {newExpensesByCategory && newExpensesByCategory.length > 0 && (
@@ -200,6 +252,8 @@ export function CategoryCard({
               setCategories={setCategories}
               setHistory={setHistory}
               handleUpdateData={handleUpdateData}
+              handleChangeIcon={handleChangeIcon}
+              setOpenCategory={setOpenCategory}
               mode="category"
               title=""
             />

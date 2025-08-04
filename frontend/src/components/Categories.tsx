@@ -26,13 +26,19 @@ export function Categories({
   expenses,
   setExpenses,
   setHistory,
+  selectedCategory,
+  setSelectedCategory,
+  handleChangeIcon,
   handleUpdateData
 }: {
   categories: Category[] | null
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>
   expenses: Expense[] | null
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>
+  selectedCategory: Category | null
+  setSelectedCategory: React.Dispatch<React.SetStateAction<Category | null>>
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>
+  handleChangeIcon: (icon: string) => void // Function to change category icon
   handleUpdateData: (updatedExpense: Expense) => Promise<void> // Function to update expense data
 }) {
   const [newExpensesByCategory, setNewExpensesByCategory] = useState<
@@ -43,9 +49,6 @@ export function Categories({
   const [newCategoryName, setNewCategoryName] = useState<string>('') // State for category name
   const newCategoryRef = useRef<HTMLInputElement | null>(null) // Reference to the new category DOM element
   const [openCategory, setOpenCategory] = useState<boolean>(false) // State for backdrop
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-    null
-  ) // State for selected category
   const MAX_VISIBLE_CATEGORIES = 8;
   const [showAll, setShowAll] = useState<boolean>(true) // State to toggle showing all categories
   const visibleCategories = showAll
@@ -233,40 +236,6 @@ export function Categories({
     console.log('Description updated successfully.')
   }
 
-  const handleChangeIcon = async (iconName: string) => {
-    if (!selectedCategory) return
-
-    setSelectedCategory((prev) => {
-      if (prev) {
-        return { ...prev, icon: iconName };
-      }
-      return prev;
-    });
-
-    const updatedCategory = await apiService.updateCategoryIcon(
-      selectedCategory.id,
-      iconName
-    )
-    if (!updatedCategory || 'error' in updatedCategory) {
-      console.error(`Error updating category icon: ${updatedCategory?.error}`)
-      // Add any additional error handling here if needed
-      return
-    }
-
-    setCategories(prev => {
-      return prev
-        ? prev.map(category =>
-          category.id === updatedCategory.id ? updatedCategory : category
-        )
-        : null
-    })
-    const activeElement = document.activeElement as HTMLElement
-    if (activeElement) {
-      activeElement.blur()
-    }
-    console.log('Icon updated successfully.')
-  }
-
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return
     if (expenses) {
@@ -298,6 +267,13 @@ export function Categories({
     })
     setSelectedCategory(null)
     setOpenCategory(false)
+  }
+
+  function formatNumberToCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
   }
 
   if (loading) {
@@ -367,12 +343,15 @@ export function Categories({
                         fontSize={16}
                         fontWeight={'600'}
                         marginBottom={'1rem'}
+                        whiteSpace={'nowrap'}
+                        overflow={'hidden'}
+                        textOverflow={'ellipsis'}
                       >
                         {category.name}
                       </Typography>
                     </Box>
                     <Typography fontSize={14} fontWeight={'400'}>
-                      ${category.total_expenses}
+                      {formatNumberToCurrency(Number(category.total_expenses))}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -384,6 +363,7 @@ export function Categories({
               <Card sx={{ background: '#f5f5f5', borderRadius: '12px' }}>
                 <CardContent>
                   <input
+                    maxLength={50}
                     type='text'
                     placeholder='Enter category name'
                     onChange={e => setNewCategoryName(e.target.value)}
@@ -395,7 +375,9 @@ export function Categories({
                       width: '100%',
                       marginBottom: '1rem',
                       fontSize: '16px',
-                      fontWeight: '600'
+                      fontWeight: '600',
+                      overflow: 'auto',
+                      marginRight: "1rem",
                     }}
                     ref={newCategoryRef}
                   />

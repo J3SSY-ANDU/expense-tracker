@@ -12,6 +12,7 @@ import {
   DialogTitle,
   FilledInput,
   FormControl,
+  FormHelperText,
   InputAdornment,
   InputLabel,
   MenuItem,
@@ -26,6 +27,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
+import { NumericFormat } from 'react-number-format';
+import { MuiIconPicker } from "./MuiIconPicker";
 
 export function ExpenseCard({
   openExpense,
@@ -37,8 +40,10 @@ export function ExpenseCard({
   showDeleteDialog,
   handleDeleteExpense,
   handleUpdateData,
+  handleChangeIcon,
   saveLoading = false,
   setSaveLoading,
+  setOpenCategory,
 }: {
   openExpense: boolean;
   setOpenExpense: React.Dispatch<React.SetStateAction<boolean>>;
@@ -49,14 +54,46 @@ export function ExpenseCard({
   showDeleteDialog: boolean;
   handleDeleteExpense: () => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
+  handleChangeIcon: (icon: string) => void;
   saveLoading: boolean;
   setSaveLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [updatedName, setUpdatedName] = useState<string | null>(null);
   const [updatedAmount, setUpdatedAmount] = useState<string | null>(null);
   const [updatedCategory, setUpdatedCategory] = useState<string | null>(null);
   const [updatedDate, setUpdatedDate] = useState<Dayjs | null>(null);
   const [updatedNotes, setUpdatedNotes] = useState<string | null>(null);
+  const [errors, setErrors] = useState({ name: "", amount: "", category: "", date: "" });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { name: "", amount: "", category: "", date: "" };
+    if (!((updatedName !== null ? updatedName : selectedExpense?.name) || "").trim()) {
+      newErrors.name = "Name is required";
+      isValid = false;
+    }
+    const amt = updatedAmount !== null ? updatedAmount : selectedExpense?.amount;
+    if (!amt || isNaN(Number(amt)) || Number(amt) <= 0) {
+      newErrors.amount = "Amount must be a positive number";
+      isValid = false;
+    }
+    if (!((updatedCategory !== null ? updatedCategory : selectedExpense?.category_id) || "")) {
+      newErrors.category = "Category is required";
+      isValid = false;
+    }
+    const dt = updatedDate !== null ? updatedDate : (selectedExpense && selectedExpense.date ? dayjs(selectedExpense.date) : null);
+    if (!dt) {
+      newErrors.date = "Date is required";
+      isValid = false;
+    }
+    if (dt && new Date(dt.toString()) > new Date()) {
+      newErrors.date = "Valid date is required";
+      isValid = false;
+    }
+    setErrors(newErrors);
+    return isValid;
+  };
 
   return (
     <Backdrop
@@ -67,6 +104,7 @@ export function ExpenseCard({
         setUpdatedCategory(null);
         setUpdatedDate(null);
         setUpdatedNotes(null);
+        setErrors({ name: "", amount: "", category: "", date: "" });
         setOpenExpense(false);
       }}
       sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -82,54 +120,88 @@ export function ExpenseCard({
         <CardContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
-          <Box
+            <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
             }}
-          >
-            <input
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                setUpdatedName(e.target.value);
+            >
+            <TextField
+              variant="standard"
+              InputProps={{
+              disableUnderline: true,
+              style: { fontSize: "2rem", fontWeight: 700, padding: 0, background: "none" },
               }}
-              style={{
-                all: "unset",
-                width: "100%",
-                fontSize: "2rem",
-                fontWeight: "700",
+              inputProps={{
+              style: { fontSize: "2rem", fontWeight: 700, padding: 0, background: "none" },
+              maxLength: 25,
+              }}
+              sx={{
+              transition: "background 0.2s",
+              borderRadius: "4px",
+              "&:hover": {
+                background: "#f5f5f5",
+              },
+              }}
+              onChange={(e) => {
+              setErrors(prev => ({ ...prev, name: "" }));
+              setUpdatedName(e.target.value);
               }}
               value={updatedName !== null ? updatedName : selectedExpense?.name || ""}
-              title="name"
+              error={!!errors.name}
+              helperText={errors.name}
+              fullWidth
               placeholder="Add name..."
             />
-            <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center", cursor: "pointer" }}
+            <Box
+              sx={{
+              display: "flex",
+              gap: "0.3rem",
+              alignItems: "center",
+              cursor: "pointer",
+              borderRadius: "4px",
+              transition: "background 0.2s",
+              "&:hover": {
+                background: "#f5f5f5",
+              },
+              padding: "0rem 0.5rem",
+              }}
               onClick={() => setShowDeleteDialog(true)}
             >
               <DeleteIcon
-                sx={{ fontSize: 20 }}
-                color="action"
+              sx={{ fontSize: 20 }}
+              color="action"
               />
-              <Typography
-                fontWeight={"600"}
-              >
-                Delete
+              <Typography fontWeight={"600"}>
+              Delete
               </Typography>
             </Box>
-          </Box>
+            </Box>
           <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-            <FormControl fullWidth variant="filled" sx={{ marginTop: "1rem" }}>
+            <FormControl fullWidth variant="filled" error={!!errors.amount} sx={{ marginTop: "1rem" }}>
               <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
-              <FilledInput
-                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
-                onChange={(e) => setUpdatedAmount(e.target.value)}
+              <NumericFormat
                 id="filled-adornment-amount"
-                startAdornment={
-                  <InputAdornment position="start">$</InputAdornment>
-                }
+                customInput={FilledInput}
+                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
+                onValueChange={(values) => {
+                  setErrors(prev => ({ ...prev, amount: "" }));
+                  setUpdatedAmount(values.value);
+                }}
+                thousandSeparator
+                decimalScale={2}
+                fixedDecimalScale
+                prefix="$"
+                allowNegative={false}
+                allowLeadingZeros={false}
+                placeholder="0.00"
               />
+              {errors.amount && (
+                <FormHelperText error>{errors.amount}</FormHelperText>
+              )}
             </FormControl>
           </Box>
-          <FormControl fullWidth>
+          <FormControl fullWidth error={!!errors.category}>
             <InputLabel id="new-category">Select Category</InputLabel>
             <Select
               fullWidth
@@ -138,17 +210,38 @@ export function ExpenseCard({
               variant="outlined"
               value={updatedCategory !== null ? updatedCategory : selectedExpense?.category_id || ""}
               label="Select Category"
-              onChange={(e) => setUpdatedCategory(e.target.value)}
+              onChange={(e) => {
+                setErrors(prev => ({ ...prev, category: "" }));
+                setUpdatedCategory(e.target.value);
+              }}
+              renderValue={(selectedId) => {
+                const selectedCat = categories?.find(cat => cat.id === selectedId);
+                if (!selectedCat) return '';
+                return (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <MuiIconPicker value={selectedCat.icon} onChange={() => { }} selectedCategory={{ icon: selectedCat.icon }} size={20} />
+                    {selectedCat.name}
+                  </Box>
+                );
+              }}
+              error={!!errors.category}
             >
               {categories?.map((category) => (
                 <MenuItem
                   key={category.id}
                   value={category.id}
+                  sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
                 >
+                  <MuiIconPicker value={category.icon} onChange={(icon) => {
+                    handleChangeIcon(icon);
+                  }} selectedCategory={category ? { icon: category.icon } : null} size={20} />
                   {category.name}
                 </MenuItem>
               ))}
             </Select>
+            {errors.category && (
+              <FormHelperText error>{errors.category}</FormHelperText>
+            )}
           </FormControl>
           <Box sx={{ marginBottom: "-1rem" }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -156,10 +249,17 @@ export function ExpenseCard({
                 label="Date"
                 value={updatedDate !== null ? updatedDate : (selectedExpense && selectedExpense.date ? dayjs(selectedExpense.date) : null)}
                 onChange={(newValue) => {
+                  setErrors(prev => ({ ...prev, date: "" }));
                   setUpdatedDate(newValue);
                 }}
                 maxDate={dayjs()}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    error: !!errors.date,
+                    helperText: errors.date,
+                  },
+                }}
               />
             </LocalizationProvider>
           </Box>
@@ -169,6 +269,7 @@ export function ExpenseCard({
               variant="outlined"
               fullWidth
               margin="normal"
+              inputProps={{ maxLength: 100}}
               value={updatedNotes !== null ? updatedNotes : selectedExpense?.notes || ""}
               onChange={(e) => setUpdatedNotes(e.target.value)}
             />
@@ -183,12 +284,14 @@ export function ExpenseCard({
                 setUpdatedCategory(null);
                 setUpdatedDate(null);
                 setUpdatedNotes(null);
+                setErrors({ name: "", amount: "", category: "", date: "" });
                 setOpenExpense(false);
               }}>Cancel</Button>
             <Button
               variant="outlined"
               color="primary"
               onClick={async () => {
+                if (!validateForm()) return;
                 setSaveLoading(true);
                 if (!selectedExpense) return;
                 const oldExpense = selectedExpense;
@@ -207,6 +310,9 @@ export function ExpenseCard({
                 setUpdatedNotes(null);
                 setSelectedExpense(updated);
                 await handleUpdateData(updated);
+                if (setOpenCategory) {
+                  setOpenCategory(false);
+                }
                 setSaveLoading(false);
                 setOpenExpense(false);
               }}
