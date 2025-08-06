@@ -390,8 +390,8 @@ app.post('/update-category-icon', authenticateToken, async (req, res) => {
 
 app.post('/add-category', authenticateToken, async (req, res) => {
   try {
-    const { name, month, year, total_expenses, description, icon } = req.body
-    if (!name || !month || !year || total_expenses === undefined) {
+    const { name, month, year, budget, total_expenses, description, icon } = req.body
+    if (!name || !month || !year) {
       return res.status(400).json({ error: 'All fields are required.' })
     }
     const category = await createCategory(
@@ -399,6 +399,7 @@ app.post('/add-category', authenticateToken, async (req, res) => {
       req.user.id,
       month,
       year,
+      budget,
       total_expenses,
       description,
       icon
