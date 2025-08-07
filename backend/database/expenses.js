@@ -18,6 +18,7 @@ const {
   getHistoryByMonthYear,
   deleteMonth
 } = require('./history')
+const { updateBudgetTotalExpenses, getBudgetByUserMonthYear } = require('./budgets');
 
 ;(async () => {
   await connectionPool.query(`
@@ -51,6 +52,7 @@ const createExpense = async (
   const monthDate = new Date(date)
   const month = new Date(date).getUTCMonth() + 1
   const year = new Date(date).getFullYear()
+  const budget = await getBudgetByUserMonthYear(user_id, month, year)
   if (monthDate.getUTCDate() === 1) {
     monthDate.setUTCDate(monthDate.getUTCDate() + 1)
   }
@@ -80,12 +82,14 @@ const createExpense = async (
         categoryById.user_id,
         month,
         year,
+        0, // Start with 0 for new month/year
         amount,
         categoryById.description
       )
       category_id = newCategory.id
     } else {
       await updateCategoryTotalExpenses(categoryByMonthYear.id, amount)
+      await updateBudgetTotalExpenses(budget.id, amount)
       category_id = categoryByMonthYear.id
     }
   }
@@ -100,6 +104,7 @@ const createExpense = async (
   }
   if (month === thisMonth && year === thisYear) {
     await updateCategoryTotalExpenses(category_id, amount)
+    await updateBudgetTotalExpenses(budget.id, amount)
   }
   console.log('Expense created successfully!')
   return expense

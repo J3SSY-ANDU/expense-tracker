@@ -46,7 +46,7 @@ const createCategory = async (
   }
   const id = uuidv4()
   await connectionPool.query(
-    `INSERT INTO categories (id, user_id, name, month, year, budget, total_expenses, description, icon) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO categories (id, user_id, name, month, year, budget, total_expenses, description, icon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [id, user_id, name, month, year, budget, total_expenses, description, icon]
   )
   const category = await getCategoryById(id)
@@ -58,7 +58,7 @@ const createCategory = async (
   return category
 }
 
-const createDefaultCategories = async user_id => {
+const createDefaultCategories = async (user_id, connection) => {
   const date = new Date()
   const month = date.getMonth() + 1
   const year = date.getFullYear()
@@ -75,9 +75,9 @@ const createDefaultCategories = async user_id => {
     category.icon
   ])
   // Insert all categories in one query
-  await connectionPool.query(
+  await (connection || connectionPool).query(
     `INSERT IGNORE INTO categories (id, user_id, name, month, year, budget, total_expenses, description, icon)
-     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
+     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
     values.flat()
   )
   console.log('Default categories created successfully!')

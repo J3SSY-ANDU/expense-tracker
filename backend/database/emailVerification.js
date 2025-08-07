@@ -46,8 +46,8 @@ const getEmailByVerificationToken = async token => {
   return result[0].email
 }
 
-const invalidateTokensByEmail = async (email) => {
-  await connectionPool.query(
+const invalidateTokensByEmail = async (email, connection) => {
+  await (connection || connectionPool).query(
     `UPDATE email_verification SET valid = FALSE WHERE email = ?`,
     [email]
   );
