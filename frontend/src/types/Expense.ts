@@ -2,6 +2,7 @@ export interface Expense {
   id: string;
   name: string;
   amount: number | string;
+  budget_id: string;
   category_id: string;
   date: Date;
   notes: string;

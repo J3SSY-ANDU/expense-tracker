@@ -27,12 +27,14 @@ const { updateBudgetTotalExpenses, getBudgetByUserMonthYear } = require('./budge
             user_id VARCHAR(100) NOT NULL,
             name VARCHAR(50) NOT NULL,
             amount DECIMAL(10,2) NOT NULL,
+            budget_id VARCHAR(100) NOT NULL,
             category_id VARCHAR(100) NOT NULL,
             created_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             date DATE NOT NULL,
             history_id VARCHAR(100) NOT NULL,
             notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (budget_id) REFERENCES budgets(id),
             FOREIGN KEY (category_id) REFERENCES categories(id),
             FOREIGN KEY (history_id) REFERENCES history(id)
         );
@@ -94,8 +96,8 @@ const createExpense = async (
     }
   }
   await connectionPool.query(
-    `INSERT INTO expenses (id, user_id, name, amount, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, user_id, name, amount, category_id, date, historyMonth.id, notes]
+    `INSERT INTO expenses (id, user_id, name, amount, budget_id, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, user_id, name, amount, budget.id, category_id, date, historyMonth.id, notes]
   )
   const expense = await getExpenseById(id)
   if (!expense) {
@@ -332,6 +334,8 @@ const deleteExpense = async id => {
   }
   await connectionPool.query(`DELETE FROM expenses WHERE id = ?`, [id])
   await updateCategoryTotalExpenses(expense.category_id, -expense.amount)
+  await updateBudgetTotalExpenses(expense.budget_id, -expense.amount)
+  // Update the history month total
   await updateMonth(
     expense.user_id,
     new Date(expense.date).getMonth() + 1,
