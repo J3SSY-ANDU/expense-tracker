@@ -183,7 +183,7 @@ export function ExpenseCard({
               <NumericFormat
                 id="filled-adornment-amount"
                 customInput={FilledInput}
-                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount || ""}
+                value={updatedAmount !== null ? updatedAmount : selectedExpense?.amount}
                 onValueChange={(values) => {
                   setErrors(prev => ({ ...prev, amount: "" }));
                   setUpdatedAmount(values.value);
