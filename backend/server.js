@@ -9,6 +9,7 @@ const dotenv = require('dotenv').config({
 const cors = require('cors')
 const bcrypt = require('bcrypt')
 const path = require('path')
+const { connectionPool } = require('./database/db')
 
 const app = express()
 const {
@@ -50,6 +51,7 @@ const {
   invalidateTokensByEmail,
   getEmailByVerificationToken
 } = require('./database/emailVerification')
+const { createBudget } = require('./database/budgets')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -127,6 +129,7 @@ app.post('/process-signup', async (req, res) => {
 // Needs to be fixed
 app.get('/verify-email/:token', async (req, res) => {
   const { token } = req.params
+  let connection
   if (!token) {
     return res.status(400).json({ error: 'Token is required' })
   }
@@ -146,9 +149,27 @@ app.get('/verify-email/:token', async (req, res) => {
         .status(200)
         .json({ message: 'Email already verified! Please log in.' })
     } else {
-      await verifyUser(user.id)
-      await invalidateTokensByEmail(email)
-      await createDefaultCategories(user.id)
+      connection = await connectionPool.getConnection()
+      await connection.beginTransaction()
+
+      await verifyUser(user.id, connection)
+      await invalidateTokensByEmail(email, connection)
+      await createDefaultCategories(user.id, connection)
+      await createBudget(
+        user.id,
+        new Date().getMonth() + 1,
+        new Date().getFullYear(),
+        0,
+        0,
+        connection
+      )
+
+      if (!createBudget) {
+        throw new Error('USER_VERIFICATION_FAILED')
+      }
+
+      await connection.commit()
+      connection.release()
 
       const authToken = jwt.sign(
         { id: user.id, purpose: 'authentication' },
@@ -163,10 +184,19 @@ app.get('/verify-email/:token', async (req, res) => {
     }
   } catch (err) {
     console.error('Error verifying token or user:', err)
+    if (connection) {
+      try {
+        console.log('Rolling back transaction due to error')
+        await connection.rollback()
+      } catch (rollbackError) {
+        console.error('Error during rollback:', rollbackError)
+      }
+      connection.release()
+    }
     if (err.message === 'USER_VERIFICATION_FAILED') {
       return res.status(500).json({ error: 'User verification failed!' })
     }
-    return res.status(401).json({ error: 'Email verification failed!' })
+    return res.status(500).json({ error: 'Email verification failed!' })
   }
 })
 
@@ -292,6 +322,7 @@ app.get('/generate-default-categories', authenticateToken, async (req, res) => {
         req.user.id,
         month,
         year,
+        0,
         category.total_expenses,
         category.description,
         category.icon
@@ -348,9 +379,7 @@ app.post(
     try {
       const { category_id, description } = req.body
       if (!category_id) {
-        return res
-          .status(400)
-          .json({ error: 'category_id is required.' })
+        return res.status(400).json({ error: 'category_id is required.' })
       }
       const updatedCategory = await updateCategoryDescription(
         category_id,
@@ -373,9 +402,7 @@ app.post('/update-category-icon', authenticateToken, async (req, res) => {
   try {
     const { category_id, icon } = req.body
     if (!category_id) {
-      return res
-        .status(400)
-        .json({ error: 'category_id is required.' })
+      return res.status(400).json({ error: 'category_id is required.' })
     }
     const updatedCategory = await updateCategoryIcon(category_id, icon)
     if (!updatedCategory) {
@@ -390,8 +417,9 @@ app.post('/update-category-icon', authenticateToken, async (req, res) => {
 
 app.post('/add-category', authenticateToken, async (req, res) => {
   try {
-    const { name, month, year, total_expenses, description, icon } = req.body
-    if (!name || !month || !year || total_expenses === undefined) {
+    const { name, month, year, budget, total_expenses, description, icon } =
+      req.body
+    if (!name || !month || !year) {
       return res.status(400).json({ error: 'All fields are required.' })
     }
     const category = await createCategory(
@@ -399,6 +427,7 @@ app.post('/add-category', authenticateToken, async (req, res) => {
       req.user.id,
       month,
       year,
+      budget,
       total_expenses,
       description,
       icon
@@ -461,6 +490,7 @@ app.get('/all-monthly-expenses', authenticateToken, async (req, res) => {
   }
 })
 
+// Needs to be updated to include budget logic
 app.post('/create-expense', authenticateToken, async (req, res) => {
   try {
     const { name, amount, category_id, date, notes } = req.body
@@ -485,6 +515,7 @@ app.post('/create-expense', authenticateToken, async (req, res) => {
   }
 })
 
+// Needs to be updated to include budget logic
 app.put('/update-expense', authenticateToken, async (req, res) => {
   try {
     const { id, name, amount, category_id, date, notes } = req.body
@@ -509,6 +540,7 @@ app.put('/update-expense', authenticateToken, async (req, res) => {
   }
 })
 
+// Needs to be updated to include budget logic
 app.delete(
   '/delete-expense/:expense_id',
   authenticateToken,
