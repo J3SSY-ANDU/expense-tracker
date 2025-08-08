@@ -18,7 +18,11 @@ const {
   getHistoryByMonthYear,
   deleteMonth
 } = require('./history')
-const { updateBudgetTotalExpenses, getBudgetByUserMonthYear } = require('./budgets');
+const {
+  updateBudgetTotalExpenses,
+  getBudgetByUserMonthYear,
+  createBudget
+} = require('./budgets')
 
 ;(async () => {
   await connectionPool.query(`
@@ -97,7 +101,17 @@ const createExpense = async (
   }
   await connectionPool.query(
     `INSERT INTO expenses (id, user_id, name, amount, budget_id, category_id, date, history_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, user_id, name, amount, budget.id, category_id, date, historyMonth.id, notes]
+    [
+      id,
+      user_id,
+      name,
+      amount,
+      budget.id,
+      category_id,
+      date,
+      historyMonth.id,
+      notes
+    ]
   )
   const expense = await getExpenseById(id)
   if (!expense) {
@@ -193,6 +207,20 @@ const getExpenseById = async id => {
   }
 }
 
+const updateExpenseBudgetId = async (expense_id, new_budget_id) => {
+  const result = await connectionPool.query(
+    `UPDATE expenses SET budget_id = ? WHERE id = ?`,
+    [new_budget_id, expense_id]
+  )
+
+  if (result.affectedRows === 0) {
+    console.log(`Expense not found.`)
+    return null
+  }
+
+  return result
+}
+
 const updateExpense = async (id, updates) => {
   try {
     const expense = await getExpenseById(id)
@@ -239,10 +267,22 @@ const updateExpense = async (id, updates) => {
 
     let newCategoryId = category_id
 
+    let newBudget = await getBudgetByUserMonthYear(
+      expense.user_id,
+      newMonth,
+      newYear
+    )
+
+    if (!newBudget) {
+      // If no budget exists for the new month/year, create one with 0 limit and 0 total expenses
+      newBudget = await createBudget(expense.user_id, newMonth, newYear, 0, 0)
+    }
+
     // If moving to a new month, get or create the category for the new month
     if (oldMonth !== newMonth || oldYear !== newYear) {
       // Subtract from old month's category
       await updateCategoryTotalExpenses(expense.category_id, -expense.amount)
+      await updateBudgetTotalExpenses(expense.budget_id, -expense.amount)
 
       // Find or create the category for the new month by name
       const selectedCategory = await getCategoryById(category_id)
@@ -258,6 +298,7 @@ const updateExpense = async (id, updates) => {
           selectedCategory.user_id,
           newMonth,
           newYear,
+          0,
           parsedAmount,
           selectedCategory.description,
           selectedCategory.icon
@@ -267,6 +308,11 @@ const updateExpense = async (id, updates) => {
         await updateCategoryTotalExpenses(newMonthCategory.id, parsedAmount)
         newCategoryId = newMonthCategory.id
       }
+      // Update new budget total expenses
+      await updateBudgetTotalExpenses(newBudget.id, parsedAmount)
+      
+      // Update expense's budget_id to the new budget
+      await updateExpenseBudgetId(id, newBudget.id)
 
       // Update the expense with the new category_id and new history_id
       await connectionPool.query(
@@ -293,10 +339,13 @@ const updateExpense = async (id, updates) => {
         // Subtract from old category, add to new category
         await updateCategoryTotalExpenses(expense.category_id, -expense.amount)
         await updateCategoryTotalExpenses(category_id, parsedAmount)
+        await updateBudgetTotalExpenses(expense.budget_id, -expense.amount)
+        await updateBudgetTotalExpenses(newBudget.id, parsedAmount)
       } else {
         // Just update the difference
         const diff = parsedAmount - expense.amount
         await updateCategoryTotalExpenses(category_id, diff)
+        await updateBudgetTotalExpenses(newBudget.id, diff)
       }
 
       // Update the expense
