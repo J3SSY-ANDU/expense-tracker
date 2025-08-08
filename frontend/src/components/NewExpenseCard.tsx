@@ -216,20 +216,20 @@ export function NewExpenseCard({
             </FormControl>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
-                label="Date"
-                value={selectedDate}
-                onChange={(newValue) => {
-                  setErrors(prev => ({ ...prev, date: "" }));
-                  setSelectedDate(newValue)
-                }}
-                maxDate={dayjs()}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!errors.date,
-                    helperText: errors.date,
-                  },
-                }}
+              label="Date"
+              value={selectedDate ?? dayjs()}
+              onChange={(newValue) => {
+                setErrors(prev => ({ ...prev, date: "" }));
+                setSelectedDate(newValue)
+              }}
+              maxDate={dayjs()}
+              slotProps={{
+                textField: {
+                fullWidth: true,
+                error: !!errors.date,
+                helperText: errors.date,
+                },
+              }}
               />
             </LocalizationProvider>
           </Box>

@@ -18,6 +18,7 @@ const { getAllUsers } = require('./users')
             name VARCHAR(50) NOT NULL,
             month INT NOT NULL,
             year INT NOT NULL,
+            budget DECIMAL(10,2) DEFAULT NULL,
             total_expenses DECIMAL(10,2) NOT NULL,
             description TEXT,
             icon VARCHAR(50) DEFAULT NULL,
@@ -34,9 +35,10 @@ const createCategory = async (
   user_id,
   month,
   year,
-  total_expenses,
-  description,
-  icon
+  budget = 0,
+  total_expenses = 0,
+  description = '',
+  icon = ''
 ) => {
   if (await getCategoryByMonthYear(name, user_id, month, year)) {
     console.log(`Category already exists.`)
@@ -44,8 +46,8 @@ const createCategory = async (
   }
   const id = uuidv4()
   await connectionPool.query(
-    `INSERT INTO categories (id, user_id, name, month, year, total_expenses, description, icon) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, user_id, name, month, year, total_expenses, description, icon]
+    `INSERT INTO categories (id, user_id, name, month, year, budget, total_expenses, description, icon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, user_id, name, month, year, budget, total_expenses, description, icon]
   )
   const category = await getCategoryById(id)
   if (!category) {
@@ -56,7 +58,7 @@ const createCategory = async (
   return category
 }
 
-const createDefaultCategories = async user_id => {
+const createDefaultCategories = async (user_id, connection) => {
   const date = new Date()
   const month = date.getMonth() + 1
   const year = date.getFullYear()
@@ -67,14 +69,15 @@ const createDefaultCategories = async user_id => {
     category.name,
     month,
     year,
+    0,
     category.total_expenses,
     category.description,
     category.icon
   ])
   // Insert all categories in one query
-  await connectionPool.query(
-    `INSERT IGNORE INTO categories (id, user_id, name, month, year, total_expenses, description, icon)
-     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
+  await (connection || connectionPool).query(
+    `INSERT IGNORE INTO categories (id, user_id, name, month, year, budget, total_expenses, description, icon)
+     VALUES ${values.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')}`,
     values.flat()
   )
   console.log('Default categories created successfully!')
@@ -191,6 +194,25 @@ const updateCategoryDescription = async (id, description) => {
   }
 }
 
+const updateCategoryBudget = async (id, budget) => {
+  try {
+    await connectionPool.query(`UPDATE categories SET budget = ? WHERE id = ?`, [
+      budget,
+      id
+    ])
+    const updatedCategory = await getCategoryById(id)
+    if (updatedCategory.budget !== budget) {
+      console.log(`Failed. Try again.`)
+      return null
+    }
+    console.log('Category budget updated successfully!')
+    return updatedCategory
+  } catch (err) {
+    console.error(`Error updating category budget: ${err}`)
+    return null
+  }
+}
+
 const updateCategoryTotalExpenses = async (id, amount) => {
   try {
     const category = await getCategoryById(id)
@@ -266,6 +288,7 @@ cron.schedule('0 0 * * *', async () => {
         user.id,
         month,
         year,
+        cat.budget,
         0, // reset expenses
         cat.description,
         cat.icon
@@ -283,6 +306,7 @@ module.exports = {
   getCategoriesByUser,
   updateCategoryName,
   updateCategoryDescription,
+  updateCategoryBudget,
   updateCategoryTotalExpenses,
   updateCategoryIcon,
   deleteCategory,

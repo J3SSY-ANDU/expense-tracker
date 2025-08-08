@@ -155,8 +155,8 @@ const userIsVerified = async id => {
   return true
 }
 
-const verifyUser = async id => {
-  await connectionPool.query(
+const verifyUser = async (id, connection) => {
+  await (connection || connectionPool).query(
     `
       UPDATE users SET is_verified = 1 WHERE id = ?`,
     [id]
