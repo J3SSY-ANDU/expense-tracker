@@ -54,10 +54,10 @@ const getBudgetByUserMonthYear = async (user_id, month, year) => {
   return rows[0] || null
 }
 
-const updateBudget = async (id, total_income, total_expenses) => {
+const updateBudgetIncome = async (id, total_income) => {
   const [result] = await connectionPool.query(
-    `UPDATE budgets SET total_income = ?, total_expenses = ? WHERE id = ?`,
-    [total_income, total_expenses, id]
+    `UPDATE budgets SET total_income = ? WHERE id = ?`,
+    [total_income, id]
   )
   if (result.affectedRows === 0) {
     console.log(`Failed to update budget. Try again.`)
@@ -99,7 +99,7 @@ module.exports = {
   createBudget,
   getBudgetById,
   getBudgetByUserMonthYear,
-  updateBudget,
+  updateBudgetIncome,
   updateBudgetTotalExpenses,
   deleteBudget
 }
