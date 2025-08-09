@@ -78,8 +78,8 @@ export default function BudgetCard({
             <CardContent>
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: "1px solid #ccc", pb: 1 }}>
-                            <Typography component="div" sx={{ fontSize: 20, fontWeight: "600", }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
+                            <Typography component="div" sx={{ fontSize: 18, fontWeight: "600", }}>
                                 Budget (Current Month)
                             </Typography>
                             <Button sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', width: 'fit-content', textTransform: 'none', color: 'inherit' }} onClick={() => { setEditBudget(true) }}>
@@ -101,7 +101,7 @@ export default function BudgetCard({
                             pt: 1,
                             margin: 'auto',
                             borderTop: '1px solid #ccc',
-                            gap: '3rem',
+                            gap: '6rem',
                         }}
                     >
                         <Box>

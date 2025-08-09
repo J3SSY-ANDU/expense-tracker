@@ -1,6 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import BudgetCard from "./components/BudgetCard";
 import { Budget } from "./types";
+import { Grid } from "@mui/material";
 
 export default function Dashboard() {
     interface OutletContextType {
@@ -15,10 +16,12 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: '0 4rem' }}>
-            <h1>Dashboard</h1>
-            <p>Welcome to your dashboard!</p>
-            {/* You can add more components or content here as needed */}
-            <BudgetCard budget={budget} setBudget={setBudget} />
+            <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={4}>
+                    <BudgetCard budget={budget} setBudget={setBudget} />
+                </Grid>
+                {/* Add more <Grid item> with <BudgetCard> as needed */}
+            </Grid>
         </div>
     )
 }
