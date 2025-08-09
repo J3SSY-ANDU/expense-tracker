@@ -1,6 +1,8 @@
-import { Box, Button, Card, CardContent, FilledInput, FormControl, InputLabel, Typography } from "@mui/material";
+import { Backdrop, Box, Button, Card, CardContent, FilledInput, FormControl, InputLabel, Typography } from "@mui/material";
 import { Budget } from "../types";
 import { useMemo, useState } from "react";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 import { NumericFormat } from "react-number-format";
 import apiService from "../api/apiService";
 
@@ -16,6 +18,7 @@ export default function BudgetCard({
     setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
 }) {
     const [totalIncome, setTotalIncome] = useState<number | null>(null);
+    const [editBudget, setEditBudget] = useState<boolean>(false);
 
     const income = useMemo(() => Number(budget?.total_income ?? 0), [budget]);
     const expenses = useMemo(() => Number(budget?.total_expenses ?? 0), [budget]);
@@ -68,61 +71,70 @@ export default function BudgetCard({
     );
 
     const hasBudget = budget && income > 0;
+    const hasExpenses = expenses > 0;
 
     return (
         <Card>
             <CardContent>
-                {hasBudget ? (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                        <Typography component="div" sx={{ fontSize: 20, fontWeight: "600", borderBottom: "1px solid #ccc", pb: 1 }}>
-                            Budget (Current Month)
-                        </Typography>
 
-                        <Box sx={{ height: 240 }}>
-                            <Doughnut data={chartData} options={chartOptions} />
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', borderBottom: "1px solid #ccc", pb: 1 }}>
+                            <Typography component="div" sx={{ fontSize: 20, fontWeight: "600", }}>
+                                Budget (Current Month)
+                            </Typography>
+                            <Button sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', width: 'fit-content', textTransform: 'none', color: 'inherit' }} onClick={() => { setEditBudget(true) }}>
+                                {hasBudget ? <EditIcon fontSize="small" /> : <AddIcon fontSize="small" />}
+                                <Typography>
+                                    {hasBudget ? "Edit" : "Add"}
+                                </Typography>
+                            </Button>
+                    </Box>
+
+                    <Box sx={{ height: 240 }}>
+                        <Doughnut data={chartData} options={chartOptions} />
+                    </Box>
+
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            mt: 1,
+                            pt: 1,
+                            margin: 'auto',
+                            borderTop: '1px solid #ccc',
+                            gap: '3rem',
+                        }}
+                    >
+                        <Box>
+                            <Typography variant="caption" color="text.secondary">
+                                Budget
+                            </Typography>
+                            <Typography variant="body1">
+                                {hasBudget ? currency.format(income) : "-"}
+                            </Typography>
                         </Box>
 
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                mt: 1,
-                                pt: 1,
-                                margin: 'auto',
-                                borderTop: '1px solid #ccc',
-                                gap: '3rem',
-                            }}
-                        >
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">
-                                    Budget
-                                </Typography>
-                                <Typography variant="body1">
-                                    {currency.format(income)}
-                                </Typography>
-                            </Box>
-
-                            <Box>
-                                <Typography variant="caption" color="text.secondary">
-                                    Expenses
-                                </Typography>
-                                <Typography variant="body1">
-                                    {currency.format(expenses)}
-                                </Typography>
-                            </Box>
+                        <Box>
+                            <Typography variant="caption" color="text.secondary">
+                                Expenses
+                            </Typography>
+                            <Typography variant="body1">
+                                {hasExpenses ? currency.format(expenses) : "-"}
+                            </Typography>
                         </Box>
                     </Box>
-                ) : (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                        <Typography variant="h5" component="div">
-                            Add Budget:
-                        </Typography>
-
+                </Box>
+                <Backdrop open={editBudget}>
+                    <Box
+                        sx={{ bgcolor: 'background.paper', p: 2, borderRadius: 1 }}
+                        onClick={e => e.stopPropagation()} // Prevent Backdrop click from closing when clicking inside
+                    >
+                        <Typography variant="h6">Edit Budget</Typography>
                         <FormControl fullWidth variant="filled">
                             <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
                             <NumericFormat
                                 id="filled-adornment-amount"
                                 customInput={FilledInput}
-                                value={totalIncome ?? ""}
+                                value={totalIncome && totalIncome > 0 ? totalIncome : ""}
                                 onValueChange={(values) => setTotalIncome(values.floatValue ?? null)}
                                 thousandSeparator
                                 decimalScale={2}
@@ -133,7 +145,6 @@ export default function BudgetCard({
                                 placeholder="0.00"
                             />
                         </FormControl>
-
                         <Box
                             sx={{
                                 display: "flex",
@@ -144,7 +155,9 @@ export default function BudgetCard({
                                 pt: "1rem",
                             }}
                         >
-                            <Button variant="outlined" onClick={() => setTotalIncome(null)}>
+                            <Button variant="outlined" onClick={() => {
+                                setEditBudget(false);
+                            }}>
                                 Cancel
                             </Button>
                             <Button
@@ -153,7 +166,9 @@ export default function BudgetCard({
                                         const data = await apiService.addBudget(budget.id, totalIncome);
                                         if (data && "total_income" in data) {
                                             setBudget(data as Budget);
+                                            setEditBudget(false);
                                         } else {
+                                            // Handle error case
                                             setBudget(null);
                                         }
                                     }
@@ -164,7 +179,16 @@ export default function BudgetCard({
                             </Button>
                         </Box>
                     </Box>
-                )}
+                    {/* Backdrop click closes only if outside the Box */}
+                    <Box
+                        sx={{
+                            position: "fixed",
+                            inset: 0,
+                            zIndex: -1,
+                        }}
+                        onClick={() => setEditBudget(false)}
+                    />
+                </Backdrop>
             </CardContent>
         </Card>
     );
