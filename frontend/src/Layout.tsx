@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Account } from './components';
 import NavTabs from './NavTabs';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Category, Expense, User, History as MonthlyHistory } from './types';
+import { Category, Expense, User, History as MonthlyHistory, Budget } from './types';
 import apiService from './api/apiService';
 
 export default function Layout() {
@@ -10,6 +10,7 @@ export default function Layout() {
     const [categories, setCategories] = useState<Category[] | null>(null);
     const [expenses, setExpenses] = useState<Expense[] | null>(null); // State for fetched data
     const [history, setHistory] = useState<MonthlyHistory[] | null>(null);
+    const [budget, setBudget] = useState<Budget | null>(null);
     const [errors, setErrors] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -20,23 +21,25 @@ export default function Layout() {
             setErrors(null);
             try {
                 // Fetch all data
-                const [userData, categoriesData, expensesData, historyData] = await Promise.all([
+                const [userData, categoriesData, expensesData, historyData, budgetData] = await Promise.all([
                     apiService.getUserData(),
                     apiService.getCategoriesData(),
                     apiService.getExpensesData(),
-                    apiService.getHistoryData()
+                    apiService.getHistoryData(),
+                    apiService.getBudgetData()
                 ]);
 
-                if ((!userData || "error" in userData) || (!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData)) {
+                if ((!userData || "error" in userData) || (!categoriesData || "error" in categoriesData) || (!expensesData || "error" in expensesData) || (!historyData || "error" in historyData) || (!budgetData || "error" in budgetData)) {
                     setErrors("Failed to fetch data.");
                     navigate("/login");
                     return;
                 }
-                
+
                 setUser(userData);
                 setCategories(categoriesData);
                 setExpenses(expensesData);
                 setHistory(historyData);
+                setBudget(budgetData);
 
                 setLoading(false);
             } catch (error) {
@@ -50,12 +53,12 @@ export default function Layout() {
     }, []);
 
     return (
-        <div style={{ paddingBottom: '5rem'}}>
+        <div style={{ paddingBottom: '5rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1rem 4rem 1rem 4rem', marginBottom: '3rem', background: '#1E2A38', gap: '1rem' }}>
                 <Account user={user} setUser={setUser} />
                 <NavTabs />
             </div>
-            <Outlet context={{ categories, setCategories, expenses, setExpenses, history, setHistory }} />
+            <Outlet context={{ categories, setCategories, expenses, setExpenses, history, setHistory, budget, setBudget }} />
         </div>
     );
 }

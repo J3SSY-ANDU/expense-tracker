@@ -22,7 +22,9 @@ import {
   UpdateCategoryName,
   UpdateCategoryIcon,
   UpdateExpense,
-  VerifyEmail
+  VerifyEmail,
+  FetchBudgetData,
+  AddBudget
 } from './'
 
 const api = axios.create({
@@ -88,7 +90,9 @@ const apiService = {
   updateExpense: UpdateExpense,
   deleteExpense: DeleteExpense,
   getHistoryData: FetchHistoryData,
-  updateCategoryIcon: UpdateCategoryIcon
+  updateCategoryIcon: UpdateCategoryIcon,
+  getBudgetData: FetchBudgetData,
+  addBudget: AddBudget,
 }
 
 export default apiService

@@ -21,6 +21,7 @@ import { ForgotPassword } from "./forgotPasswordApi";
 import { ResetForgotPassword } from "./resetForgotPassword";
 import { FetchHistoryData } from "./historyApi";
 import { LogIn } from "./loginApi";
+import { AddBudget, FetchBudgetData } from "./budgetApi";
 
 export {
   FetchCategoriesData,
@@ -46,4 +47,6 @@ export {
   FetchHistoryData,
   GetCategory,
   LogIn, 
+  FetchBudgetData,
+  AddBudget
 };

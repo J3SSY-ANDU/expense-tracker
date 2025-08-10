@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
-import { Category, Expense, History as MonthlyHistory } from "./types";
+import { Budget, Category, Expense, History as MonthlyHistory } from "./types";
 import { useOutletContext } from "react-router-dom";
 import { Categories, ExpensesTable, History } from "./components";
 // import expense_tracker from "./expense-tracker.svg";
@@ -19,11 +19,13 @@ export default function Expenses() {
     setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
     history: MonthlyHistory[] | null;
     setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
+    budget: Budget | null;
+    setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
   }
 
-  const { categories, setCategories, expenses, setExpenses, history, setHistory } = useOutletContext<OutletContextType>();
+  const { categories, setCategories, expenses, setExpenses, history, setHistory, budget, setBudget } = useOutletContext<OutletContextType>();
 
-  if (!categories || !expenses || !history) {
+  if (!categories || !expenses || !history || !budget) {
     return <div>Loading...</div>;
   }
 
@@ -37,16 +39,18 @@ export default function Expenses() {
         return;
       }
       // Fetch updated data after successful update
-      const [expensesData, categoriesData, historyData] = await Promise.all([
+      const [expensesData, categoriesData, historyData, budgetData] = await Promise.all([
         apiService.getExpensesData(),
         apiService.getCategoriesData(),
-        apiService.getHistoryData()
+        apiService.getHistoryData(),
+        apiService.getBudgetData()
       ]);
 
       if (
         (!expensesData || "error" in expensesData) ||
         (!categoriesData || "error" in categoriesData) ||
-        (!historyData || "error" in historyData)
+        (!historyData || "error" in historyData) ||
+        (!budgetData || "error" in budgetData)
       ) {
         console.error("Failed to fetch updated data.");
         setUpdatingDataError("Failed to fetch updated data.");
@@ -55,6 +59,7 @@ export default function Expenses() {
       setExpenses(expensesData);
       setCategories(categoriesData); // This will update category totals in the UI
       setHistory(historyData);
+      setBudget(budgetData);
     } catch (error) {
       console.error("Error updating expense:", error);
       setUpdatingDataError("Failed to update expense. Please try again later.");
@@ -146,6 +151,7 @@ export default function Expenses() {
         setSelectedCategory={setSelectedCategory}
         handleChangeIcon={handleChangeIcon}
         handleUpdateData={handleUpdateData}
+        setBudget={setBudget}
       />
       <ExpensesTable
         expenses={expenses}
@@ -157,8 +163,9 @@ export default function Expenses() {
         handleChangeIcon={handleChangeIcon}
         mode="monthly"
         title={"Monthly Expenses"}
+        setBudget={setBudget}
       />
-      <History history={history} setHistory={setHistory} handleUpdateData={handleUpdateData} handleChangeIcon={handleChangeIcon} />
+      <History history={history} setHistory={setHistory} handleUpdateData={handleUpdateData} handleChangeIcon={handleChangeIcon} setBudget={setBudget} />
     </Box>
   );
 }

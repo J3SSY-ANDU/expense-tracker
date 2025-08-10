@@ -1,5 +1,5 @@
 import { Accordion, AccordionSummary, AccordionDetails } from "@mui/material";
-import { Category, Expense, History as MonthlyHistory } from "../types";
+import { Budget, Category, Expense, History as MonthlyHistory } from "../types";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
@@ -9,6 +9,7 @@ export function History({
   setHistory,
   handleUpdateData,
   handleChangeIcon,
+  setBudget,
 }: {
   history: MonthlyHistory[] | null;
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
@@ -16,6 +17,7 @@ export function History({
     updatedExpense: Expense,
   ) => Promise<void>;
   handleChangeIcon: (icon: string) => void; // Function to change category icon
+  setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
 }) {
   const [expenses, setExpenses] = useState<Expense[] | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -105,6 +107,7 @@ export function History({
                 handleChangeIcon={handleChangeIcon}
                 mode="history"
                 title=""
+                setBudget={setBudget}
               />
             ) : (
               <div>Loading...</div>
