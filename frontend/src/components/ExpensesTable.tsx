@@ -17,7 +17,7 @@ import {
   NewExpense,
   History as MonthlyHistory,
 } from "../types";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import apiService from "../api/apiService";
 import { ExpenseCard } from "./ExpenseCard";
 import { NewExpenseCard } from "./NewExpenseCard";
@@ -135,7 +135,7 @@ export function ExpensesTable({
   const [newExpenseName, setNewExpenseName] = useState<string>("");
   const [newExpenseAmount, setNewExpenseAmount] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(dayjs());
   const [newExpenseNotes, setNewExpenseNotes] = useState<string>("");
   const [openExpense, setOpenExpense] = useState<boolean>(false); // State for backdrop
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null); // State for selected expense

@@ -248,7 +248,7 @@ export function NewExpenseCard({
               setNewExpenseName("");
               setNewExpenseAmount("");
               setSelectedCategory(null);
-              setSelectedDate(null);
+              setSelectedDate(dayjs());
               setNewExpenseNotes("");
               setErrors({ name: "", amount: "", category: "", date: "" });
             }}>
