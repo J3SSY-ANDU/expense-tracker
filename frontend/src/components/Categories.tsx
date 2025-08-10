@@ -12,7 +12,8 @@ import {
   Category,
   NewCategory,
   Expense,
-  History as MonthlyHistory
+  History as MonthlyHistory,
+  Budget
 } from '../types'
 import apiService from '../api/apiService'
 import { CategoryCard } from './index'
@@ -29,7 +30,8 @@ export function Categories({
   selectedCategory,
   setSelectedCategory,
   handleChangeIcon,
-  handleUpdateData
+  handleUpdateData,
+  setBudget,
 }: {
   categories: Category[] | null
   setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>
@@ -40,6 +42,7 @@ export function Categories({
   setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>
   handleChangeIcon: (icon: string) => void // Function to change category icon
   handleUpdateData: (updatedExpense: Expense) => Promise<void> // Function to update expense data
+  setBudget: React.Dispatch<React.SetStateAction<Budget | null>> // Function to set budget
 }) {
   const [newExpensesByCategory, setNewExpensesByCategory] = useState<
     Expense[] | null
@@ -438,6 +441,7 @@ export function Categories({
           handleChangeIcon={handleChangeIcon}
           handleDeleteCategory={handleDeleteCategory}
           handleUpdateData={handleUpdateData}
+          setBudget={setBudget}
         />
       </Box>
     </Box>

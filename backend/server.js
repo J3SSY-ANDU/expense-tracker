@@ -51,7 +51,7 @@ const {
   invalidateTokensByEmail,
   getEmailByVerificationToken
 } = require('./database/emailVerification')
-const { createBudget } = require('./database/budgets')
+const { createBudget, getBudgetByUserMonthYear, updateBudgetIncome } = require('./database/budgets')
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
@@ -653,6 +653,37 @@ app.get('/history', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching history:', error)
     return res.status(500).json({ error: 'Failed to fetch history.' })
+  }
+})
+
+app.get('/get-budget', authenticateToken, async (req, res) => {
+  try {
+    const budget = await getBudgetByUserMonthYear(req.user.id, new Date().getMonth() + 1, new Date().getFullYear())
+    if (!budget) {
+      return res.status(404).json({ error: 'Budget not found.' })
+    }
+    console.log('Data fetch successfully!')
+    return res.status(200).json(budget)
+  } catch (error) {
+    console.error('Error fetching budget:', error)
+    return res.status(500).json({ error: 'Failed to fetch budget.' })
+  }
+})
+
+app.post('/add-budget', authenticateToken, async (req, res) => {
+  try {
+    const { budget_id, total_income } = req.body
+    if (!budget_id || total_income === undefined || total_income === null || total_income === 0) {
+      return res.status(400).json({ error: 'Budget ID and total income are required.' })
+    }
+    const newBudget = await updateBudgetIncome(budget_id, total_income)
+    if (!newBudget) {
+      return res.status(500).json({ error: 'Failed to add budget.' })
+    }
+    res.status(200).json(newBudget)
+  } catch (error) {
+    console.error('Error adding budget:', error)
+    res.status(500).json({ error: 'Failed to add budget.' })
   }
 })
 
