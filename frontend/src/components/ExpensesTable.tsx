@@ -16,6 +16,7 @@ import {
   ExampleExpense,
   NewExpense,
   History as MonthlyHistory,
+  Budget,
 } from "../types";
 import dayjs, { Dayjs } from "dayjs";
 import apiService from "../api/apiService";
@@ -110,6 +111,7 @@ export function ExpensesTable({
   handleUpdateData, // Optional prop for updating history
   handleChangeIcon, // Optional prop for changing category icon
   setOpenCategory, // Optional prop to open category dialog
+  setBudget,
 }: {
   expenses: Expense[] | null;
   setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
@@ -122,6 +124,7 @@ export function ExpensesTable({
   handleUpdateData: (updatedExpense: Expense) => Promise<void>; // Optional prop for updating history
   handleChangeIcon: (icon: string) => void; // Optional prop for changing category icon
   setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
+  setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
 }) {
   const [loading, setLoading] = useState<boolean>(true); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
@@ -323,6 +326,13 @@ export function ExpensesTable({
         ).toFixed(2);
         return prev;
       });
+      setBudget((prev) => {
+        if (!prev) return prev;
+        prev.total_expenses = (
+          Number(prev.total_expenses) + Number(createdExpense.amount)
+        ).toFixed(2);
+        return prev;
+      });
 
       setCreatingExpense(false);
       setNewExpense(false);
@@ -423,6 +433,13 @@ export function ExpensesTable({
         Number(category.total_expenses) - Number(selectedExpense.amount)
       ).toFixed(2);
       return prev;
+    });
+    setBudget((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        total_expenses: (Number(prev.total_expenses) - Number(selectedExpense.amount)).toFixed(2),
+      };
     });
 
     setSelectedExpense(null);

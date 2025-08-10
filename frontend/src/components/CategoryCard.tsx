@@ -15,7 +15,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ExpensesTable } from "./ExpensesTable";
 import { JSX, useState } from "react";
-import { Category, Expense, History as MonthlyHistory } from "../types";
+import { Budget, Category, Expense, History as MonthlyHistory } from "../types";
 import { MuiIconPicker } from "./MuiIconPicker";
 import { iconMap } from "./icons";
 import React from "react";
@@ -36,6 +36,7 @@ export function CategoryCard({
   handleChangeIcon,
   handleDeleteCategory,
   handleUpdateData,
+  setBudget,
 }: {
   newExpensesByCategory: Expense[] | null;
   setNewExpensesByCategory: React.Dispatch<
@@ -54,6 +55,7 @@ export function CategoryCard({
   handleChangeIcon: (iconName: string) => void;
   handleDeleteCategory: () => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
+  setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
   const [errors, setErrors] = useState<{ name: string; }>({ name: "" });
@@ -256,6 +258,7 @@ export function CategoryCard({
               setOpenCategory={setOpenCategory}
               mode="category"
               title=""
+              setBudget={setBudget}
             />
           )}
         </CardContent>
