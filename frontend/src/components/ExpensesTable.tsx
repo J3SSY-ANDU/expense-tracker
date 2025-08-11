@@ -223,6 +223,7 @@ export function ExpensesTable({
             : {
               id: createdExpense.category_id,
               name: selectedCategory?.name || "Uncategorized",
+              budget: selectedCategory?.budget || 0,
               total_expenses: createdExpense.amount,
               description: "",
               order: 0,

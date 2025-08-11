@@ -201,7 +201,7 @@ const updateCategoryBudget = async (id, budget) => {
       id
     ])
     const updatedCategory = await getCategoryById(id)
-    if (updatedCategory.budget !== budget) {
+    if (Number(updatedCategory.budget) !== budget) {
       console.log(`Failed. Try again.`)
       return null
     }

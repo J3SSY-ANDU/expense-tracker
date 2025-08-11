@@ -104,6 +104,7 @@ export function Categories({
       name: newCategoryName,
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
+      budget: 0, // Default budget, can be updated later
       total_expenses: 0,
       description: '',
       icon: ''
@@ -239,6 +240,43 @@ export function Categories({
     console.log('Description updated successfully.')
   }
 
+  const handleChangeBudget = async (value: number) => {
+    if (!selectedCategory) return
+
+    const currentCategory = categories?.find(
+      category => category.id === selectedCategory.id
+    )
+
+    // Check if the budget has changed
+    if (currentCategory && currentCategory.budget === value) {
+      console.log('No changes detected in budget.')
+      return
+    }
+
+    const updatedCategory = await apiService.updateCategoryBudget(
+      selectedCategory.id,
+      value
+    )
+    if (!updatedCategory || 'error' in updatedCategory) {
+      console.error(`Error updating category budget: ${updatedCategory?.error}`)
+      // Add any additional error handling here if needed
+
+      return
+    }
+    setCategories(prev => {
+      return prev
+        ? prev.map(category =>
+          category.id === updatedCategory.id ? updatedCategory : category
+        )
+        : null
+    })
+    const activeElement = document.activeElement as HTMLElement
+    if (activeElement) {
+      activeElement.blur()
+    }
+    console.log('Budget updated successfully.')
+  }
+
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return
     if (expenses) {
@@ -354,7 +392,21 @@ export function Categories({
                       </Typography>
                     </Box>
                     <Typography fontSize={14} fontWeight={'400'}>
-                      {formatNumberToCurrency(Number(category.total_expenses))}
+                      {Number(category?.budget) > 0 ? (
+                        <>
+                          <span
+                            style={{ color: Number(category.total_expenses) > Number(category.budget) ? 'var(--color-error)' : 'inherit' }}>{formatNumberToCurrency(Number(category.total_expenses))}</span>
+                            <span> / </span>
+                          <span
+                            style={{ fontWeight: '600' }}>
+                            {formatNumberToCurrency(Number(category.budget))}
+                          </span>
+                        </>
+                      ) : (
+                        <span
+                          style={{ fontWeight: '600' }}>{formatNumberToCurrency(Number(category.total_expenses))}
+                        </span>
+                      )}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -442,8 +494,9 @@ export function Categories({
           handleDeleteCategory={handleDeleteCategory}
           handleUpdateData={handleUpdateData}
           setBudget={setBudget}
+          handleChangeBudget={handleChangeBudget}
         />
       </Box>
-    </Box>
+    </Box >
   )
 }
