@@ -201,7 +201,7 @@ export function CategoryCard({
               }}
             >
               <Typography fontSize={16} fontWeight={400} sx={{ width: "auto", whiteSpace: "nowrap" }}>
-                Budget
+                Budget:
               </Typography>
               <NumericFormat
                 value={selectedCategory?.budget && selectedCategory.budget !== 0 ? selectedCategory.budget : ""}
@@ -252,7 +252,7 @@ export function CategoryCard({
               }}
             >
               <Typography fontSize={16} fontWeight={400} sx={{ width: "auto", whiteSpace: "nowrap" }}>
-                Total expenses
+                Total Expenses:
               </Typography>
               <span
                 style={{

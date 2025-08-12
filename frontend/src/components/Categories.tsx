@@ -373,30 +373,34 @@ export function Categories({
                     setSelectedCategory(category)
                   }}
                 >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-                      {iconMap[category.icon] ? (
-                        React.createElement(iconMap[category.icon], {
-                          style: { fontSize: 24 }
-                        })
-                      ) : null}
+                  <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                       <Typography
                         fontSize={16}
                         fontWeight={'600'}
-                        marginBottom={'1rem'}
                         whiteSpace={'nowrap'}
                         overflow={'hidden'}
                         textOverflow={'ellipsis'}
+                        sx={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                       >
+                        {iconMap[category.icon] ? (
+                          React.createElement(iconMap[category.icon], {
+                            style: { fontSize: 20 }
+                          })
+                        ) : null}
                         {category.name}
                       </Typography>
+                      {Number(category?.budget) > 0 && Number(category?.total_expenses) > 0 && (
+                        <Typography sx={{ fontSize: 11, fontWeight: '400', color: Number(category?.total_expenses) > Number(category?.budget) ? 'var(--color-error)' : 'var(--color-success)' }}>
+                          {formatNumberToCurrency(Number(category?.budget) - Number(category?.total_expenses))}
+                        </Typography>
+                      )}
                     </Box>
-                    <Typography fontSize={14} fontWeight={'400'}>
+                    <Typography fontSize={14} fontWeight={'400'} sx={{ justifySelf: 'flex-end' }}>
                       {Number(category?.budget) > 0 ? (
                         <>
-                          <span
-                            style={{ color: Number(category.total_expenses) > Number(category.budget) ? 'var(--color-error)' : 'inherit' }}>{formatNumberToCurrency(Number(category.total_expenses))}</span>
-                            <span> / </span>
+                          <span>{formatNumberToCurrency(Number(category.total_expenses))}</span>
+                          <span> / </span>
                           <span
                             style={{ fontWeight: '600' }}>
                             {formatNumberToCurrency(Number(category.budget))}
