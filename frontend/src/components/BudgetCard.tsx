@@ -43,8 +43,8 @@ export default function BudgetCard({
             datasets: [
                 {
                     data: showPlaceholder ? [0.00000001] : [Math.max(expenses, 0), Math.max(remaining, 0)],
-                    backgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50a8e3dd", "#ccccccd8"],
-                    hoverBackgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50A9E3", "#ccc"],
+                    backgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50A9E3", "#cccccc"],
+                    hoverBackgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50a8e3dd", "#ccccccd8"],
                     borderWidth: 0,
                 },
             ],
