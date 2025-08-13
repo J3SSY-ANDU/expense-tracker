@@ -18,12 +18,11 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: '0 4rem' }}>
-            <Grid container spacing={3}>
-                <Grid item xs={12} sm={6} md={4}>
+            <Grid container spacing={3} alignItems="stretch">
+                <Grid item xs={12} sm={6} md={4} style={{ display: 'flex' }}>
                     <BudgetCard budget={budget} setBudget={setBudget} />
                 </Grid>
-                {/* Add more <Grid item> with <BudgetCard> as needed */}
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid item xs={12} sm={6} md={4} style={{ display: 'flex' }}>
                     <CategoriesBudgetsCard budget={budget} categories={categories} />
                 </Grid>
             </Grid>

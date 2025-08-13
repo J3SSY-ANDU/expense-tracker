@@ -14,8 +14,6 @@ export default function CategoriesBudgetsCard({
     categories: Category[] | null;
 }) {
     const income = useMemo(() => Number(budget?.total_income ?? 0), [budget]);
-    const expenses = useMemo(() => Number(budget?.total_expenses ?? 0), [budget]);
-    const remaining = useMemo(() => Math.max(income - expenses, 0), [income, expenses]);
 
     const currency = useMemo(
         () =>
@@ -32,9 +30,27 @@ export default function CategoriesBudgetsCard({
         value: Number(category.budget ?? 0),
     }));
 
+    const filteredCategories = useMemo(
+        () => categoriesBudgets?.filter(c => c.value > 0) ?? [],
+        [categoriesBudgets]
+    );
+
+    const mostSpentCategory = useMemo(() => {
+        if (filteredCategories.length === 0) return { label: "", value: 0 };
+        return filteredCategories.reduce((max, category) => {
+            return category.value > max.value ? category : max;
+        }, filteredCategories[0]);
+    }, [filteredCategories]);
+
+    const lessSpentCategory = useMemo(() => {
+        if (filteredCategories.length === 0) return { label: "", value: 0 };
+        return filteredCategories.reduce((min, category) => {
+            return category.value < min.value ? category : min;
+        }, filteredCategories[0]);
+    }, [filteredCategories]);
+
     const chartData = useMemo(() => {
         // Filter only categories with budget > 0
-        const filteredCategories = categoriesBudgets?.filter(c => c.value > 0) ?? [];
 
         if (filteredCategories.length === 0) {
             return {
@@ -57,6 +73,41 @@ export default function CategoriesBudgetsCard({
             "#ff6f61", // red
             "#a259f7", // purple
             "#f6c85f", // yellow
+            "#43aa8b", // green
+            "#e4572e", // coral
+            "#2e4057", // navy
+            "#f4d35e", // light yellow
+            "#b56576", // mauve
+            "#355c7d", // deep blue
+            "#ffb4a2", // peach
+            "#9d8189", // taupe
+            "#3a86ff", // vivid blue
+            "#8338ec", // violet
+            "#fb5607", // orange-red
+            "#ffbe0b", // gold
+            "#00b4d8", // cyan
+            "#90be6d", // olive green
+            "#ff006e", // magenta
+            "#06d6a0", // mint
+            "#ffd166", // pastel yellow
+            "#118ab2", // steel blue
+            "#ef476f", // pink
+            "#073b4c", // dark blue
+            "#8d99ae", // gray blue
+            "#f3722c", // tangerine
+            "#4d908e", // turquoise
+            "#577590", // slate blue
+            "#bc5090", // raspberry
+            "#ff9f1c", // amber
+            "#2ec4b6", // aqua
+            "#e71d36", // crimson
+            "#ff7f50", // coral orange
+            "#6a4c93", // indigo
+            "#cdb4db", // lavender
+            "#b2f7ef", // pale cyan
+            "#fcbf49", // sunflower
+            "#a1c181", // moss green
+            "#e5989b", // rose
         ];
         const categoriesValues = filteredCategories.map((c) => c.value);
         const totalCategories = categoriesValues.reduce((sum, v) => sum + v, 0);
@@ -65,13 +116,13 @@ export default function CategoriesBudgetsCard({
         const data = [...categoriesValues, remainingValue];
         const labels = [...filteredCategories.map((c) => c.label), "Remaining"];
 
-        // Assign each category a color, remaining is always gray
+        // Assign each category a color, remaining is always #ccc
         const backgroundColor = [
             ...categoryColors.slice(0, filteredCategories.length),
-            "#cccccc", // Remaining color (always gray)
+            "#cccccc", // Remaining color (always #ccc)
         ];
         const hoverBackgroundColor = [
-            ...categoryColors.slice(0, filteredCategories.length).map((color) => `${color}cc`), // add opacity for stronger hover
+            ...categoryColors.slice(0, filteredCategories.length).map((color) => `${color}cc`),
             "#ccccccd8", // Stronger gray for "Remaining"
         ];
 
@@ -86,7 +137,7 @@ export default function CategoriesBudgetsCard({
                 },
             ],
         };
-    }, [categoriesBudgets, income]);
+    }, [income, filteredCategories]);
 
     const chartOptions = useMemo(
         () => ({
@@ -109,18 +160,52 @@ export default function CategoriesBudgetsCard({
         [currency]
     );
     return (
-        <Card>
+        <Card sx={{ flex: 1 }}>
             <CardContent>
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
-                        <Typography component="div" sx={{ fontSize: 18, fontWeight: "600", }}>
-                            Categories & Budgets
+                        <Typography component="div" sx={{ fontSize: 18, fontWeight: "600" }}>
+                            Budgets by Category
                         </Typography>
                     </Box>
 
                     <Box sx={{ height: 240 }}>
                         <Doughnut data={chartData} options={chartOptions} />
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            mt: 1,
+                            pt: 1,
+                            margin: 'auto',
+                            borderTop: '1px solid #ccc',
+                            gap: '6rem',
+                        }}
+                    >
+                        <Box>
+                            <Typography variant="caption" color="text.secondary">
+                                Highest Budget
+                            </Typography>
+                            <Typography variant="body1">
+                                {mostSpentCategory.value > 0 ? currency.format(mostSpentCategory.value) : "-"}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {mostSpentCategory.value > 0 ? mostSpentCategory.label : ""}
+                            </Typography>
+                        </Box>
+
+                        <Box>
+                            <Typography variant="caption" color="text.secondary">
+                                Lowest Budget
+                            </Typography>
+                            <Typography variant="body1">
+                                {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? currency.format(lessSpentCategory.value) : "-"}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? lessSpentCategory.label : ""}
+                            </Typography>
+                        </Box>
                     </Box>
                 </Box>
             </CardContent>

@@ -76,13 +76,13 @@ export default function BudgetCard({
     const hasExpenses = expenses > 0;
 
     return (
-        <Card>
+        <Card sx={{ flex: 1 }}>
             <CardContent>
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
                         <Typography component="div" sx={{ fontSize: 18, fontWeight: "600", }}>
-                            Budget (Current Month)
+                            Budget Overview
                         </Typography>
                         <Button sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', width: 'fit-content', textTransform: 'none', color: 'inherit' }} onClick={() => { setEditBudget(true) }}>
                             {hasBudget ? <EditIcon fontSize="small" /> : <AddIcon fontSize="small" />}
