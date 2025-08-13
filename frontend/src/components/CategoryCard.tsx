@@ -19,6 +19,7 @@ import { Budget, Category, Expense, History as MonthlyHistory } from "../types";
 import { MuiIconPicker } from "./MuiIconPicker";
 import { iconMap } from "./icons";
 import React from "react";
+import { NumericFormat } from "react-number-format";
 
 export function CategoryCard({
   newExpensesByCategory,
@@ -37,6 +38,7 @@ export function CategoryCard({
   handleDeleteCategory,
   handleUpdateData,
   setBudget,
+  handleChangeBudget,
 }: {
   newExpensesByCategory: Expense[] | null;
   setNewExpensesByCategory: React.Dispatch<
@@ -56,6 +58,7 @@ export function CategoryCard({
   handleDeleteCategory: () => void;
   handleUpdateData: (updatedExpense: Expense) => Promise<void>;
   setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
+  handleChangeBudget: (budget: number) => Promise<void>;
 }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false); // State for delete category dialog
   const [errors, setErrors] = useState<{ name: string; }>({ name: "" });
@@ -194,17 +197,73 @@ export function CategoryCard({
               sx={{
                 display: "flex",
                 alignItems: "center",
+                gap: "0.5rem",
               }}
             >
-              <Typography fontSize={16} fontWeight={"400"} sx={{ minWidth: "120px" }}>
-                Total expenses
+              <Typography fontSize={16} fontWeight={400} sx={{ width: "auto", whiteSpace: "nowrap" }}>
+                Budget:
               </Typography>
-              <span style={{
-                width: "100%",
-                backgroundColor: "#d3d3d3",
-                padding: "0.3rem",
-                borderRadius: "3px",
-              }}>{formatNumberToCurrency(Number(selectedCategory?.total_expenses))}
+              <NumericFormat
+                value={selectedCategory?.budget && selectedCategory.budget !== 0 ? selectedCategory.budget : ""}
+                thousandSeparator
+                prefix="$"
+                decimalScale={2}
+                fixedDecimalScale
+                allowNegative={false}
+                customInput={TextField}
+                onValueChange={(values) => {
+                  const { floatValue } = values;
+                  setSelectedCategory((prev) => {
+                    if (prev) {
+                      return { ...prev, budget: floatValue ?? "" };
+                    }
+                    return prev;
+                  });
+                }}
+                inputProps={{
+                  style: {
+                    backgroundColor: "#d3d3d3",
+                    padding: "0.3rem",
+                    borderRadius: "3px",
+                    cursor: "text",
+                    flex: 1,
+                    border: "none !important",
+                  },
+                }}
+                onKeyDown={async (e) => {
+                if (e.key === "Enter") {
+                  if (validateFields()) {
+                    await handleChangeBudget(Number(selectedCategory?.budget) || 0);
+                  }
+                }
+              }}
+                sx={{ width: "100%" }}
+                inputMode="decimal"
+                title="budget"
+                placeholder="$0.00"
+                variant="standard"
+              />
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+              }}
+            >
+              <Typography fontSize={16} fontWeight={400} sx={{ width: "auto", whiteSpace: "nowrap" }}>
+                Total Expenses:
+              </Typography>
+              <span
+                style={{
+                  width: "100%",
+                  backgroundColor: "#d3d3d3",
+                  padding: "0.3rem",
+                  borderRadius: "3px",
+                  display: "inline-block",
+                }}
+              >
+                {formatNumberToCurrency(Number(selectedCategory?.total_expenses))}
               </span>
             </Box>
             <input

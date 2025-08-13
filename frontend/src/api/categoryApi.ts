@@ -104,6 +104,20 @@ export async function UpdateCategoryDescription (
   }
 }
 
+export async function UpdateCategoryBudget (category_id: string, budget: number): Promise<Category | { error: string }> {
+  try {
+    const res = await api.post('/update-category-budget', { category_id, budget })
+    return res.data
+  } catch (err: any) {
+    // If it's an Axios error, get the backend error message if present
+    if (axios.isAxiosError(err) && err.response && err.response.data) {
+      return { error: err.response.data.error || 'Unknown error occurred.' }
+    }
+    // Otherwise, return a generic error
+    return { error: 'Failed to connect to the server. Please try again later.' }
+  }
+}
+
 export async function UpdateCategoryIcon (category_id: string, icon: string): Promise<Category | { error: string }> {
   try {
     const res = await api.post('/update-category-icon', { category_id, icon })
