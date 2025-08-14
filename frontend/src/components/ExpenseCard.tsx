@@ -111,7 +111,6 @@ export function ExpenseCard({
     >
       <Card
         sx={{
-          width: "50%",
           padding: "1rem",
           overflow: "auto",
         }}

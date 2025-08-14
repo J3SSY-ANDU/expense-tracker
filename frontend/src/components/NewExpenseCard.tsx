@@ -98,96 +98,90 @@ export function NewExpenseCard({
   }
 
   return (
-    <Backdrop
-      open={newExpense}
-      onClick={() => setNewExpense(false)}
-      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    <Card
+      sx={{
+        padding: '1rem',
+        overflow: "auto",
+      }}
+      onClick={(e) => e.stopPropagation()}
     >
-      <Card
+      <CardContent
         sx={{
-          width: "50%",
-          padding: '1rem',
-          overflow: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.5rem",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <CardContent
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "0.5rem",
-          }}
-        >
-          <Typography sx={{ width: "100%", fontSize: "2rem", fontWeight: "700", padding: 0, margin: 0 }}>
-            New Expense
-          </Typography>
-          <Box sx={{ display: "flex", gap: "1rem" }}>
-            <TextField
-              label="Name"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={newExpenseName}
-              inputProps={{ maxLength: 25 }}
-              onChange={(e) => {
-                setErrors(prev => ({ ...prev, name: ""}));
-                setNewExpenseName(e.target.value)
+        <Typography sx={{ width: "100%", fontSize: "2rem", fontWeight: "700", padding: 0, margin: 0 }}>
+          New Expense
+        </Typography>
+        <Box sx={{ display: "flex", gap: "1rem" }}>
+          <TextField
+            label="Name"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={newExpenseName}
+            inputProps={{ maxLength: 25 }}
+            onChange={(e) => {
+              setErrors(prev => ({ ...prev, name: "" }));
+              setNewExpenseName(e.target.value)
+            }}
+            error={!!errors.name}
+            helperText={errors.name}
+          />
+          <FormControl
+            fullWidth
+            variant="filled"
+            error={!!errors.amount}
+            sx={{
+              marginTop: "1rem",
+            }}
+          >
+            <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
+            <NumericFormat
+              id="filled-adornment-amount"
+              customInput={FilledInput}
+              value={newExpenseAmount}
+              onValueChange={(values) => {
+                setErrors(prev => ({ ...prev, amount: "" }));
+                setNewExpenseAmount(values.value)
               }}
-              error={!!errors.name}
-              helperText={errors.name}
-            />
-            <FormControl
-              fullWidth
-              variant="filled"
+              thousandSeparator
+              decimalScale={2}
+              fixedDecimalScale
+              prefix="$"
+              allowNegative={false}
+              allowLeadingZeros={false}
+              placeholder="0.00"
+              required
               error={!!errors.amount}
-              sx={{
-                marginTop: "1rem",
-              }}
-            >
-              <InputLabel htmlFor="filled-adornment-amount">Amount</InputLabel>
-              <NumericFormat
-                id="filled-adornment-amount"
-                customInput={FilledInput}
-                value={newExpenseAmount}
-                onValueChange={(values) => {
-                  setErrors(prev => ({ ...prev, amount: "" }));
-                  setNewExpenseAmount(values.value)
-                }}
-                thousandSeparator
-                decimalScale={2}
-                fixedDecimalScale
-                prefix="$"
-                allowNegative={false}
-                allowLeadingZeros={false}
-                placeholder="0.00"
-                required
-                error={!!errors.amount}
-              />
-              {errors.amount && (
-                <FormHelperText error>{errors.amount}</FormHelperText>
-              )}
-            </FormControl>
-          </Box>
-          <Box sx={{ display: "flex", gap: "1rem" }}>
-            <FormControl
+            />
+            {errors.amount && (
+              <FormHelperText error>{errors.amount}</FormHelperText>
+            )}
+          </FormControl>
+        </Box>
+        <Box sx={{ display: "flex", gap: "1rem" }}>
+          <FormControl
+            fullWidth
+            error={!!errors.category}
+          >
+            <InputLabel id="category">Select Category</InputLabel>
+            <Select
               fullWidth
-              error={!!errors.category}
-            >
-              <InputLabel id="category">Select Category</InputLabel>
-              <Select
-                fullWidth
-                labelId="category"
-                id="category"
-                variant="outlined"
-                value={selectedCategory?.id || ""}
-                label="Select Category"
-                onChange={(e) => {
-                  setErrors(prev => ({ ...prev, category: "" }));
-                  const selectedId = e.target.value;
-                  const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
-                  setSelectedCategory(selectedCat);
-                }}
-                renderValue={(selectedId) => {
+              labelId="category"
+              id="category"
+              variant="outlined"
+              value={selectedCategory?.id || ""}
+              label="Select Category"
+              onChange={(e) => {
+                setErrors(prev => ({ ...prev, category: "" }));
+                const selectedId = e.target.value;
+                const selectedCat = categories?.find((cat) => cat.id === selectedId) || null;
+                setSelectedCategory(selectedCat);
+              }}
+              renderValue={(selectedId) => {
                 const selectedCat = categories?.find(cat => cat.id === selectedId);
                 if (!selectedCat) return '';
                 return (
@@ -197,25 +191,25 @@ export function NewExpenseCard({
                   </Box>
                 );
               }}
-                error={!!errors.category}
-              >
-                {categories?.map((category) => (
-                  <MenuItem
-                    key={category.id}
-                    value={category.id}
-                    sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-                  >
-                    <MuiIconPicker value={category.icon} selectedCategory={category} onChange={() => {}} size={20} />
-                    {category.name}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.category && (
-                <FormHelperText error>{errors.category}</FormHelperText>
-              )}
-            </FormControl>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
+              error={!!errors.category}
+            >
+              {categories?.map((category) => (
+                <MenuItem
+                  key={category.id}
+                  value={category.id}
+                  sx={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+                >
+                  <MuiIconPicker value={category.icon} selectedCategory={category} onChange={() => { }} size={20} />
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.category && (
+              <FormHelperText error>{errors.category}</FormHelperText>
+            )}
+          </FormControl>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
               label="Date"
               value={selectedDate ?? dayjs()}
               onChange={(newValue) => {
@@ -225,53 +219,52 @@ export function NewExpenseCard({
               maxDate={dayjs()}
               slotProps={{
                 textField: {
-                fullWidth: true,
-                error: !!errors.date,
-                helperText: errors.date,
+                  fullWidth: true,
+                  error: !!errors.date,
+                  helperText: errors.date,
                 },
               }}
-              />
-            </LocalizationProvider>
-          </Box>
-          <TextField
-            label="Note"
+            />
+          </LocalizationProvider>
+        </Box>
+        <TextField
+          label="Note"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={newExpenseNotes}
+          inputProps={{ maxLength: 100 }}
+          onChange={(e) => setNewExpenseNotes(e.target.value)}
+        />
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: '1rem', marginTop: "5rem", paddingTop: "1rem", borderTop: "1px solid #d3d3d3" }}>
+          <Button variant="outlined" color="primary" onClick={() => {
+            setNewExpense(false);
+            setNewExpenseName("");
+            setNewExpenseAmount("");
+            setSelectedCategory(null);
+            setSelectedDate(dayjs());
+            setNewExpenseNotes("");
+            setErrors({ name: "", amount: "", category: "", date: "" });
+          }}>
+            Cancel
+          </Button>
+          <Button
             variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newExpenseNotes}
-            inputProps={{ maxLength: 100 }}
-            onChange={(e) => setNewExpenseNotes(e.target.value)}
-          />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: '1rem', marginTop: "5rem", paddingTop: "1rem", borderTop: "1px solid #d3d3d3" }}>
-            <Button variant="outlined" color="primary" onClick={() => {
-              setNewExpense(false);
-              setNewExpenseName("");
-              setNewExpenseAmount("");
-              setSelectedCategory(null);
-              setSelectedDate(dayjs());
-              setNewExpenseNotes("");
-              setErrors({ name: "", amount: "", category: "", date: "" });
-            }}>
-              Cancel
-            </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => {
-                if (validateForm()) {
-                  handleSave();
-                }
-              }}
-            >
-              {creatingExpense ? (
-                <CircularProgress size={20} />
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
-    </Backdrop>
+            color="primary"
+            onClick={() => {
+              if (validateForm()) {
+                handleSave();
+              }
+            }}
+          >
+            {creatingExpense ? (
+              <CircularProgress size={20} />
+            ) : (
+              "Save"
+            )}
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
   );
 }
