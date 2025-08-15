@@ -7,6 +7,7 @@ import { NewExpenseCard } from "./components";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import apiService from "./api/apiService";
+import MonthlyExpensesCard from "./components/MonthlyExpensesCard";
 
 export default function Dashboard() {
     const [newExpense, setNewExpense] = useState<boolean>(false); // You can use this to show/hide the card, or just set true always
@@ -22,11 +23,12 @@ export default function Dashboard() {
         setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
         categories: Category[] | null;
         setCategories: React.Dispatch<React.SetStateAction<Category[] | null>>;
+        expenses: Expense[] | null;
         setExpenses: React.Dispatch<React.SetStateAction<Expense[] | null>>;
         setHistory: React.Dispatch<React.SetStateAction<MonthlyHistory[] | null>>;
     }
 
-    const { budget, setBudget, categories, setCategories, setExpenses, setHistory } = useOutletContext<OutletContextType>();
+    const { budget, setBudget, categories, setCategories, expenses, setExpenses, setHistory } = useOutletContext<OutletContextType>();
 
     function formatDateToYYYYMMDD(date: Date) {
         const year = date.getFullYear();
@@ -211,7 +213,7 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: '0 4rem' }}>
-            <Grid container spacing={3} alignItems="stretch">
+            <Grid container spacing={3}>
                 <Grid item xs={12} sm={6} md={4} style={{ display: 'flex' }}>
                     <BudgetCard budget={budget} setBudget={setBudget} />
                 </Grid>
@@ -236,6 +238,9 @@ export default function Dashboard() {
                         handleSave={handleSave}
                         creatingExpense={creatingExpense}
                     />
+                </Grid>
+                <Grid item xs={12} sm={6} md={8} style={{ display: 'flex' }}>
+                    <MonthlyExpensesCard expenses={expenses} />
                 </Grid>
             </Grid>
         </div>

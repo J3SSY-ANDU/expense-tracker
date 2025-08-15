@@ -160,54 +160,53 @@ export default function CategoriesBudgetsCard({
         [currency]
     );
     return (
-        <Card sx={{ flex: 1 }}>
-            <CardContent>
-
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
-                        <Typography component="div" sx={{ fontSize: 18, fontWeight: "600" }}>
-                            Budgets by Category
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{ height: 240 }}>
-                        <Doughnut data={chartData} options={chartOptions} />
-                    </Box>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            mt: 1,
-                            pt: 1,
-                            margin: 'auto',
-                            borderTop: '1px solid #ccc',
-                            gap: '6rem',
-                        }}
-                    >
-                        <Box>
-                            <Typography variant="caption" color="text.secondary">
-                                Highest Budget
-                            </Typography>
-                            <Typography variant="body1">
-                                {mostSpentCategory.value > 0 ? currency.format(mostSpentCategory.value) : "-"}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                {mostSpentCategory.value > 0 ? mostSpentCategory.label : ""}
-                            </Typography>
-                        </Box>
-
-                        <Box>
-                            <Typography variant="caption" color="text.secondary">
-                                Lowest Budget
-                            </Typography>
-                            <Typography variant="body1">
-                                {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? currency.format(lessSpentCategory.value) : "-"}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? lessSpentCategory.label : ""}
-                            </Typography>
-                        </Box>
-                    </Box>
+        <Card sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem", flex: 1, justifyContent: "center" }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
+                <Typography component="div" sx={{ fontSize: 18, fontWeight: "600" }}>
+                    Budgets by Category
+                </Typography>
                 </Box>
+
+                <Box sx={{ height: 240 }}>
+                <Doughnut data={chartData} options={chartOptions} />
+                </Box>
+                <Box
+                sx={{
+                    display: 'flex',
+                    mt: 1,
+                    pt: 1,
+                    margin: 'auto',
+                    borderTop: '1px solid #ccc',
+                    gap: '6rem',
+                }}
+                >
+                <Box>
+                    <Typography variant="caption" color="text.secondary">
+                    Highest Budget
+                    </Typography>
+                    <Typography variant="body1">
+                    {mostSpentCategory.value > 0 ? currency.format(mostSpentCategory.value) : "-"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                    {mostSpentCategory.value > 0 ? mostSpentCategory.label : ""}
+                    </Typography>
+                </Box>
+
+                <Box>
+                    <Typography variant="caption" color="text.secondary">
+                    Lowest Budget
+                    </Typography>
+                    <Typography variant="body1">
+                    {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? currency.format(lessSpentCategory.value) : "-"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                    {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? lessSpentCategory.label : ""}
+                    </Typography>
+                </Box>
+                </Box>
+            </Box>
             </CardContent>
         </Card>
     )
