@@ -11,7 +11,6 @@ import {
 } from "./components";
 import Layout from "./Layout";
 import Dashboard from "./Dashboard";
-import Stats from "./Stats";
 import Settings from "./Settings";
 
 const root = ReactDOM.createRoot(
@@ -32,7 +31,6 @@ root.render(
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/expenses" element={<Expenses />} />
-        <Route path="/stats" element={<Stats />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<h1>Not Found</h1>} />
