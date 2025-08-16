@@ -8,6 +8,7 @@ import {
   TableContainer,
   Typography,
   Button,
+  Backdrop,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -126,7 +127,7 @@ export function ExpensesTable({
   setOpenCategory?: React.Dispatch<React.SetStateAction<boolean>>;
   setBudget: React.Dispatch<React.SetStateAction<Budget | null>>;
 }) {
-  const [loading, setLoading] = useState<boolean>(true); // State for loading
+  const [loading, setLoading] = useState<boolean>(false); // State for loading
   const [categoriesNames, setCategoriesNames] = useState<{
     [key: string]: string;
   }>({});
@@ -223,6 +224,7 @@ export function ExpensesTable({
             : {
               id: createdExpense.category_id,
               name: selectedCategory?.name || "Uncategorized",
+              budget: selectedCategory?.budget || 0,
               total_expenses: createdExpense.amount,
               description: "",
               order: 0,
@@ -594,23 +596,29 @@ export function ExpensesTable({
           </TableBody>
         </Table>
       </TableContainer>
-      <NewExpenseCard
-        newExpense={newExpense}
-        setNewExpense={setNewExpense}
-        newExpenseName={newExpenseName}
-        setNewExpenseName={setNewExpenseName}
-        newExpenseAmount={newExpenseAmount}
-        setNewExpenseAmount={setNewExpenseAmount}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        categories={categories}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        newExpenseNotes={newExpenseNotes}
-        setNewExpenseNotes={setNewExpenseNotes}
-        handleSave={handleSave}
-        creatingExpense={creatingExpense}
-      />
+      <Backdrop
+        open={newExpense}
+        onClick={() => setNewExpense(false)}
+        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      >
+        <NewExpenseCard
+          newExpense={newExpense}
+          setNewExpense={setNewExpense}
+          newExpenseName={newExpenseName}
+          setNewExpenseName={setNewExpenseName}
+          newExpenseAmount={newExpenseAmount}
+          setNewExpenseAmount={setNewExpenseAmount}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          categories={categories}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          newExpenseNotes={newExpenseNotes}
+          setNewExpenseNotes={setNewExpenseNotes}
+          handleSave={handleSave}
+          creatingExpense={creatingExpense}
+        />
+      </Backdrop>
       <ExpenseCard
         openExpense={openExpense}
         setOpenExpense={setOpenExpense}

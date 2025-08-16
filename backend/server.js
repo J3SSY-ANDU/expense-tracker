@@ -38,7 +38,8 @@ const {
   updateCategoryIcon,
   getOrderedCategories,
   getCategoryById,
-  createDefaultCategories
+  createDefaultCategories,
+  updateCategoryBudget
 } = require('./database/categories')
 const { sendEmailVerification, forgotPasswordEmail } = require('./emails')
 const {
@@ -397,6 +398,23 @@ app.post(
     }
   }
 )
+
+app.post('/update-category-budget', authenticateToken, async (req, res) => {
+  try {
+    const { category_id, budget } = req.body
+    if (!category_id || budget === undefined) {
+      return res.status(400).json({ error: 'category_id and budget are required.' })
+    }
+    const updatedCategory = await updateCategoryBudget(category_id, budget)
+    if (!updatedCategory) {
+      return res.status(401).json({ error: 'Category budget update failed!' })
+    }
+    res.status(200).json(updatedCategory)
+  } catch (error) {
+    console.error('Error updating category budget:', error)
+    res.status(500).json({ error: 'Failed to update category budget.' })
+  }
+})
 
 app.post('/update-category-icon', authenticateToken, async (req, res) => {
   try {

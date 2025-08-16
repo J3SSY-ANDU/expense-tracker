@@ -43,8 +43,8 @@ export default function BudgetCard({
             datasets: [
                 {
                     data: showPlaceholder ? [0.00000001] : [Math.max(expenses, 0), Math.max(remaining, 0)],
-                    backgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50a8e3dd", "#ccccccd8"],
-                    hoverBackgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50A9E3", "#ccc"],
+                    backgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50A9E3", "#cccccc"],
+                    hoverBackgroundColor: showPlaceholder ? ["#e0e0e0"] : ["#50a8e3dd", "#ccccccd8"],
                     borderWidth: 0,
                 },
             ],
@@ -76,15 +76,14 @@ export default function BudgetCard({
     const hasExpenses = expenses > 0;
 
     return (
-        <Card>
-            <CardContent>
-
-                <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
+        <Card sx={{ flex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
+            <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", height: "100%" }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem", flex: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1, mb: 3 }}>
                         <Typography component="div" sx={{ fontSize: 18, fontWeight: "600", }}>
-                            Budget (Current Month)
+                            Budget Overview
                         </Typography>
-                        <Button sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', width: 'fit-content', textTransform: 'none', color: 'inherit' }} onClick={() => { setEditBudget(true) }}>
+                        <Button sx={{ display: 'flex', alignItems: 'center', gap: '0.4rem', p: 0, cursor: 'pointer', width: 'fit-content', textTransform: 'none', color: 'inherit' }} onClick={() => { setEditBudget(true) }}>
                             {hasBudget ? <EditIcon fontSize="small" /> : <AddIcon fontSize="small" />}
                             <Typography>
                                 {hasBudget ? "Edit" : "Add"}
