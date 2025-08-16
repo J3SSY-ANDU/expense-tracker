@@ -8,6 +8,7 @@ import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import apiService from "./api/apiService";
 import MonthlyExpensesCard from "./components/MonthlyExpensesCard";
+import CategoryBudgetExpensesCard from "./components/CategoryBudgetExpensesCard";
 
 export default function Dashboard() {
     const [newExpense, setNewExpense] = useState<boolean>(false); // You can use this to show/hide the card, or just set true always
@@ -239,8 +240,11 @@ export default function Dashboard() {
                         creatingExpense={creatingExpense}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={8} style={{ display: 'flex' }}>
+                <Grid item xs={12} sm={6} md={6} style={{ display: 'flex' }}>
                     <MonthlyExpensesCard expenses={expenses} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={6} style={{ display: 'flex' }}>
+                    <CategoryBudgetExpensesCard categories={categories} />
                 </Grid>
             </Grid>
         </div>

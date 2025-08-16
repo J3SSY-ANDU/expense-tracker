@@ -6,7 +6,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const tabConfig = [
   { label: 'Dashboard', path: '/' },
   { label: 'Expenses', path: '/expenses' },
-  { label: 'Stats', path: '/stats' },
   { label: 'Settings', path: '/settings'}
 ];
 
