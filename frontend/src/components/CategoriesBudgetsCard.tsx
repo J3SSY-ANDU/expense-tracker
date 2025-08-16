@@ -163,7 +163,7 @@ export default function CategoriesBudgetsCard({
         <Card sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem", flex: 1, justifyContent: "center" }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1, mb: 3 }}>
                 <Typography component="div" sx={{ fontSize: 18, fontWeight: "600" }}>
                     Budgets by Category
                 </Typography>

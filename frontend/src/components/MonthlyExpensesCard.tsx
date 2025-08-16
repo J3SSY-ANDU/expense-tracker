@@ -99,7 +99,7 @@ export default function DailyExpensesChart({ expenses }: { expenses: Expense[] |
           Daily Expenses ({now.format("MMMM YYYY")})
         </Typography>
         <Box>
-          <Line data={chartData} options={chartOptions} style={{ width: '100%'}} />
+          <Line data={chartData} options={chartOptions} style={{ width: '100%' }} />
         </Box>
       </CardContent>
     </Card>
