@@ -93,13 +93,15 @@ export default function DailyExpensesChart({ expenses }: { expenses: Expense[] |
   };
 
   return (
-    <Card sx={{ flex: 1 }}>
-      <CardContent>
+    <Card sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
           Daily Expenses ({now.format("MMMM YYYY")})
         </Typography>
-        <Box>
-          <Line data={chartData} options={chartOptions} style={{ width: '100%' }} />
+        <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Box sx={{ width: "100%", height: 350 }}>
+            <Line data={chartData} options={chartOptions} style={{ width: "100%", height: "100%" }} />
+          </Box>
         </Box>
       </CardContent>
     </Card>

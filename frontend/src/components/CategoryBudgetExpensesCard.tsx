@@ -22,7 +22,15 @@ export default function CategoryBudgetExpensesCard({ categories }: Props) {
                 <Typography component="div" sx={{ fontSize: 18, fontWeight: "600", borderBottom: "1px solid #ccc", pb: 1, mb: 3 }}>
                     Category Budgets and Expenses
                 </Typography>
-                <Grid container spacing={2} sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                <Grid
+                    container
+                    spacing={2}
+                    sx={{
+                        flexGrow: 1,
+                        overflowY: categories.filter(cat => Number(cat.budget) > 0).length > 8 ? 'auto' : 'unset',
+                        maxHeight: categories.filter(cat => Number(cat.budget) > 0).length > 8 ? 400 : 'unset',
+                    }}
+                >
                     {categories
                         .filter(cat => Number(cat.budget) > 0)
                         .map((cat, i) => {
