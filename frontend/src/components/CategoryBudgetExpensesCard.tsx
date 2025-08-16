@@ -1,5 +1,6 @@
 import { Box, Card, CardContent, Typography, LinearProgress, Stack, Grid } from "@mui/material";
 import { Category } from "../types";
+import { iconMap } from "./icons";
 
 type Props = {
     categories: Category[] | null;
@@ -34,6 +35,7 @@ export default function CategoryBudgetExpensesCard({ categories }: Props) {
                     {categories
                         .filter(cat => Number(cat.budget) > 0)
                         .map((cat, i) => {
+                            const CategoryIcon = cat.icon ? iconMap[cat.icon] : "";
                             const budget = Number(cat.budget);
                             const totalExpenses = Number(cat.total_expenses);
                             const percent = budget > 0 ? Math.min((totalExpenses / budget) * 100, 100) : 0;
@@ -41,7 +43,10 @@ export default function CategoryBudgetExpensesCard({ categories }: Props) {
                                 <Grid item xs={12} sm={6} key={cat.id}>
                                     <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                                         <Box display="flex" justifyContent="space-between" alignItems="center">
-                                            <Typography variant="subtitle1">{cat.name}</Typography>
+                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                {CategoryIcon && <CategoryIcon sx={{ fontSize: 18 }} />}
+                                                <Typography variant="subtitle1">{cat.name}</Typography>
+                                            </Box>
                                             <Typography variant="body2">
                                                 ${budget}
                                             </Typography>

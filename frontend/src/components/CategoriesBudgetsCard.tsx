@@ -36,18 +36,28 @@ export default function CategoriesBudgetsCard({
     );
 
     const mostSpentCategory = useMemo(() => {
-        if (filteredCategories.length === 0) return { label: "", value: 0 };
-        return filteredCategories.reduce((max, category) => {
-            return category.value > max.value ? category : max;
-        }, filteredCategories[0]);
-    }, [filteredCategories]);
+        if (!categories || categories.length === 0) return { label: "", value: 0 };
+        const withExpenses = categories
+            .map((category) => ({
+                label: category.name,
+                value: Number(category.total_expenses ?? 0),
+            }))
+            .filter((c) => c.value > 0);
+        if (withExpenses.length === 0) return { label: "", value: 0 };
+        return withExpenses.reduce((max, category) => (category.value > max.value ? category : max), withExpenses[0]);
+    }, [categories]);
 
-    const lessSpentCategory = useMemo(() => {
-        if (filteredCategories.length === 0) return { label: "", value: 0 };
-        return filteredCategories.reduce((min, category) => {
-            return category.value < min.value ? category : min;
-        }, filteredCategories[0]);
-    }, [filteredCategories]);
+    const leastSpentCategory = useMemo(() => {
+        if (!categories || categories.length === 0) return { label: "", value: 0 };
+        const withExpenses = categories
+            .map((category) => ({
+                label: category.name,
+                value: Number(category.total_expenses ?? 0),
+            }))
+            .filter((c) => c.value > 0);
+        if (withExpenses.length === 0) return { label: "", value: 0 };
+        return withExpenses.reduce((min, category) => (category.value < min.value ? category : min), withExpenses[0]);
+    }, [categories]);
 
     const chartData = useMemo(() => {
         // Filter only categories with budget > 0
@@ -184,7 +194,7 @@ export default function CategoriesBudgetsCard({
                 >
                 <Box>
                     <Typography variant="caption" color="text.secondary">
-                    Highest Budget
+                    Most Spent
                     </Typography>
                     <Typography variant="body1">
                     {mostSpentCategory.value > 0 ? currency.format(mostSpentCategory.value) : "-"}
@@ -196,13 +206,13 @@ export default function CategoriesBudgetsCard({
 
                 <Box>
                     <Typography variant="caption" color="text.secondary">
-                    Lowest Budget
+                    Least Spent
                     </Typography>
                     <Typography variant="body1">
-                    {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? currency.format(lessSpentCategory.value) : "-"}
+                    {leastSpentCategory.value > 0 && mostSpentCategory !== leastSpentCategory ? currency.format(leastSpentCategory.value) : "-"}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                    {lessSpentCategory.value > 0 && mostSpentCategory !== lessSpentCategory ? lessSpentCategory.label : ""}
+                    {leastSpentCategory.value > 0 && mostSpentCategory !== leastSpentCategory ? leastSpentCategory.label : ""}
                     </Typography>
                 </Box>
                 </Box>
