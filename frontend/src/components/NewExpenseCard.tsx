@@ -24,6 +24,27 @@ import { NumericFormat } from 'react-number-format';
 import { useState } from "react";
 import { MuiIconPicker } from "./MuiIconPicker";
 
+/**
+ * Renders a card component for creating a new expense entry.
+ *
+ * @param newExpense - Boolean indicating if the new expense form is open.
+ * @param setNewExpense - Function to set the newExpense state.
+ * @param newExpenseName - The name of the new expense.
+ * @param setNewExpenseName - Function to set the newExpenseName state.
+ * @param newExpenseAmount - The amount for the new expense as a string.
+ * @param setNewExpenseAmount - Function to set the newExpenseAmount state.
+ * @param selectedCategory - The currently selected category or null.
+ * @param setSelectedCategory - Function to set the selectedCategory state.
+ * @param categories - Array of available categories or null.
+ * @param selectedDate - The selected date for the expense or null.
+ * @param setSelectedDate - Function to set the selectedDate state.
+ * @param newExpenseNotes - Notes for the new expense.
+ * @param setNewExpenseNotes - Function to set the newExpenseNotes state.
+ * @param handleSave - Callback function to handle saving the new expense.
+ * @param creatingExpense - Boolean indicating if the expense is being created (loading state).
+ *
+ * @returns A Material-UI Card component containing the new expense form.
+ */
 export function NewExpenseCard({
   newExpense,
   setNewExpense,

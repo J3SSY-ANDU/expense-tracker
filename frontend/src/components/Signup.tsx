@@ -15,6 +15,18 @@ import "../styles/signup.css";
 import apiService from "../api/apiService";
 import { User } from "../types";
 
+/**
+ * SignupForm component renders a user registration form with validation and error handling.
+ *
+ * @component
+ * 
+ * @description
+ * This component provides a sign-up form for new users, including fields for first name, last name, email, password, and password confirmation.
+ * It performs client-side validation for all fields, displays error messages, and handles form submission.
+ * On successful registration, it navigates the user to the email verification page.
+ *
+ * @returns {JSX.Element} The rendered sign-up form component.
+ */
 export function SignupForm() {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");

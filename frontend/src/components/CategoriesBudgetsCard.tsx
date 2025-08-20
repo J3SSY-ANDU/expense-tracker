@@ -6,6 +6,20 @@ import { Budget, Category } from "../types";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 
+/**
+ * Displays a card summarizing budget allocations by category, including a doughnut chart visualization,
+ * and highlights the most and least spent categories.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Budget | null} props.budget - The overall budget object, containing total income.
+ * @param {Category[] | null} props.categories - Array of category objects, each with budget and expense data.
+ *
+ * @returns {JSX.Element} A card component showing category budgets, a doughnut chart, and spending highlights.
+ *
+ * @example
+ * <CategoriesBudgetsCard budget={budget} categories={categories} />
+ */
 export default function CategoriesBudgetsCard({
     budget,
     categories,

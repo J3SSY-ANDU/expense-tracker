@@ -22,6 +22,20 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
 
+/**
+ * Renders the Account component, which displays user account information,
+ * provides options for logging out, changing the password, and deleting the account.
+ *
+ * @param user - The current authenticated user or null if not loaded.
+ * @param setUser - Function to update the user state (e.g., after logout).
+ *
+ * @remarks
+ * - Shows a dropdown menu with profile and sign out options.
+ * - Allows the user to change their password via a modal dialog.
+ * - Provides a confirmation dialog for account deletion.
+ *
+ * @component
+ */
 export function Account({
   user,
   setUser,

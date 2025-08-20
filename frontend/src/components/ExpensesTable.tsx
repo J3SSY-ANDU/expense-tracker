@@ -100,6 +100,26 @@ export const exampleExpenses: ExampleExpense[] = [
 ];
 
 type ExpenseTableModeValues = "monthly" | "history" | "category";
+/**
+ * Renders a table displaying a list of expenses with options to add, edit, and delete expenses.
+ * Supports both "monthly" and "category" modes, and integrates with category and budget management.
+ *
+ * @param props - The props for the ExpensesTable component.
+ * @param props.expenses - The list of expenses to display.
+ * @param props.setExpenses - Function to update the expenses state.
+ * @param props.categories - The list of categories available.
+ * @param props.setCategories - Function to update the categories state.
+ * @param props.setHistory - Function to update the monthly history state.
+ * @param props.mode - The mode of the table ("monthly" or "category").
+ * @param props.title - The title to display above the table.
+ * @param props.handleDeleteExpenseByCategory - Optional function to handle deleting an expense by category (used in "category" mode).
+ * @param props.handleUpdateData - Function to handle updating an expense and related history.
+ * @param props.handleChangeIcon - Function to handle changing a category's icon.
+ * @param props.setOpenCategory - Optional function to open the category dialog.
+ * @param props.setBudget - Function to update the budget state.
+ *
+ * @returns The rendered ExpensesTable component.
+ */
 export function ExpensesTable({
   expenses,
   setExpenses,

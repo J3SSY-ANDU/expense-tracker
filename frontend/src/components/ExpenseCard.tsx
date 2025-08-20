@@ -30,6 +30,28 @@ import { useState } from "react";
 import { NumericFormat } from 'react-number-format';
 import { MuiIconPicker } from "./MuiIconPicker";
 
+/**
+ * ExpenseCard component displays and allows editing of a selected expense.
+ * 
+ * This modal card provides fields to update the expense's name, amount, category, date, and notes.
+ * It also allows deleting the expense with a confirmation dialog.
+ * 
+ * @param openExpense - Controls whether the expense card modal is open.
+ * @param setOpenExpense - Function to set the open state of the expense card modal.
+ * @param selectedExpense - The currently selected expense to display and edit.
+ * @param setSelectedExpense - Function to update the selected expense.
+ * @param setShowDeleteDialog - Function to control the visibility of the delete confirmation dialog.
+ * @param categories - List of available categories for selection.
+ * @param showDeleteDialog - Controls whether the delete confirmation dialog is open.
+ * @param handleDeleteExpense - Callback to handle deleting the expense.
+ * @param handleUpdateData - Callback to handle updating the expense data.
+ * @param handleChangeIcon - Callback to handle changing the category icon.
+ * @param saveLoading - Indicates if the save operation is in progress.
+ * @param setSaveLoading - Function to set the loading state for saving.
+ * @param setOpenCategory - (Optional) Function to control the open state of the category selector.
+ * 
+ * @returns A modal card UI for viewing, editing, and deleting an expense.
+ */
 export function ExpenseCard({
   openExpense,
   setOpenExpense,
