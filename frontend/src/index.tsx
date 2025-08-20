@@ -13,6 +13,27 @@ import Layout from "./Layout";
 import Dashboard from "./Dashboard";
 import Settings from "./Settings";
 
+/**
+ * Sets up the root React DOM node and configures the application's routing.
+ *
+ * This initializes the root element using React 18's `createRoot` API,
+ * and wraps the application in a React Router for client-side navigation.
+ *
+ * @see https://react.dev/reference/react-dom/client/createRoot
+ * @see https://reactrouter.com/en/main
+ *
+ * @example
+ * const root = ReactDOM.createRoot(
+ *   document.getElementById("root") as HTMLElement
+ * );
+ * root.render(
+ *   <Router>
+ *     <Routes>
+ *       // ...routes
+ *     </Routes>
+ *   </Router>
+ * );
+ */
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );

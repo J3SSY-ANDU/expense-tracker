@@ -9,6 +9,14 @@ const tabConfig = [
   { label: 'Settings', path: '/settings'}
 ];
 
+/**
+ * Renders a set of navigation tabs for the application.
+ *
+ * The active tab is determined by the current route pathname.
+ * When a tab is selected, the navigation updates to the corresponding route.
+ *
+ * @returns {JSX.Element} The navigation tabs component.
+ */
 export default function NavTabs() {
   const navigate = useNavigate();
   const location = useLocation();

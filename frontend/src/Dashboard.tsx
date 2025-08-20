@@ -10,6 +10,23 @@ import apiService from "./api/apiService";
 import MonthlyExpensesCard from "./components/MonthlyExpensesCard";
 import CategoryBudgetExpensesCard from "./components/CategoryBudgetExpensesCard";
 
+/**
+ * Dashboard component for the expense tracker application.
+ *
+ * This component displays the main dashboard, including budget overview, category budgets,
+ * monthly expenses, and the ability to add new expenses. It manages state for new expense creation,
+ * interacts with the API to persist new expenses, and updates local state for budgets, categories,
+ * expenses, and monthly history accordingly.
+ *
+ * @component
+ *
+ * @returns {JSX.Element} The rendered dashboard UI.
+ *
+ * @remarks
+ * - Uses context from the parent route to access and update budget, categories, expenses, and history.
+ * - Handles creation of new expenses and updates all relevant state slices.
+ * - Displays loading state if budget data is not yet available.
+ */
 export default function Dashboard() {
     const [newExpense, setNewExpense] = useState<boolean>(false); // You can use this to show/hide the card, or just set true always
     const [newExpenseName, setNewExpenseName] = useState<string>("");

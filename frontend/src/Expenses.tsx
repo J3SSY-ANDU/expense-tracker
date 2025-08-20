@@ -6,6 +6,21 @@ import { Categories, ExpensesTable, History } from "./components";
 // import expense_tracker from "./expense-tracker.svg";
 import apiService from "./api/apiService";
 
+/**
+ * The main Expenses component for the expense tracker application.
+ *
+ * This component manages and displays the user's expenses, categories, budget, and monthly history.
+ * It provides handlers for updating expenses and category icons, and coordinates data fetching and state updates.
+ *
+ * @component
+ *
+ * @returns {JSX.Element} The rendered Expenses page, including categories, expenses table, and history.
+ *
+ * @remarks
+ * - Uses context from the parent route to access and update categories, expenses, history, and budget.
+ * - Handles asynchronous updates and error states for expense and category modifications.
+ * - Renders loading state until all required data is available.
+ */
 export default function Expenses() {
   const [updatingDataError, setUpdatingDataError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
