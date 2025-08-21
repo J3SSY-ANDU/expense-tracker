@@ -21,6 +21,33 @@ import { iconMap } from "./icons";
 import React from "react";
 import { NumericFormat } from "react-number-format";
 
+/**
+ * CategoryCard component displays and manages a single expense category, allowing users to:
+ * - Edit the category's name, description, icon, and budget.
+ * - View total expenses for the category.
+ * - Delete the category (with confirmation dialog).
+ * - View and manage expenses associated with the category.
+ *
+ * @param newExpensesByCategory - The list of expenses filtered by the selected category, or null.
+ * @param setNewExpensesByCategory - Setter for updating the filtered expenses by category.
+ * @param setExpenses - Setter for updating the global list of expenses.
+ * @param categories - The list of all categories, or null.
+ * @param setCategories - Setter for updating the list of categories.
+ * @param setHistory - Setter for updating the monthly history of expenses.
+ * @param selectedCategory - The currently selected category, or null.
+ * @param setSelectedCategory - Setter for updating the selected category.
+ * @param openCategory - Boolean indicating if the category card dialog is open.
+ * @param setOpenCategory - Setter for toggling the category card dialog.
+ * @param handleChangeName - Async function to handle updating the category name.
+ * @param handleChangeDescription - Async function to handle updating the category description.
+ * @param handleChangeIcon - Function to handle updating the category icon.
+ * @param handleDeleteCategory - Function to handle deleting the category.
+ * @param handleUpdateData - Async function to handle updating an expense.
+ * @param setBudget - Setter for updating the budget object.
+ * @param handleChangeBudget - Async function to handle updating the category budget.
+ *
+ * @returns The rendered CategoryCard component.
+ */
 export function CategoryCard({
   newExpensesByCategory,
   setNewExpensesByCategory,

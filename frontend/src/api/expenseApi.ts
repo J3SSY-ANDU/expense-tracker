@@ -2,7 +2,16 @@ import axios from 'axios'
 import { Expense, NewExpense } from '../types/Expense'
 import { api } from './apiService'
 
-export async function FetchExpensesData (): Promise<Expense[] | { error: string }> {
+/**
+ * Fetches all monthly expenses from the backend API.
+ *
+ * @returns {Promise<Expense[] | { error: string }>} A promise that resolves to an array of expenses on success,
+ * or an object containing an error message on failure.
+ *
+ */
+export async function FetchExpensesData (): Promise<
+  Expense[] | { error: string }
+> {
   try {
     const res = await api.get(`/all-monthly-expenses`)
     return res.data
@@ -16,6 +25,17 @@ export async function FetchExpensesData (): Promise<Expense[] | { error: string 
   }
 }
 
+/**
+ * Creates a new expense by sending a POST request to the backend API.
+ *
+ * @param expense - The new expense data to be created.
+ * @returns A promise that resolves to the created `Expense` object, or an object containing an error message.
+ *
+ * @remarks
+ * - If the API call is successful, the created expense is returned.
+ * - If an Axios error occurs, the backend error message is returned if available.
+ * - If another error occurs, a generic error message is returned.
+ */
 export async function CreateExpense (
   expense: NewExpense
 ): Promise<Expense | { error: string }> {
@@ -39,6 +59,13 @@ export async function CreateExpense (
   }
 }
 
+/**
+ * Updates an existing expense in the backend.
+ *
+ * @param expense - The expense object containing updated information.
+ * @returns A promise that resolves to the updated Expense object, or an object containing an error message.
+ *
+ */
 export async function UpdateExpense (
   expense: Expense
 ): Promise<Expense | { error: string }> {
@@ -63,7 +90,18 @@ export async function UpdateExpense (
   }
 }
 
-export async function DeleteExpense (expense_id: string): Promise<void | { error: string }> {
+/**
+ * Deletes an expense by its ID.
+ *
+ * Sends a DELETE request to the backend API to remove the specified expense.
+ *
+ * @param expense_id - The unique identifier of the expense to be deleted.
+ * @returns A promise that resolves to void if successful, or an object containing an error message if the operation fails.
+ *
+ */
+export async function DeleteExpense (
+  expense_id: string
+): Promise<void | { error: string }> {
   try {
     await api.delete(`/delete-expense/${expense_id}`)
     console.log(`Expense deleted successfully.`)

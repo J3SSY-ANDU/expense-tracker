@@ -52,8 +52,22 @@ const {
   invalidateTokensByEmail,
   getEmailByVerificationToken
 } = require('./database/emailVerification')
-const { createBudget, getBudgetByUserMonthYear, updateBudgetIncome } = require('./database/budgets')
+const {
+  createBudget,
+  getBudgetByUserMonthYear,
+  updateBudgetIncome
+} = require('./database/budgets')
 
+/**
+ * Middleware to authenticate JWT tokens in the Authorization header.
+ * Expects the header in the format "Bearer <token>".
+ * If the token is missing or invalid, responds with 401 (Unauthorized) or 403 (Forbidden).
+ * On success, attaches the decoded user object to req.user and calls next().
+ *
+ * @param {import('express').Request} req - Express request object.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization']
   const token = authHeader && authHeader.split(' ')[1] // Support "Bearer <token>"
@@ -86,6 +100,7 @@ app.use(
   })
 )
 
+// Get user data
 app.get('/user-data', authenticateToken, async (req, res) => {
   try {
     const user = await getUserById(req.user.id)
@@ -107,6 +122,7 @@ app.get('/user-data', authenticateToken, async (req, res) => {
   }
 })
 
+// Process user signup
 app.post('/process-signup', async (req, res) => {
   try {
     const { firstname, lastname, email, password } = req.body
@@ -127,7 +143,7 @@ app.post('/process-signup', async (req, res) => {
   }
 })
 
-// Needs to be fixed
+// Verify email address
 app.get('/verify-email/:token', async (req, res) => {
   const { token } = req.params
   let connection
@@ -201,7 +217,7 @@ app.get('/verify-email/:token', async (req, res) => {
   }
 })
 
-// Needs to be fixed
+// Verify email address
 app.post('/resend-verification-email', async (req, res) => {
   try {
     const { id, token, email } = req.body
@@ -243,6 +259,7 @@ app.post('/resend-verification-email', async (req, res) => {
   }
 })
 
+// Process user login
 app.post('/process-login', async (req, res) => {
   try {
     const { email, password } = req.body
@@ -276,7 +293,7 @@ app.post('/process-login', async (req, res) => {
   }
 })
 
-// Needs to be fixed
+// Process forgot password
 app.post('/forgot-password', async (req, res) => {
   const { email } = req.body
   const user = await getUserByEmail(email)
@@ -288,7 +305,7 @@ app.post('/forgot-password', async (req, res) => {
   res.status(200).send('Password reset email sent!')
 })
 
-// Need to be fixed
+// Process password reset
 app.post('/reset-forgot-password', async (req, res) => {
   const { token, new_password } = req.body
   if (!token || !new_password) {
@@ -302,6 +319,7 @@ app.post('/reset-forgot-password', async (req, res) => {
   res.status(200).send('Password reset successfully!')
 })
 
+// Get all categories
 app.get('/all-categories', authenticateToken, async (req, res) => {
   try {
     const categories = await getOrderedCategories(req.user.id)
@@ -312,6 +330,7 @@ app.get('/all-categories', authenticateToken, async (req, res) => {
   }
 })
 
+// Generate default categories
 app.get('/generate-default-categories', authenticateToken, async (req, res) => {
   try {
     const date = new Date()
@@ -337,6 +356,7 @@ app.get('/generate-default-categories', authenticateToken, async (req, res) => {
   }
 })
 
+// Get category by ID
 app.get('/get-category', authenticateToken, async (req, res) => {
   try {
     const { category_id } = req.query
@@ -354,6 +374,7 @@ app.get('/get-category', authenticateToken, async (req, res) => {
   }
 })
 
+// Process category name update
 app.post('/update-category-name', authenticateToken, async (req, res) => {
   try {
     const { category_id, name } = req.body
@@ -373,6 +394,7 @@ app.post('/update-category-name', authenticateToken, async (req, res) => {
   }
 })
 
+// Process category description update
 app.post(
   '/update-category-description',
   authenticateToken,
@@ -399,11 +421,14 @@ app.post(
   }
 )
 
+// Process category budget update
 app.post('/update-category-budget', authenticateToken, async (req, res) => {
   try {
     const { category_id, budget } = req.body
     if (!category_id || budget === undefined) {
-      return res.status(400).json({ error: 'category_id and budget are required.' })
+      return res
+        .status(400)
+        .json({ error: 'category_id and budget are required.' })
     }
     const updatedCategory = await updateCategoryBudget(category_id, budget)
     if (!updatedCategory) {
@@ -416,6 +441,7 @@ app.post('/update-category-budget', authenticateToken, async (req, res) => {
   }
 })
 
+// Process category icon update
 app.post('/update-category-icon', authenticateToken, async (req, res) => {
   try {
     const { category_id, icon } = req.body
@@ -433,6 +459,7 @@ app.post('/update-category-icon', authenticateToken, async (req, res) => {
   }
 })
 
+// Process category addition
 app.post('/add-category', authenticateToken, async (req, res) => {
   try {
     const { name, month, year, budget, total_expenses, description, icon } =
@@ -460,6 +487,7 @@ app.post('/add-category', authenticateToken, async (req, res) => {
   }
 })
 
+// Process category deletion
 app.delete(
   '/delete-category/:category_id',
   authenticateToken,
@@ -481,7 +509,7 @@ app.delete(
   }
 )
 
-// Delete if it's not been used
+// Get all expenses
 app.get('/all-expenses', authenticateToken, async (req, res) => {
   const expenses = await getOrganizedExpenses(req.user.id)
   if (!expenses) {
@@ -491,6 +519,7 @@ app.get('/all-expenses', authenticateToken, async (req, res) => {
   return res.status(200).json(expenses)
 })
 
+// Get all monthly expenses
 app.get('/all-monthly-expenses', authenticateToken, async (req, res) => {
   try {
     const date = new Date()
@@ -508,7 +537,7 @@ app.get('/all-monthly-expenses', authenticateToken, async (req, res) => {
   }
 })
 
-// Needs to be updated to include budget logic
+// Create a new expense
 app.post('/create-expense', authenticateToken, async (req, res) => {
   try {
     const { name, amount, category_id, date, notes } = req.body
@@ -533,7 +562,7 @@ app.post('/create-expense', authenticateToken, async (req, res) => {
   }
 })
 
-// Needs to be updated to include budget logic
+// Process expense update
 app.put('/update-expense', authenticateToken, async (req, res) => {
   try {
     const { id, name, amount, category_id, date, notes } = req.body
@@ -558,7 +587,7 @@ app.put('/update-expense', authenticateToken, async (req, res) => {
   }
 })
 
-// Needs to be updated to include budget logic
+// Delete an expense
 app.delete(
   '/delete-expense/:expense_id',
   authenticateToken,
@@ -580,6 +609,7 @@ app.delete(
   }
 )
 
+// Delete user account
 app.delete('/delete-user', authenticateToken, async (req, res) => {
   try {
     await deleteUser(req.user.id)
@@ -596,6 +626,7 @@ app.delete('/delete-user', authenticateToken, async (req, res) => {
   }
 })
 
+// Process password change
 app.post('/change-password', authenticateToken, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body
@@ -621,6 +652,7 @@ app.post('/change-password', authenticateToken, async (req, res) => {
   }
 })
 
+// Process user name change
 app.post('/change-name', authenticateToken, async (req, res) => {
   try {
     const { new_firstname, new_lastname } = req.body
@@ -640,7 +672,7 @@ app.post('/change-name', authenticateToken, async (req, res) => {
   }
 })
 
-// Need to be optimized
+// Get user history
 app.get('/history', authenticateToken, async (req, res) => {
   try {
     const history = await getHistoryByUser(req.user.id)
@@ -674,9 +706,14 @@ app.get('/history', authenticateToken, async (req, res) => {
   }
 })
 
+// Get user budget
 app.get('/get-budget', authenticateToken, async (req, res) => {
   try {
-    const budget = await getBudgetByUserMonthYear(req.user.id, new Date().getMonth() + 1, new Date().getFullYear())
+    const budget = await getBudgetByUserMonthYear(
+      req.user.id,
+      new Date().getMonth() + 1,
+      new Date().getFullYear()
+    )
     if (!budget) {
       return res.status(404).json({ error: 'Budget not found.' })
     }
@@ -688,11 +725,19 @@ app.get('/get-budget', authenticateToken, async (req, res) => {
   }
 })
 
+// Add budget
 app.post('/add-budget', authenticateToken, async (req, res) => {
   try {
     const { budget_id, total_income } = req.body
-    if (!budget_id || total_income === undefined || total_income === null || total_income === 0) {
-      return res.status(400).json({ error: 'Budget ID and total income are required.' })
+    if (
+      !budget_id ||
+      total_income === undefined ||
+      total_income === null ||
+      total_income === 0
+    ) {
+      return res
+        .status(400)
+        .json({ error: 'Budget ID and total income are required.' })
     }
     const newBudget = await updateBudgetIncome(budget_id, total_income)
     if (!newBudget) {

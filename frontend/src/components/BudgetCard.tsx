@@ -11,6 +11,21 @@ import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+/**
+ * BudgetCard component displays an overview of the user's budget, including total income, expenses, and remaining balance.
+ * It visualizes the budget using a doughnut chart and allows users to add or edit their budget via a modal dialog.
+ *
+ * @param budget - The current budget object or null if not set.
+ * @param setBudget - Function to update the budget state.
+ *
+ * Features:
+ * - Shows a summary of budget and expenses.
+ * - Visualizes data with a doughnut chart.
+ * - Allows editing or adding a budget with a modal form.
+ * - Handles loading and input validation.
+ *
+ * @component
+ */
 export default function BudgetCard({
     budget,
     setBudget,

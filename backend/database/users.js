@@ -29,6 +29,19 @@ const getAllUsers = async () => {
   return users
 }
 
+/**
+ * Creates a new user in the database.
+ *
+ * @async
+ * @function
+ * @param {string} firstname - The user's first name.
+ * @param {string} lastname - The user's last name.
+ * @param {string} email - The user's email address.
+ * @param {string} password - The user's hashed password.
+ * @returns {Promise<Object>} The newly created user object.
+ * @throws {Error} If a user with the given email already exists ('USER_EXISTS').
+ * @throws {Error} If user creation fails ('USER_CREATION_FAILED').
+ */
 const createUser = async (firstname, lastname, email, password) => {
   const userByEmail = await getUserByEmail(email)
   if (userByEmail) {
@@ -50,6 +63,14 @@ const createUser = async (firstname, lastname, email, password) => {
   return user
 }
 
+/**
+ * Retrieves a user from the database by their unique ID.
+ *
+ * @async
+ * @function
+ * @param {string} id - The unique identifier of the user.
+ * @returns {Promise<Object|null>} The user object if found, otherwise null.
+ */
 const getUserById = async id => {
   const [user] = await connectionPool.query(
     `SELECT * FROM users WHERE id = ?`,
@@ -59,6 +80,14 @@ const getUserById = async id => {
   return user[0]
 }
 
+/**
+ * Retrieves a user from the database by their email address.
+ *
+ * @async
+ * @function
+ * @param {string} email - The email address of the user to retrieve.
+ * @returns {Promise<Object|null>} The user object if found, otherwise null.
+ */
 const getUserByEmail = async email => {
   const [user] = await connectionPool.query(
     `SELECT * FROM users WHERE email = ?`,
@@ -68,6 +97,16 @@ const getUserByEmail = async email => {
   return user[0]
 }
 
+/**
+ * Authenticates a user by email and password.
+ *
+ * @async
+ * @param {string} email - The email address of the user to authenticate.
+ * @param {string} password - The plaintext password to verify.
+ * @returns {Promise<Object>} Resolves with the user object if authentication is successful.
+ * @throws {Error} Throws 'USER_NOT_FOUND' if the user does not exist.
+ * @throws {Error} Throws 'INVALID_CREDENTIALS' if the password is incorrect.
+ */
 const authenticateUser = async (email, password) => {
   const user = await getUserByEmail(email)
   if (!user) {
@@ -83,6 +122,24 @@ const authenticateUser = async (email, password) => {
   }
 }
 
+/**
+ * Deletes a user and all associated data from the database.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the user by ID. Throws an error if the user does not exist.
+ * 2. Begins a database transaction.
+ * 3. Deletes all expenses, categories, and history records associated with the user.
+ * 4. Deletes the user record from the users table.
+ * 5. Sends a deletion email to the user's email address.
+ * 6. Commits the transaction if all operations succeed.
+ * 7. Rolls back the transaction and releases the connection if any operation fails.
+ *
+ * @async
+ * @function deleteUser
+ * @param {string} id - The unique identifier of the user to delete.
+ * @returns {Promise<boolean>} Returns true if the user was successfully deleted.
+ * @throws {Error} Throws an error if the user is not found, deletion fails, or any database/email operation fails.
+ */
 const deleteUser = async id => {
   try {
     const user = await getUserById(id)
@@ -114,6 +171,15 @@ const deleteUser = async id => {
   }
 }
 
+/**
+ * Updates the password for a user with the given ID.
+ *
+ * @async
+ * @function
+ * @param {string} id - The unique identifier of the user whose password is to be updated.
+ * @param {string} newPassword - The new password to set for the user.
+ * @returns {Promise<Object|null>} The updated user object if the password was updated successfully, or null if the update failed.
+ */
 const updatePassword = async (id, newPassword) => {
   await connectionPool.query(`UPDATE users SET password = ? WHERE id = ?`, [
     newPassword,
@@ -129,6 +195,16 @@ const updatePassword = async (id, newPassword) => {
   return user
 }
 
+/**
+ * Updates the first name and last name of a user in the database.
+ *
+ * @async
+ * @function updateName
+ * @param {string} id - The unique identifier of the user to update.
+ * @param {string} newFirstname - The new first name for the user.
+ * @param {string} newLastname - The new last name for the user.
+ * @returns {Promise<Object|null>} The updated user object if successful, or null if the update failed.
+ */
 const updateName = async (id, newFirstname, newLastname) => {
   await connectionPool.query(
     `UPDATE users SET firstname = ?, lastname = ?, fullname = ? WHERE id = ?`,
@@ -143,6 +219,13 @@ const updateName = async (id, newFirstname, newLastname) => {
   return user
 }
 
+/**
+ * Checks if a user with the given ID is verified.
+ *
+ * @async
+ * @param {string} id - The ID of the user to check.
+ * @returns {Promise<boolean>} Returns true if the user is verified, otherwise false.
+ */
 const userIsVerified = async id => {
   const [user] = await connectionPool.query(
     `
@@ -155,6 +238,14 @@ const userIsVerified = async id => {
   return true
 }
 
+/**
+ * Marks a user as verified in the database by setting the `is_verified` field to 1.
+ *
+ * @async
+ * @param {string} id - The unique identifier of the user to verify.
+ * @param {object} [connection] - Optional database connection object. If not provided, a default connection pool is used.
+ * @returns {Promise<void>} Resolves when the user has been verified.
+ */
 const verifyUser = async (id, connection) => {
   await (connection || connectionPool).query(
     `

@@ -10,6 +10,19 @@ import {
   Alert,
 } from "@mui/material";
 
+/**
+ * Renders a form for users to request a password reset email.
+ *
+ * This component provides an input for the user's email address and a submit button.
+ * When submitted, it calls the `apiService.forgotPassword` method to send a password reset email.
+ * Displays a loading indicator while the request is in progress and shows a success snackbar upon completion.
+ *
+ * @component
+ * @returns {JSX.Element} The forgot password form UI.
+ *
+ * @example
+ * <ForgotPasswordForm />
+ */
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

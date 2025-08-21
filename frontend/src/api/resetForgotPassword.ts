@@ -1,6 +1,17 @@
 import { api } from './apiService'
 import axios from 'axios'
 
+/**
+ * Resets the user's password using a provided reset token and new password.
+ *
+ * Sends a POST request to the `/reset-forgot-password` endpoint with the reset token and new password.
+ * On success, redirects the user to the login page.
+ * On failure, returns an error object containing the error message.
+ *
+ * @param token - The password reset token received by the user.
+ * @param new_password - The new password to set for the user.
+ * @returns A promise that resolves to void on success, or an object with an error message on failure.
+ */
 export async function ResetForgotPassword (
   token: string,
   new_password: string

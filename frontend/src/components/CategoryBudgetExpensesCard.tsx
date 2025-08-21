@@ -6,6 +6,22 @@ type Props = {
     categories: Category[] | null;
 };
 
+/**
+ * Renders a card displaying a list of categories with their respective budgets and total expenses.
+ * Each category with a budget greater than zero is shown with its name, icon, budget amount,
+ * a progress bar indicating the percentage of the budget spent, and the total expenses.
+ * If no categories are provided or the list is empty, a message is displayed instead.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Array} props.categories - An array of category objects to display. Each category should have:
+ *   - {string|number} id - Unique identifier for the category.
+ *   - {string} name - Name of the category.
+ *   - {string} [icon] - Optional icon key for the category.
+ *   - {number|string} budget - The budget amount for the category.
+ *   - {number|string} total_expenses - The total expenses for the category.
+ * @returns {JSX.Element} The rendered card component with category budgets and expenses.
+ */
 export default function CategoryBudgetExpensesCard({ categories }: Props) {
     if (!categories || categories.length === 0) {
         return (

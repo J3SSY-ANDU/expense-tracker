@@ -7,6 +7,18 @@ import { useMemo } from "react";
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Filler);
 
+/**
+ * Renders a card displaying a cumulative daily expenses area chart for the current month.
+ *
+ * @component
+ * @param {Object} props - Component props.
+ * @param {Expense[] | null} props.expenses - Array of expense objects or null.
+ * @returns {JSX.Element} The rendered card with a daily cumulative expenses chart.
+ *
+ * The chart visualizes the cumulative sum of expenses for each day of the current month.
+ * Tooltips show both the cumulative and individual daily expense amounts.
+ * Only even-numbered days are labeled on the x-axis for clarity.
+ */
 export default function DailyExpensesChart({ expenses }: { expenses: Expense[] | null }) {
   const now = dayjs();
   const year = now.year();

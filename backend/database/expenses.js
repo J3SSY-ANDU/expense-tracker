@@ -46,6 +46,19 @@ const {
   console.log('Table created successfully!')
 })()
 
+/**
+ * Creates a new expense entry for a user, updates related budget, category, and history records.
+ *
+ * @async
+ * @function createExpense
+ * @param {string} name - The name or description of the expense.
+ * @param {string} user_id - The unique identifier of the user.
+ * @param {number} amount - The amount of the expense.
+ * @param {string} category_id - The unique identifier of the expense category.
+ * @param {string|Date} date - The date of the expense (ISO string or Date object).
+ * @param {string} [notes=''] - Optional notes or comments about the expense.
+ * @returns {Promise<Object|null>} The created expense object if successful, or null if creation failed.
+ */
 const createExpense = async (
   name,
   user_id,
@@ -126,6 +139,14 @@ const createExpense = async (
   return expense
 }
 
+/**
+ * Retrieves all expenses for a specific user from the database.
+ *
+ * @async
+ * @function getExpensesByUser
+ * @param {string} user_id - The unique identifier of the user whose expenses are to be fetched.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of expense objects associated with the user.
+ */
 const getExpensesByUser = async user_id => {
   const [expenses] = await connectionPool.query(
     `SELECT * FROM expenses WHERE user_id = ?`,
@@ -134,6 +155,14 @@ const getExpensesByUser = async user_id => {
   return expenses
 }
 
+/**
+ * Retrieves and returns a list of expenses for a specific user, ordered by creation date (most recent first).
+ *
+ * @async
+ * @function getOrganizedExpenses
+ * @param {string} user_id - The unique identifier of the user whose expenses are to be fetched.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of expense objects. Returns an empty array if an error occurs.
+ */
 const getOrganizedExpenses = async user_id => {
   try {
     const [rows] = await connectionPool.query(
@@ -152,6 +181,15 @@ const getOrganizedExpenses = async user_id => {
   }
 }
 
+/**
+ * Retrieves expenses for a specific user and category from the database.
+ *
+ * @async
+ * @function getExpensesByCategory
+ * @param {string} user_id - The ID of the user whose expenses are to be retrieved.
+ * @param {string} category_id - The ID of the category to filter expenses by.
+ * @returns {Promise<Array<Object>|null>} A promise that resolves to an array of expense objects if successful, or null if an error occurs.
+ */
 const getExpensesByCategory = async (user_id, category_id) => {
   try {
     const [expenses] = await connectionPool.query(
@@ -165,6 +203,15 @@ const getExpensesByCategory = async (user_id, category_id) => {
   }
 }
 
+/**
+ * Retrieves expenses for a specific user on a given date.
+ *
+ * @async
+ * @function getExpensesByDate
+ * @param {string} user_id - The ID of the user whose expenses are to be retrieved.
+ * @param {string} date - The date for which to retrieve expenses (in 'YYYY-MM-DD' format).
+ * @returns {Promise<Array<Object>|null>} A promise that resolves to an array of expense objects if found, or null if an error occurs.
+ */
 const getExpensesByDate = async (user_id, date) => {
   try {
     const [expenses] = await connectionPool.query(
@@ -178,6 +225,16 @@ const getExpensesByDate = async (user_id, date) => {
   }
 }
 
+/**
+ * Retrieves expenses for a specific user filtered by month and year.
+ *
+ * @async
+ * @function getExpensesByMonth
+ * @param {string} user_id - The ID of the user whose expenses are to be retrieved.
+ * @param {number} month - The month (1-12) to filter expenses by.
+ * @param {number} year - The year to filter expenses by.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of expense objects for the specified user, month, and year.
+ */
 const getExpensesByMonth = async (user_id, month, year) => {
   const [expenses] = await connectionPool.query(
     `SELECT * FROM expenses WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ? ORDER BY created_date DESC;`,
@@ -190,6 +247,14 @@ const getExpensesByMonth = async (user_id, month, year) => {
   return expenses
 }
 
+/**
+ * Retrieves an expense by its ID from the database.
+ *
+ * @async
+ * @function getExpenseById
+ * @param {string} id - The unique identifier of the expense to retrieve.
+ * @returns {Promise<Object|null>} The expense object if found, or null if not found or on error.
+ */
 const getExpenseById = async id => {
   try {
     const [expense] = await connectionPool.query(
@@ -207,6 +272,15 @@ const getExpenseById = async id => {
   }
 }
 
+/**
+ * Updates the budget ID of a specific expense in the database.
+ *
+ * @async
+ * @function updateExpenseBudgetId
+ * @param {string} expense_id - The unique identifier of the expense to update.
+ * @param {string} new_budget_id - The new budget ID to assign to the expense.
+ * @returns {Promise<Object|null>} The result of the update operation, or null if the expense was not found.
+ */
 const updateExpenseBudgetId = async (expense_id, new_budget_id) => {
   const result = await connectionPool.query(
     `UPDATE expenses SET budget_id = ? WHERE id = ?`,
@@ -221,6 +295,23 @@ const updateExpenseBudgetId = async (expense_id, new_budget_id) => {
   return result
 }
 
+/**
+ * Updates an existing expense with new data, handling changes in month, category, and related budget/history records.
+ *
+ * @async
+ * @function
+ * @param {string} id - The unique identifier of the expense to update.
+ * @param {Object} updates - The updated expense data.
+ * @param {string} updates.name - The new name of the expense.
+ * @param {number|string} updates.amount - The new amount for the expense.
+ * @param {string} updates.category_id - The ID of the new or existing category.
+ * @param {Date|string} updates.date - The new date for the expense.
+ * @param {string} [updates.notes] - Optional notes for the expense.
+ * @returns {Promise<Object>} The updated expense object.
+ * @throws {Error} Throws 'EXPENSE_NOT_FOUND' if the expense does not exist.
+ * @throws {Error} Throws 'INVALID_EXPENSE_DATA' if the provided data is invalid.
+ * @throws {Error} Throws if any database operation fails.
+ */
 const updateExpense = async (id, updates) => {
   try {
     const expense = await getExpenseById(id)
@@ -310,7 +401,7 @@ const updateExpense = async (id, updates) => {
       }
       // Update new budget total expenses
       await updateBudgetTotalExpenses(newBudget.id, parsedAmount)
-      
+
       // Update expense's budget_id to the new budget
       await updateExpenseBudgetId(id, newBudget.id)
 
@@ -375,6 +466,15 @@ const updateExpense = async (id, updates) => {
   }
 }
 
+/**
+ * Deletes an expense by its ID, updates related category, budget, and monthly totals.
+ *
+ * @async
+ * @function deleteExpense
+ * @param {string} id - The unique identifier of the expense to delete.
+ * @throws {Error} Throws 'EXPENSE_NOT_FOUND' if the expense does not exist.
+ * @returns {Promise<void>} Resolves when the expense is deleted and related totals are updated.
+ */
 const deleteExpense = async id => {
   const expense = await getExpenseById(id)
   if (!expense) {
@@ -394,6 +494,15 @@ const deleteExpense = async id => {
   console.log('Expense deleted successfully!')
 }
 
+/**
+ * Deletes all expenses for a specific user from the database.
+ *
+ * @async
+ * @function
+ * @param {string} user_id - The ID of the user whose expenses will be deleted.
+ * @returns {Promise<void>} Resolves when all expenses are deleted.
+ * @throws Will log an error message if the deletion fails.
+ */
 const deleteAllExpenses = async user_id => {
   try {
     await connectionPool.query(`DELETE FROM expenses WHERE user_id = ?`, [

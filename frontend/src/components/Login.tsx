@@ -14,6 +14,16 @@ import {
 import apiService from "../api/apiService";
 import "../styles/login.css";
 
+/**
+ * Login component for user authentication.
+ *
+ * Renders a login form with email and password fields, handles input validation,
+ * displays error messages, and manages login requests to the backend API.
+ * On successful login, stores the authentication token and redirects to the home page.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered login form component.
+ */
 export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

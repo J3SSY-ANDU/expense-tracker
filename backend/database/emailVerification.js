@@ -5,8 +5,8 @@ const dotenv = require('dotenv').config({
       ? '.env.production'
       : '.env.development'
 })
-const crypto = require('crypto');
-const cron = require('node-cron');
+const crypto = require('crypto')
+const cron = require('node-cron')
 
 ;(async () => {
   await connectionPool.query(`
@@ -22,6 +22,13 @@ const cron = require('node-cron');
   console.log('Table created successfully!')
 })()
 
+/**
+ * Retrieves the email verification token associated with the given email address.
+ *
+ * @async
+ * @param {string} email - The email address to look up the verification token for.
+ * @returns {Promise<string|null>} The verification token if found, or null if no token exists for the email.
+ */
 const getEmailVerificationToken = async email => {
   const [verification] = await connectionPool.query(
     `SELECT token FROM email_verification WHERE email = ?`,
@@ -34,6 +41,13 @@ const getEmailVerificationToken = async email => {
   return verification[0].token
 }
 
+/**
+ * Retrieves the email address associated with a given verification token.
+ *
+ * @async
+ * @param {string} token - The verification token to search for.
+ * @returns {Promise<string|null>} The email address if found, or null if no matching token exists.
+ */
 const getEmailByVerificationToken = async token => {
   const [result] = await connectionPool.query(
     `SELECT email FROM email_verification WHERE token = ?`,
@@ -46,14 +60,29 @@ const getEmailByVerificationToken = async token => {
   return result[0].email
 }
 
+/**
+ * Invalidates all email verification tokens associated with the specified email address.
+ *
+ * @async
+ * @param {string} email - The email address whose tokens should be invalidated.
+ * @param {object} [connection] - Optional database connection object. If not provided, a default connection pool is used.
+ * @returns {Promise<void>} Resolves when all tokens for the email have been invalidated.
+ */
 const invalidateTokensByEmail = async (email, connection) => {
   await (connection || connectionPool).query(
     `UPDATE email_verification SET valid = FALSE WHERE email = ?`,
     [email]
-  );
-  console.log('All tokens for this email invalidated.');
-};
+  )
+  console.log('All tokens for this email invalidated.')
+}
 
+/**
+ * Validates an email verification token by checking its existence, validity, and expiration in the database.
+ *
+ * @async
+ * @param {string} token - The email verification token to validate.
+ * @returns {Promise<string|null>} The associated email address if the token is valid, or null if invalid or expired.
+ */
 const validateEmailVerificationToken = async token => {
   const [result] = await connectionPool.query(
     `SELECT email FROM email_verification WHERE token = ? AND expires_at > NOW() AND valid = TRUE`,
@@ -66,32 +95,51 @@ const validateEmailVerificationToken = async token => {
   return result[0].email
 }
 
+/**
+ * Creates a new email verification token for the specified email address.
+ * Invalidates any existing tokens for the email before creating a new one.
+ * The generated token is URL-safe and expires in 15 minutes.
+ *
+ * @async
+ * @param {string} email - The email address to generate a verification token for.
+ * @returns {Promise<string>} The newly created email verification token.
+ */
 const createEmailVerificationToken = async email => {
-  await invalidateTokensByEmail(email); // Invalidate existing tokens for this email
-  const token = encodeURIComponent(crypto.randomBytes(48).toString('base64url')); // 64 chars, url-safe
-  const expires_at = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
-  
+  await invalidateTokensByEmail(email) // Invalidate existing tokens for this email
+  const token = encodeURIComponent(crypto.randomBytes(48).toString('base64url')) // 64 chars, url-safe
+  const expires_at = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
+
   await connectionPool.query(
     `INSERT INTO email_verification (token, email, expires_at) VALUES (?, ?, ?)`,
     [token, email, expires_at]
-  );
-  return token;
-};
+  )
+  return token
+}
 
+/**
+ * Deletes email verification tokens from the database that are older than one day.
+ * Utilizes the connection pool to execute a DELETE query on the `email_verification` table,
+ * removing records where the `created_date` is more than one day in the past.
+ * Logs a message upon successful deletion.
+ *
+ * @async
+ * @function cleanupEmailVerificationTokens
+ * @returns {Promise<void>} Resolves when old tokens have been deleted.
+ */
 const cleanupEmailVerificationTokens = async () => {
   await connectionPool.query(
     `DELETE FROM email_verification WHERE created_date < NOW() - INTERVAL 1 DAY`
-  );
-  console.log('Old email verification tokens deleted.');
-};
+  )
+  console.log('Old email verification tokens deleted.')
+}
 
 // Use node-cron to schedule every night at 2 AM
-cron.schedule('0 2 * * *', cleanupEmailVerificationTokens);
+cron.schedule('0 2 * * *', cleanupEmailVerificationTokens)
 
 module.exports = {
   getEmailVerificationToken,
   getEmailByVerificationToken,
   validateEmailVerificationToken,
   createEmailVerificationToken,
-  invalidateTokensByEmail,
+  invalidateTokensByEmail
 }

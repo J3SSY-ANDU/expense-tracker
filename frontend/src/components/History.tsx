@@ -4,6 +4,21 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useEffect, useState } from "react";
 import { ExpensesTable } from "./ExpensesTable";
 
+/**
+ * Renders the history of past months' expenses in an accordion format.
+ * 
+ * @param history - Array of MonthlyHistory objects or null, representing the user's expense history.
+ * @param setHistory - Function to update the history state.
+ * @param handleUpdateData - Async function to handle updating an expense.
+ * @param handleChangeIcon - Function to change the icon of a category.
+ * @param setBudget - Function to update the budget state.
+ * 
+ * Displays each past month's expenses in a collapsible accordion.
+ * The current month is excluded from the history.
+ * When an accordion is expanded, the corresponding expenses and categories are loaded and displayed.
+ * 
+ * @returns A React component displaying the history of expenses, or null if there is no past history.
+ */
 export function History({
   history,
   setHistory,
