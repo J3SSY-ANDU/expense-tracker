@@ -144,7 +144,7 @@ const createExpense = async (
  *
  * @async
  * @function getExpensesByUser
- * @param {number|string} user_id - The unique identifier of the user whose expenses are to be fetched.
+ * @param {string} user_id - The unique identifier of the user whose expenses are to be fetched.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of expense objects associated with the user.
  */
 const getExpensesByUser = async user_id => {
@@ -160,7 +160,7 @@ const getExpensesByUser = async user_id => {
  *
  * @async
  * @function getOrganizedExpenses
- * @param {number|string} user_id - The unique identifier of the user whose expenses are to be fetched.
+ * @param {string} user_id - The unique identifier of the user whose expenses are to be fetched.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of expense objects. Returns an empty array if an error occurs.
  */
 const getOrganizedExpenses = async user_id => {
@@ -186,8 +186,8 @@ const getOrganizedExpenses = async user_id => {
  *
  * @async
  * @function getExpensesByCategory
- * @param {number|string} user_id - The ID of the user whose expenses are to be retrieved.
- * @param {number|string} category_id - The ID of the category to filter expenses by.
+ * @param {string} user_id - The ID of the user whose expenses are to be retrieved.
+ * @param {string} category_id - The ID of the category to filter expenses by.
  * @returns {Promise<Array<Object>|null>} A promise that resolves to an array of expense objects if successful, or null if an error occurs.
  */
 const getExpensesByCategory = async (user_id, category_id) => {
@@ -208,7 +208,7 @@ const getExpensesByCategory = async (user_id, category_id) => {
  *
  * @async
  * @function getExpensesByDate
- * @param {number|string} user_id - The ID of the user whose expenses are to be retrieved.
+ * @param {string} user_id - The ID of the user whose expenses are to be retrieved.
  * @param {string} date - The date for which to retrieve expenses (in 'YYYY-MM-DD' format).
  * @returns {Promise<Array<Object>|null>} A promise that resolves to an array of expense objects if found, or null if an error occurs.
  */
@@ -230,7 +230,7 @@ const getExpensesByDate = async (user_id, date) => {
  *
  * @async
  * @function getExpensesByMonth
- * @param {number|string} user_id - The ID of the user whose expenses are to be retrieved.
+ * @param {string} user_id - The ID of the user whose expenses are to be retrieved.
  * @param {number} month - The month (1-12) to filter expenses by.
  * @param {number} year - The year to filter expenses by.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of expense objects for the specified user, month, and year.
@@ -252,7 +252,7 @@ const getExpensesByMonth = async (user_id, month, year) => {
  *
  * @async
  * @function getExpenseById
- * @param {number|string} id - The unique identifier of the expense to retrieve.
+ * @param {string} id - The unique identifier of the expense to retrieve.
  * @returns {Promise<Object|null>} The expense object if found, or null if not found or on error.
  */
 const getExpenseById = async id => {
@@ -277,8 +277,8 @@ const getExpenseById = async id => {
  *
  * @async
  * @function updateExpenseBudgetId
- * @param {number|string} expense_id - The unique identifier of the expense to update.
- * @param {number|string} new_budget_id - The new budget ID to assign to the expense.
+ * @param {string} expense_id - The unique identifier of the expense to update.
+ * @param {string} new_budget_id - The new budget ID to assign to the expense.
  * @returns {Promise<Object|null>} The result of the update operation, or null if the expense was not found.
  */
 const updateExpenseBudgetId = async (expense_id, new_budget_id) => {
@@ -471,7 +471,7 @@ const updateExpense = async (id, updates) => {
  *
  * @async
  * @function deleteExpense
- * @param {number|string} id - The unique identifier of the expense to delete.
+ * @param {string} id - The unique identifier of the expense to delete.
  * @throws {Error} Throws 'EXPENSE_NOT_FOUND' if the expense does not exist.
  * @returns {Promise<void>} Resolves when the expense is deleted and related totals are updated.
  */
@@ -499,7 +499,7 @@ const deleteExpense = async id => {
  *
  * @async
  * @function
- * @param {number|string} user_id - The ID of the user whose expenses will be deleted.
+ * @param {string} user_id - The ID of the user whose expenses will be deleted.
  * @returns {Promise<void>} Resolves when all expenses are deleted.
  * @throws Will log an error message if the deletion fails.
  */

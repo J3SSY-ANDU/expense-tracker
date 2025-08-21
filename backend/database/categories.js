@@ -112,7 +112,7 @@ const createDefaultCategories = async (user_id, connection) => {
  *
  * @async
  * @function getCategoriesByUser
- * @param {number|string} user_id - The unique identifier of the user whose categories are to be fetched.
+ * @param {string} user_id - The unique identifier of the user whose categories are to be fetched.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of category objects.
  */
 const getCategoriesByUser = async user_id => {
@@ -128,7 +128,7 @@ const getCategoriesByUser = async user_id => {
  *
  * @async
  * @function getCategoriesByMonth
- * @param {number|string} user_id - The ID of the user whose categories are to be retrieved.
+ * @param {string} user_id - The ID of the user whose categories are to be retrieved.
  * @param {number|string} month - The month for which categories are to be retrieved (1-12).
  * @param {number|string} year - The year for which categories are to be retrieved (e.g., 2024).
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of category objects.
@@ -147,7 +147,7 @@ const getCategoriesByMonth = async (user_id, month, year) => {
  * @async
  * @function getCategoryByMonthYear
  * @param {string} name - The name of the category.
- * @param {number} user_id - The ID of the user who owns the category.
+ * @param {string} user_id - The ID of the user who owns the category.
  * @param {number} month - The month associated with the category (1-12).
  * @param {number} year - The year associated with the category (e.g., 2024).
  * @returns {Promise<Object|null>} The category object if found, otherwise null.
@@ -170,7 +170,7 @@ const getCategoryByMonthYear = async (name, user_id, month, year) => {
  *
  * @async
  * @function getOrderedCategories
- * @param {number|string} userId - The unique identifier of the user whose categories are to be fetched.
+ * @param {string} userId - The unique identifier of the user whose categories are to be fetched.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of category objects, or an empty array if an error occurs.
  */
 const getOrderedCategories = async userId => {
@@ -194,7 +194,7 @@ const getOrderedCategories = async userId => {
  *
  * @async
  * @function getCategoryById
- * @param {number|string} id - The unique identifier of the category to retrieve.
+ * @param {string} id - The unique identifier of the category to retrieve.
  * @returns {Promise<Object|null>} The category object if found, or null if not found.
  */
 const getCategoryById = async id => {
@@ -214,7 +214,7 @@ const getCategoryById = async id => {
  *
  * @async
  * @function getCategoryByName
- * @param {number|string} user_id - The ID of the user to whom the category belongs.
+ * @param {string} user_id - The ID of the user to whom the category belongs.
  * @param {string} name - The name of the category to retrieve.
  * @returns {Promise<Object|null>} The category object if found, otherwise null.
  */
@@ -240,7 +240,7 @@ const getCategoryByName = async (user_id, name) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} id - The unique identifier of the category to update.
  * @param {string} name - The new name for the category.
  * @returns {Promise<Object|null>} The updated category object if successful, or null if the update failed.
  */
@@ -268,7 +268,7 @@ const updateCategoryName = async (id, name) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} id - The unique identifier of the category to update.
  * @param {string} description - The new description for the category.
  * @returns {Promise<Object|null>} The updated category object if successful, or null if the update fails.
  */
@@ -296,7 +296,7 @@ const updateCategoryDescription = async (id, description) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} id - The unique identifier of the category to update.
  * @param {number} budget - The new budget value to set for the category.
  * @returns {Promise<Object|null>} The updated category object if successful, or null if the update fails.
  */
@@ -324,7 +324,7 @@ const updateCategoryBudget = async (id, budget) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} id - The unique identifier of the category to update.
  * @param {number|string} amount - The amount to add to the category's total expenses.
  * @returns {Promise<Object|null>} The updated category object if successful, or null if the update fails.
  */
@@ -354,7 +354,7 @@ const updateCategoryTotalExpenses = async (id, amount) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} id - The unique identifier of the category to update.
  * @param {string} icon - The new icon value to set for the category.
  * @returns {Promise<Object|null>} The updated category object if successful, or null if the update failed.
  */
@@ -382,7 +382,7 @@ const updateCategoryIcon = async (id, icon) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the category to delete.
+ * @param {string} id - The unique identifier of the category to delete.
  * @throws {Error} Throws an error with code 'CATEGORY_NOT_FOUND' if the category does not exist.
  * @returns {Promise<void>} Resolves when the category is successfully deleted.
  */

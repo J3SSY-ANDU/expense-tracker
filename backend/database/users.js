@@ -68,7 +68,7 @@ const createUser = async (firstname, lastname, email, password) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the user.
+ * @param {string} id - The unique identifier of the user.
  * @returns {Promise<Object|null>} The user object if found, otherwise null.
  */
 const getUserById = async id => {
@@ -136,7 +136,7 @@ const authenticateUser = async (email, password) => {
  *
  * @async
  * @function deleteUser
- * @param {number|string} id - The unique identifier of the user to delete.
+ * @param {string} id - The unique identifier of the user to delete.
  * @returns {Promise<boolean>} Returns true if the user was successfully deleted.
  * @throws {Error} Throws an error if the user is not found, deletion fails, or any database/email operation fails.
  */
@@ -176,7 +176,7 @@ const deleteUser = async id => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the user whose password is to be updated.
+ * @param {string} id - The unique identifier of the user whose password is to be updated.
  * @param {string} newPassword - The new password to set for the user.
  * @returns {Promise<Object|null>} The updated user object if the password was updated successfully, or null if the update failed.
  */
@@ -200,7 +200,7 @@ const updatePassword = async (id, newPassword) => {
  *
  * @async
  * @function updateName
- * @param {number|string} id - The unique identifier of the user to update.
+ * @param {string} id - The unique identifier of the user to update.
  * @param {string} newFirstname - The new first name for the user.
  * @param {string} newLastname - The new last name for the user.
  * @returns {Promise<Object|null>} The updated user object if successful, or null if the update failed.
@@ -223,7 +223,7 @@ const updateName = async (id, newFirstname, newLastname) => {
  * Checks if a user with the given ID is verified.
  *
  * @async
- * @param {number|string} id - The ID of the user to check.
+ * @param {string} id - The ID of the user to check.
  * @returns {Promise<boolean>} Returns true if the user is verified, otherwise false.
  */
 const userIsVerified = async id => {
@@ -242,7 +242,7 @@ const userIsVerified = async id => {
  * Marks a user as verified in the database by setting the `is_verified` field to 1.
  *
  * @async
- * @param {number|string} id - The unique identifier of the user to verify.
+ * @param {string} id - The unique identifier of the user to verify.
  * @param {object} [connection] - Optional database connection object. If not provided, a default connection pool is used.
  * @returns {Promise<void>} Resolves when the user has been verified.
  */
