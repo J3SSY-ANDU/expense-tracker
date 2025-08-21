@@ -8,6 +8,16 @@ import {
   CircularProgress,
 } from "@mui/material";
 
+/**
+ * ResetForgotPasswordForm is a React functional component that renders a form for resetting a user's password.
+ * 
+ * The form includes fields for entering a new password and confirming it. It validates that both passwords match,
+ * retrieves a reset token from the URL query parameters, and submits the new password to the backend via the
+ * `apiService.resetForgotPassword` method. The component also manages loading state and provides basic error handling.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered password reset form.
+ */
 export function ResetForgotPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

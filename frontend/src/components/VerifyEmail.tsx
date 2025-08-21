@@ -13,6 +13,21 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import apiService from "../api/apiService";
 
+/**
+ * Component for verifying a user's email address.
+ *
+ * This component handles the email verification process by extracting the verification token,
+ * user ID, and email from the URL parameters. It attempts to verify the email upon mounting,
+ * and provides an option to resend the verification email if needed.
+ *
+ * Features:
+ * - Automatically verifies the email using the token from the URL.
+ * - Allows users to resend the verification email by providing their email address.
+ * - Displays feedback to the user regarding the verification and resend status.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered VerifyEmail component.
+ */
 export function VerifyEmail() {
   const [token, setToken] = useState<string | null>(null);
   const [id, setId] = useState<string | null>(null);

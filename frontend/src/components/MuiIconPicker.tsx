@@ -10,6 +10,18 @@ interface MuiIconPickerProps {
     size?: number;
 }
 
+/**
+ * MuiIconPicker is a component that allows users to select an icon from a predefined set.
+ * It displays the currently selected icon and opens a dialog for icon selection when clicked.
+ *
+ * @param {object} props - The component props.
+ * @param {string} props.value - The currently selected icon name.
+ * @param {(name: string) => void} props.onChange - Callback fired when an icon is selected or cleared.
+ * @param {object} [props.selectedCategory] - The currently selected category, which may contain an icon property.
+ * @param {number} [props.size] - Optional size for the displayed icon.
+ *
+ * @returns {JSX.Element} The rendered MuiIconPicker component.
+ */
 export function MuiIconPicker({ value, onChange, selectedCategory, size }: MuiIconPickerProps) {
     const [open, setOpen] = useState(false);
 

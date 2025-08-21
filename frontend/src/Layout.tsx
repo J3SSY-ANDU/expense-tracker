@@ -5,6 +5,19 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { Category, Expense, User, History as MonthlyHistory, Budget } from './types';
 import apiService from './api/apiService';
 
+/**
+ * The `Layout` component serves as the main layout wrapper for the application.
+ * 
+ * It is responsible for:
+ * - Fetching and managing user, categories, expenses, history, and budget data from the API on mount.
+ * - Handling loading and error states during data fetching.
+ * - Redirecting to the login page if any data fetch fails.
+ * - Providing fetched data and setters to child routes via React Router's `Outlet` context.
+ * - Rendering the account information and navigation tabs in a styled header.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered layout component with context for child routes.
+ */
 export default function Layout() {
     const [user, setUser] = useState<User | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);

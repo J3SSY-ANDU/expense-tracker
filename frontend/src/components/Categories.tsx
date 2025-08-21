@@ -21,6 +21,30 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { iconMap } from './icons'
 
+/**
+ * Renders the Categories component, which displays a list of expense categories,
+ * allows users to add, edit, and delete categories, and shows summary information
+ * such as total expenses and budgets for each category.
+ *
+ * @param categories - The list of categories to display.
+ * @param setCategories - Function to update the categories state.
+ * @param expenses - The list of expenses associated with the categories.
+ * @param setExpenses - Function to update the expenses state.
+ * @param setHistory - Function to update the monthly history state.
+ * @param selectedCategory - The currently selected category.
+ * @param setSelectedCategory - Function to update the selected category.
+ * @param handleChangeIcon - Function to change the icon of a category.
+ * @param handleUpdateData - Function to update an expense's data.
+ * @param setBudget - Function to set the budget for a category.
+ *
+ * @remarks
+ * - Allows users to create new categories, edit category names, descriptions, budgets, and icons.
+ * - Handles deletion of categories and their associated expenses.
+ * - Displays a limited number of categories by default, with an option to show more or less.
+ * - Integrates with an API service for CRUD operations on categories and expenses.
+ *
+ * @component
+ */
 export function Categories({
   categories,
   setCategories,

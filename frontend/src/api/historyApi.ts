@@ -1,11 +1,21 @@
-import axios from "axios";
-import { History as MonthlyHistory } from "../types";
-import { api } from "./apiService";
+import axios from 'axios'
+import { History as MonthlyHistory } from '../types'
+import { api } from './apiService'
 
-export async function FetchHistoryData(): Promise<MonthlyHistory[] | { error: string }> {
+/**
+ * Fetches the monthly history data from the backend API.
+ *
+ * @returns {Promise<MonthlyHistory[] | { error: string }>}
+ *   A promise that resolves to an array of MonthlyHistory objects on success,
+ *   or an object containing an error message on failure.
+ *
+ */
+export async function FetchHistoryData (): Promise<
+  MonthlyHistory[] | { error: string }
+> {
   try {
-    const res = await api.get("/history");
-    return res.data;
+    const res = await api.get('/history')
+    return res.data
   } catch (err: any) {
     // If it's an Axios error, get the backend error message if present
     if (axios.isAxiosError(err) && err.response && err.response.data) {
