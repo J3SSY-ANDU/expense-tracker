@@ -7,7 +7,7 @@ const dotenv = require('dotenv').config({
 })
 const { v4: uuidv4 } = require('uuid')
 const { categoriesData } = require('./categoriesData')
-const cron = require('node-cron');
+const cron = require('node-cron')
 const { getAllUsers } = require('./users')
 
 ;(async () => {
@@ -30,6 +30,22 @@ const { getAllUsers } = require('./users')
   console.log('Table created successfully!')
 })()
 
+/**
+ * Creates a new category for a user for a specific month and year.
+ * If a category with the same name, user, month, and year already exists, it returns null.
+ *
+ * @async
+ * @function createCategory
+ * @param {string} name - The name of the category.
+ * @param {string} user_id - The ID of the user creating the category.
+ * @param {number} month - The month for which the category is created (1-12).
+ * @param {number} year - The year for which the category is created (e.g., 2024).
+ * @param {number} [budget=0] - The budget allocated to the category.
+ * @param {number} [total_expenses=0] - The total expenses for the category.
+ * @param {string} [description=''] - A description of the category.
+ * @param {string} [icon=''] - An icon representing the category.
+ * @returns {Promise<Object|null>} The created category object, or null if creation failed or category already exists.
+ */
 const createCategory = async (
   name,
   user_id,
@@ -58,6 +74,14 @@ const createCategory = async (
   return category
 }
 
+/**
+ * Creates default categories for a given user in the database.
+ *
+ * @async
+ * @param {string} user_id - The unique identifier of the user for whom to create categories.
+ * @param {object} connection - The database connection object. If not provided, a default connection pool is used.
+ * @returns {Promise<void>} Resolves when the default categories have been created.
+ */
 const createDefaultCategories = async (user_id, connection) => {
   const date = new Date()
   const month = date.getMonth() + 1
@@ -83,6 +107,14 @@ const createDefaultCategories = async (user_id, connection) => {
   console.log('Default categories created successfully!')
 }
 
+/**
+ * Retrieves all categories associated with a specific user from the database.
+ *
+ * @async
+ * @function getCategoriesByUser
+ * @param {number|string} user_id - The unique identifier of the user whose categories are to be fetched.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of category objects.
+ */
 const getCategoriesByUser = async user_id => {
   const [categories] = await connectionPool.query(
     `SELECT * FROM categories WHERE user_id = ?`,
@@ -91,6 +123,16 @@ const getCategoriesByUser = async user_id => {
   return categories
 }
 
+/**
+ * Retrieves categories for a specific user, month, and year from the database.
+ *
+ * @async
+ * @function getCategoriesByMonth
+ * @param {number|string} user_id - The ID of the user whose categories are to be retrieved.
+ * @param {number|string} month - The month for which categories are to be retrieved (1-12).
+ * @param {number|string} year - The year for which categories are to be retrieved (e.g., 2024).
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of category objects.
+ */
 const getCategoriesByMonth = async (user_id, month, year) => {
   const [categories] = await connectionPool.query(
     `SELECT * FROM categories WHERE user_id = ? AND month = ? AND year = ?`,
@@ -99,6 +141,17 @@ const getCategoriesByMonth = async (user_id, month, year) => {
   return categories
 }
 
+/**
+ * Retrieves a category by its name, user ID, month, and year from the database.
+ *
+ * @async
+ * @function getCategoryByMonthYear
+ * @param {string} name - The name of the category.
+ * @param {number} user_id - The ID of the user who owns the category.
+ * @param {number} month - The month associated with the category (1-12).
+ * @param {number} year - The year associated with the category (e.g., 2024).
+ * @returns {Promise<Object|null>} The category object if found, otherwise null.
+ */
 const getCategoryByMonthYear = async (name, user_id, month, year) => {
   const [categories] = await connectionPool.query(
     `SELECT * FROM categories WHERE name = ? AND user_id = ? AND month = ? AND year = ?`,
@@ -111,6 +164,15 @@ const getCategoryByMonthYear = async (name, user_id, month, year) => {
   return categories[0]
 }
 
+/**
+ * Retrieves the list of categories for a specific user, ordered by the `order` field in ascending order,
+ * for the current month and year.
+ *
+ * @async
+ * @function getOrderedCategories
+ * @param {number|string} userId - The unique identifier of the user whose categories are to be fetched.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of category objects, or an empty array if an error occurs.
+ */
 const getOrderedCategories = async userId => {
   try {
     const date = new Date()
@@ -127,6 +189,14 @@ const getOrderedCategories = async userId => {
   }
 }
 
+/**
+ * Retrieves a category from the database by its ID.
+ *
+ * @async
+ * @function getCategoryById
+ * @param {number|string} id - The unique identifier of the category to retrieve.
+ * @returns {Promise<Object|null>} The category object if found, or null if not found.
+ */
 const getCategoryById = async id => {
   const [category] = await connectionPool.query(
     `SELECT * FROM categories WHERE id = ?`,
@@ -139,6 +209,15 @@ const getCategoryById = async id => {
   return category[0]
 }
 
+/**
+ * Retrieves a category by its name for a specific user.
+ *
+ * @async
+ * @function getCategoryByName
+ * @param {number|string} user_id - The ID of the user to whom the category belongs.
+ * @param {string} name - The name of the category to retrieve.
+ * @returns {Promise<Object|null>} The category object if found, otherwise null.
+ */
 const getCategoryByName = async (user_id, name) => {
   try {
     const [category] = await connectionPool.query(
@@ -156,6 +235,15 @@ const getCategoryByName = async (user_id, name) => {
   }
 }
 
+/**
+ * Updates the name of a category in the database by its ID.
+ *
+ * @async
+ * @function
+ * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} name - The new name for the category.
+ * @returns {Promise<Object|null>} The updated category object if successful, or null if the update failed.
+ */
 const updateCategoryName = async (id, name) => {
   try {
     await connectionPool.query(`UPDATE categories SET name = ? WHERE id = ?`, [
@@ -175,6 +263,15 @@ const updateCategoryName = async (id, name) => {
   }
 }
 
+/**
+ * Updates the description of a category by its ID.
+ *
+ * @async
+ * @function
+ * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} description - The new description for the category.
+ * @returns {Promise<Object|null>} The updated category object if successful, or null if the update fails.
+ */
 const updateCategoryDescription = async (id, description) => {
   try {
     await connectionPool.query(
@@ -194,12 +291,21 @@ const updateCategoryDescription = async (id, description) => {
   }
 }
 
+/**
+ * Updates the budget for a specific category by its ID.
+ *
+ * @async
+ * @function
+ * @param {number|string} id - The unique identifier of the category to update.
+ * @param {number} budget - The new budget value to set for the category.
+ * @returns {Promise<Object|null>} The updated category object if successful, or null if the update fails.
+ */
 const updateCategoryBudget = async (id, budget) => {
   try {
-    await connectionPool.query(`UPDATE categories SET budget = ? WHERE id = ?`, [
-      budget,
-      id
-    ])
+    await connectionPool.query(
+      `UPDATE categories SET budget = ? WHERE id = ?`,
+      [budget, id]
+    )
     const updatedCategory = await getCategoryById(id)
     if (Number(updatedCategory.budget) !== budget) {
       console.log(`Failed. Try again.`)
@@ -213,6 +319,15 @@ const updateCategoryBudget = async (id, budget) => {
   }
 }
 
+/**
+ * Updates the total expenses for a specific category by adding the given amount.
+ *
+ * @async
+ * @function
+ * @param {number|string} id - The unique identifier of the category to update.
+ * @param {number|string} amount - The amount to add to the category's total expenses.
+ * @returns {Promise<Object|null>} The updated category object if successful, or null if the update fails.
+ */
 const updateCategoryTotalExpenses = async (id, amount) => {
   try {
     const category = await getCategoryById(id)
@@ -234,6 +349,15 @@ const updateCategoryTotalExpenses = async (id, amount) => {
   }
 }
 
+/**
+ * Updates the icon of a category by its ID.
+ *
+ * @async
+ * @function
+ * @param {number|string} id - The unique identifier of the category to update.
+ * @param {string} icon - The new icon value to set for the category.
+ * @returns {Promise<Object|null>} The updated category object if successful, or null if the update failed.
+ */
 const updateCategoryIcon = async (id, icon) => {
   try {
     await connectionPool.query(`UPDATE categories SET icon = ? WHERE id = ?`, [
@@ -253,6 +377,15 @@ const updateCategoryIcon = async (id, icon) => {
   }
 }
 
+/**
+ * Deletes a category by its ID.
+ *
+ * @async
+ * @function
+ * @param {number|string} id - The unique identifier of the category to delete.
+ * @throws {Error} Throws an error with code 'CATEGORY_NOT_FOUND' if the category does not exist.
+ * @returns {Promise<void>} Resolves when the category is successfully deleted.
+ */
 const deleteCategory = async id => {
   const category = await getCategoryById(id)
   if (!category) {
@@ -263,24 +396,29 @@ const deleteCategory = async id => {
   console.log('Category deleted successfully!')
 }
 
+// Schedule a job to run on the first day of every month
 cron.schedule('0 0 * * *', async () => {
   // Runs every day at midnight
-  const now = new Date();
-  if (now.getDate() !== 1) return; // Only run on the first day of the month
+  const now = new Date()
+  if (now.getDate() !== 1) return // Only run on the first day of the month
 
-  const month = now.getMonth() + 1; // JS months are 0-indexed
-  const year = now.getFullYear();
+  const month = now.getMonth() + 1 // JS months are 0-indexed
+  const year = now.getFullYear()
 
-  const lastMonth = month === 1 ? 12 : month - 1;
-  const lastYear = month === 1 ? year - 1 : year;
+  const lastMonth = month === 1 ? 12 : month - 1
+  const lastYear = month === 1 ? year - 1 : year
 
-  const users = await getAllUsers(); // implement this function
+  const users = await getAllUsers() // implement this function
 
   for (const user of users) {
-    const categoriesThisMonth = await getCategoriesByMonth(user.id, month, year);
-    if (categoriesThisMonth.length > 0) continue; // Already created
+    const categoriesThisMonth = await getCategoriesByMonth(user.id, month, year)
+    if (categoriesThisMonth.length > 0) continue // Already created
 
-    const categoriesLastMonth = await getCategoriesByMonth(user.id, lastMonth, lastYear);
+    const categoriesLastMonth = await getCategoriesByMonth(
+      user.id,
+      lastMonth,
+      lastYear
+    )
 
     for (const cat of categoriesLastMonth) {
       await createCategory(
@@ -292,11 +430,11 @@ cron.schedule('0 0 * * *', async () => {
         0, // reset expenses
         cat.description,
         cat.icon
-      );
+      )
     }
-    console.log(`Created categories for user ${user.id} for ${month}/${year}`);
+    console.log(`Created categories for user ${user.id} for ${month}/${year}`)
   }
-});
+})
 
 module.exports = {
   createCategory,
