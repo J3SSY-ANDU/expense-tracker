@@ -60,7 +60,7 @@ const createMonth = async (name, user_id, month, year, amount) => {
  *
  * @async
  * @function getHistoryById
- * @param {number|string} id - The unique identifier of the history record.
+ * @param {string} id - The unique identifier of the history record.
  * @returns {Promise<Object|null>} The history record object if found, otherwise null.
  */
 const getHistoryById = async id => {
@@ -81,7 +81,7 @@ const getHistoryById = async id => {
  *
  * @async
  * @function
- * @param {number|string} user_id - The unique identifier of the user whose history is to be fetched.
+ * @param {string} user_id - The unique identifier of the user whose history is to be fetched.
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of history records for the user.
  */
 const getHistoryByUser = async user_id => {
@@ -97,7 +97,7 @@ const getHistoryByUser = async user_id => {
  *
  * @async
  * @function getHistoryByMonthYear
- * @param {number|string} user_id - The ID of the user whose history is to be retrieved.
+ * @param {string} user_id - The ID of the user whose history is to be retrieved.
  * @param {number} month - The month for which to retrieve the history (1-12).
  * @param {number} year - The year for which to retrieve the history (e.g., 2024).
  * @returns {Promise<Object|null>} The history record if found, or null if an error occurs or no record exists.
@@ -121,7 +121,7 @@ const getHistoryByMonthYear = async (user_id, month, year) => {
  *
  * @async
  * @function updateMonth
- * @param {number|string} user_id - The ID of the user whose history is being updated.
+ * @param {string} user_id - The ID of the user whose history is being updated.
  * @param {number|string} month - The month to update (1-12).
  * @param {number|string} year - The year to update (e.g., 2024).
  * @param {number|string} amount - The amount to add (can be negative to subtract).
@@ -158,7 +158,7 @@ const updateMonth = async (user_id, month, year, amount) => {
  *
  * @async
  * @function
- * @param {number|string} id - The unique identifier of the month to delete.
+ * @param {string} id - The unique identifier of the month to delete.
  * @returns {Promise<void>} Resolves when the deletion is complete.
  * @throws Will log an error message if the deletion fails.
  */

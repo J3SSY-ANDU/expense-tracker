@@ -63,7 +63,7 @@ const createBudget = async (
  *
  * @async
  * @function getBudgetById
- * @param {number|string} id - The unique identifier of the budget to retrieve.
+ * @param {string} id - The unique identifier of the budget to retrieve.
  * @param {object} [connection] - Optional. The database connection to use. If not provided, a default connection pool is used.
  * @returns {Promise<object|null>} A promise that resolves to the budget object if found, or null if not found.
  */
@@ -80,7 +80,7 @@ const getBudgetById = async (id, connection) => {
  *
  * @async
  * @function
- * @param {number|string} user_id - The ID of the user whose budget is being retrieved.
+ * @param {string} user_id - The ID of the user whose budget is being retrieved.
  * @param {number} month - The month for which the budget is requested (1-12).
  * @param {number} year - The year for which the budget is requested (e.g., 2024).
  * @returns {Promise<Object|null>} The budget record if found, otherwise null.
@@ -97,7 +97,7 @@ const getBudgetByUserMonthYear = async (user_id, month, year) => {
  * Updates the total income of a budget by its ID.
  *
  * @async
- * @param {number|string} id - The unique identifier of the budget to update.
+ * @param {string} id - The unique identifier of the budget to update.
  * @param {number} total_income - The new total income value to set for the budget.
  * @returns {Promise<Object|null>} The updated budget object if successful, or null if the update failed.
  */
@@ -119,7 +119,7 @@ const updateBudgetIncome = async (id, total_income) => {
  * Updates the total expenses for a specific budget by adding the given amount.
  *
  * @async
- * @param {number} id - The unique identifier of the budget to update.
+ * @param {string} id - The unique identifier of the budget to update.
  * @param {number} amount - The amount to add to the budget's total expenses.
  * @returns {Promise<Object|null>} The updated budget object if successful, or null if the update failed.
  */
@@ -141,7 +141,7 @@ const updateBudgetTotalExpenses = async (id, amount) => {
  * Deletes a budget entry from the database by its ID.
  *
  * @async
- * @param {number|string} id - The unique identifier of the budget to delete.
+ * @param {string} id - The unique identifier of the budget to delete.
  * @returns {Promise<boolean|null>} Returns true if the budget was deleted successfully,
  * null if no budget was found with the given ID.
  */
