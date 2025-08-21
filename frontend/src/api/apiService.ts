@@ -57,11 +57,11 @@ api.interceptors.response.use(
         case 403:
           console.log(`error response: ${error.response.status}`)
           // window.location.href = '/login' // Or show a modal
-          break;
+          break
         case 500:
-          break;
+          break
         default:
-          break;
+          break
       }
     }
     return Promise.reject(error)
@@ -94,7 +94,7 @@ const apiService = {
   getHistoryData: FetchHistoryData,
   updateCategoryIcon: UpdateCategoryIcon,
   getBudgetData: FetchBudgetData,
-  addBudget: AddBudget,
+  addBudget: AddBudget
 }
 
 export default apiService

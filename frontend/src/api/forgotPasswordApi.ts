@@ -1,7 +1,17 @@
 import axios from 'axios'
 import { api } from './apiService'
 
-export async function ForgotPassword (email: string): Promise<void | { error: string }> {
+/**
+ * Sends a forgot password request to the backend API with the provided email address.
+ *
+ * @param email - The email address of the user requesting a password reset.
+ * @returns A promise that resolves to `void` if the email was sent successfully,
+ *          or an object containing an error message if the request failed.
+ *
+ */
+export async function ForgotPassword (
+  email: string
+): Promise<void | { error: string }> {
   try {
     await api.post('/forgot-password', { email })
     console.log('Email sent successfully')

@@ -1,7 +1,17 @@
 import { api } from './apiService'
 import axios from 'axios'
 
-export async function VerifyEmail(
+/**
+ * Verifies a user's email address using the provided token.
+ *
+ * Sends a GET request to the backend API to verify the email associated with the token.
+ * Returns a message and a new token on success, or an error message on failure.
+ *
+ * @param token - The email verification token to be validated.
+ * @returns A promise that resolves to an object containing either a success message and token,
+ *          or an error message if verification fails.
+ */
+export async function VerifyEmail (
   token: string
 ): Promise<{ message?: string; token?: string; error?: string }> {
   try {
@@ -17,7 +27,19 @@ export async function VerifyEmail(
   }
 }
 
-export async function ResendVerificationEmail(
+/**
+ * Resends the verification email to the user using one of the provided identifiers: id, token, or email.
+ *
+ * @param id - (Optional) The user's unique identifier.
+ * @param token - (Optional) The verification token associated with the user.
+ * @param email - (Optional) The user's email address.
+ * @returns A promise that resolves to an object containing either a success message or an error message.
+ *
+ * @remarks
+ * - At least one of `id`, `token`, or `email` must be provided.
+ * - If the request fails due to a server or network error, an appropriate error message is returned.
+ */
+export async function ResendVerificationEmail (
   id?: string | null,
   token?: string | null,
   email?: string | null
