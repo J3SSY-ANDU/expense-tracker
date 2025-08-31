@@ -21,6 +21,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from "react-router-dom";
+
 
 /**
  * Renders the Account component, which displays user account information,
@@ -49,6 +51,8 @@ export function Account({
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [showDialog, setShowDialog] = useState<boolean>(false);
+  const navigate = useNavigate();
+
   const handleLogout = async () => {
     // Clear user data and token
     setUser(null);
@@ -134,7 +138,11 @@ export function Account({
         >
           <MenuList>
             <MenuItem
-            sx={{ padding: '0.8rem' }}
+              sx={{ padding: '0.8rem' }}
+              onClick={() => {
+                navigate("/settings");
+                setOpen(false);
+              }}
             >
               <PersonIcon sx={{ marginRight: '0.5rem' }} />
               <Typography>
@@ -144,8 +152,9 @@ export function Account({
             <MenuItem
               onClick={() => {
                 handleLogout();
+                setOpen(false);
               }}
-              sx={{ padding: '0.8rem'}}
+              sx={{ padding: '0.8rem' }}
             >
               <LogoutIcon sx={{ marginRight: '0.5rem', color: "var(--color-error)" }} />
               Sign Out
