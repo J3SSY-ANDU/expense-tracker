@@ -1,114 +1,229 @@
 # Expense Tracker
 
-A modern full-stack web application for managing personal finances. Expense Tracker empowers users to record, categorize, and analyze their spending with an intuitive interface and insightful visualizations.
+A self-hosted, full-featured expense tracker web application.
+
+- **Frontend:** React + TypeScript (Create React App, Material-UI)
+- **Backend:** Node.js (JavaScript, Express)
+- **Database:** MySQL
 
 ---
 
-## Table of Contents
-- [Overview](#overview)
-- [How It Works](#how-it-works)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Live Deployment](#live-deployment)
-- [Planned Enhancements](#planned-enhancements)
-- [Contributing](#contributing)
-- [License](#license)
+## 🚀 Features
+
+- User authentication (JWT)
+- Expense and budget management
+- Category-based tracking
+- Data visualization (charts)
+- Email notifications
+- Modern, responsive UI
+- Self-hostable (local or cloud)
 
 ---
 
-## Overview
+## 🖥️ Prerequisites
 
-**Expense Tracker** is designed to make personal finance management accessible and insightful. Whether you're budgeting for daily expenses or analyzing monthly trends, the app provides tools to help users stay on top of their financial goals. The platform emphasizes security, usability, and meaningful data presentation.
-
----
-
-## How It Works
-
-1. **Account Creation & Email Verification**  
-   Users sign up with their email, receive a verification link, and activate their account for secure access.
-
-2. **Personalized Dashboard**  
-   After logging in, users are greeted with a dashboard summarizing their financial activity, including categorized expenses and monthly trends.
-
-3. **Expense & Category Management**  
-   - **Add Expenses:** Record spending with details such as amount, category, date, and notes.
-   - **Edit/Delete:** Update or remove expenses as needed.
-   - **Categories:** Organize expenses using default or custom categories for clearer insights.
-
-4. **Monthly History & Insights**  
-   View spending breakdowns by month and analyze patterns over time to make informed financial decisions.
-
-5. **Responsive Design**  
-   The interface is optimized for both desktop and mobile use, ensuring accessibility anywhere.
+- [Node.js](https://nodejs.org/) (v16 or newer)
+- [Yarn](https://classic.yarnpkg.com/)
+- [MySQL](https://www.mysql.com/downloads/) (v8+ recommended)
 
 ---
 
-## Features
+## 📦 Installation & Self-Hosting
 
-- **Secure User Authentication**  
-  Email/password sign-up with email verification for enhanced security.
+### 1. **Clone the Repository**
 
-- **Expense Tracking**  
-  Log, edit, and delete expenses with full control and flexibility.
+```bash
+git clone https://github.com/YOUR_USERNAME/expense-tracker.git
+cd expense-tracker
+```
 
-- **Category Management**  
-  Use built-in or custom categories to organize your spending.
+### 2. **Install Dependencies**
 
-- **Monthly Summaries**  
-  Instantly see how much you've spent and in which categories each month.
+```bash
+# Install backend dependencies
+cd backend
+yarn install
 
-- **Historical Analysis**  
-  Browse previous months' data to identify trends and adjust habits.
+# Install frontend dependencies
+cd ../frontend
+yarn install
+```
 
-- **User-Friendly Interface**  
-  Clean, intuitive design using Material-UI for a seamless experience.
+### 3. **Set Up the MySQL Database**
+
+- Create your database:
+  ```sql
+  CREATE DATABASE expense_tracker;
+  ```
+- Create a MySQL user and grant access (or use root for local testing).
+- Update your `.env.development` and `.env.production` files in `/backend` with your credentials.
+
+### 4. **Configure Environment Variables**
+
+#### **Backend (`/backend`)**
+
+- Create two files:  
+  - `.env.development` for local/dev
+  - `.env.production` for production
+
+**Example `.env.development`:**
+```
+PORT=4000
+NODE_ENV=development
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=yourpassword
+MYSQL_DB=expense-tracker
+AUTH_SECRET=your_auth_secret
+EMAIL_SECRET=your_email_secret
+EMAIL=youremail@gmail.com
+EMAIL_PASSWORD=your_app_password
+API_URL=http://localhost:4000
+CLIENT_URL=http://localhost:3000
+```
+
+**Example `.env.production`:**
+```
+NODE_ENV=production
+MYSQL_HOST=your-production-host
+MYSQL_PORT=3306
+MYSQL_USER=your-prod-user
+MYSQL_PASSWORD=your-prod-password
+MYSQL_DB=your-prod-db
+AUTH_SECRET=your_prod_auth_secret
+TOKEN_SECRET=your_prod_token_secret
+EMAIL=youremail@gmail.com
+EMAIL_PASSWORD=your_app_password
+API_URL=https://your-prod-api
+CLIENT_URL=https://your-prod-client
+```
+
+#### **Frontend (`/frontend`)**
+
+- Create two files:  
+  - `.env.development` for local/dev
+  - `.env.production` for production
+
+**Example `.env.development`:**
+```
+REACT_APP_API_URL=http://localhost:4000
+```
+
+**Example `.env.production`:**
+```
+REACT_APP_API_URL=https://your-production-api-url
+```
+
+- Your React app will use `REACT_APP_API_URL` to connect to the backend.
 
 ---
 
-## Technology Stack
+## 🏃 Running the Application
 
-**Frontend:**  
-- React  
-- Material-UI (MUI)
+### **In Development**
 
-**Backend:**  
-- Node.js  
-- Express.js  
-- MySQL  
-- JWT & bcrypt for authentication and security
+**Backend:**
 
-**DevOps & Hosting:**  
-- **Frontend:** [Vercel](https://vercel.com)  
-- **Backend:** [Render](https://render.com)  
-- **Database:** [Railway](https://railway.app)
+```bash
+cd backend
+yarn server
+# or
+yarn dev
+```
+- By default, runs at `http://localhost:4000`
 
----
+**Frontend:**
 
-## Live Deployment
-
-- **Frontend:** [Expense Tracker on Vercel](https://expense-tracker-gules-pi.vercel.app)
-- **Backend API:** Hosted on Render
+```bash
+cd frontend
+yarn start
+```
+- By default, runs at `http://localhost:3000`
 
 ---
 
-## Planned Enhancements
+### **In Production**
 
-- **Visual Analytics**: Integrate interactive charts for spending overview and trends.
-- **Budgeting Tools**: Allow users to set and track monthly budgets for each category.
-- **Recurring Expenses**: Support for automatic logging of regular expenses.
-- **Dark Mode**: Theme toggle for enhanced accessibility and appearance.
-- **Improved Notifications**: Email or in-app notifications for budget limits, upcoming bills, etc.
+1. Set up your `.env.production` in both `/backend` and `/frontend`.
+2. **Build the frontend**:
+    ```bash
+    cd frontend
+    yarn build
+    ```
+    - Static files will be output to `/frontend/build`.
+3. **Run the backend**:
+    ```bash
+    cd ../backend
+    yarn start
+    ```
+    - Or use a process manager like [pm2](https://pm2.keymetrics.io/):
+      ```bash
+      pm2 start server.js --name expense-tracker-backend
+      ```
+
+4. **Serve the frontend**:
+    - You can serve the `/frontend/build` directory with [serve](https://www.npmjs.com/package/serve), Nginx, or set up your backend to serve static files.
 
 ---
 
-## Contributing
+## ✉️ Email & Notifications
 
-Contributions are welcome! If you have suggestions or want to help with a feature, feel free to open an issue or submit a pull request.  
-For major changes, please open a discussion first to talk about what you would like to change.
+- Requires a valid email account and app password (for Gmail or similar).
+- Set `EMAIL` and `EMAIL_PASSWORD` in your `/backend/.env` file.
+- Email notifications will work automatically if credentials are valid.
 
 ---
 
-## License
+## 🛠️ Environment Variables Reference
 
-This project is licensed under the MIT License.  
-See the [LICENSE](./LICENSE) file for details.
+**Backend**
+
+| Name            | Description                       |
+|-----------------|-----------------------------------|
+| PORT            | Backend server port               |
+| NODE_ENV        | `development` or `production`     |
+| MYSQL_HOST      | MySQL host                        |
+| MYSQL_PORT      | MySQL port                        |
+| MYSQL_USER      | MySQL user                        |
+| MYSQL_PASSWORD  | MySQL password                    |
+| MYSQL_DB        | MySQL database name               |
+| AUTH_SECRET     | JWT secret                        |
+| EMAIL_SECRET    | Email-related secret              |
+| TOKEN_SECRET    | (Production) Token secret         |
+| EMAIL           | Sender email address              |
+| EMAIL_PASSWORD  | App password for email            |
+| API_URL         | Backend API URL                   |
+| CLIENT_URL      | Frontend client URL               |
+
+**Frontend**
+
+| Name                 | Description            |
+|----------------------|------------------------|
+| REACT_APP_API_URL    | Backend API base URL   |
+
+---
+
+## ❓ Troubleshooting
+
+- **CORS errors:** Ensure `API_URL` and `CLIENT_URL` settings match and CORS is enabled on backend.
+- **Emails not sending:** Use a valid app password and check your provider’s settings.
+- **Database errors:** Verify MySQL is running, credentials are correct, and host/port are accessible.
+
+---
+
+## 🙌 Contributing
+
+Pull requests and issues are welcome!
+
+---
+
+## 📄 License
+
+MIT
+
+---
+
+## 👤 Credits
+
+Created by [J3SSY-ANDU](https://github.com/J3SSY-ANDU)
