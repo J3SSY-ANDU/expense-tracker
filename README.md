@@ -20,6 +20,55 @@ A self-hosted, full-featured expense tracker web application.
 
 ---
 
+## 🗂️ Project Structure
+
+The repository is organized as follows:
+
+```
+EXPENSE-TRACKER/
+│
+├── backend/                # Node.js backend with Express & MySQL
+│   ├── database/           # Database access and models (budgets, users, etc.)
+│   ├── node_modules/
+│   ├── .env.development
+│   ├── .env.production
+│   ├── emails.js
+│   ├── package.json
+│   ├── server.js
+│   └── yarn.lock
+│
+├── frontend/               # React + TypeScript frontend (Create React App)
+│   ├── node_modules/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/            # API service wrappers
+│   │   ├── components/     # React components
+│   │   ├── styles/
+│   │   ├── types/          # TypeScript types and declarations
+│   │   ├── ...
+│   │   ├── App.tsx, etc.
+│   │
+│   ├── .env.development
+│   ├── .env.production
+│   ├── package.json
+│   ├── README.md
+│   ├── tsconfig.json
+│   └── yarn.lock
+│
+├── .gitignore
+├── LICENSE
+├── package.json            # (If present in root, for scripts or monorepo management)
+├── README.md
+└── yarn.lock
+```
+
+- **backend/** contains all server-side code, database handling, and environment files for the API and email service.
+- **frontend/** contains all client-side React code, organized by feature (API, components, types, styles).
+
+Feel free to refer to the codebase for more details on each folder’s purpose.
+
+---
+
 ## 🖥️ Prerequisites
 
 - [Node.js](https://nodejs.org/) (v16 or newer)
