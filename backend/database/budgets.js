@@ -6,6 +6,7 @@ const dotenv = require('dotenv').config({
       : '.env.development'
 })
 const { v4: uuidv4 } = require('uuid')
+const cron = require('node-cron')
 
 ;(async () => {
   await connectionPool.query(`
@@ -157,6 +158,28 @@ const deleteBudget = async id => {
   console.log('Budget deleted successfully!')
   return true
 }
+
+cron.schedule('0 0 1 * *', async () => {
+  console.log(
+    'Running scheduled budget reset at 12:00 a.m. on the 1st of every month...'
+  )
+  // Logic to create a new budget for the current month if not already created
+
+  // Get current month and year
+  const now = new Date()
+  const month = now.getMonth() + 1 // JS months are 0-based
+  const year = now.getFullYear()
+
+  // Get all users
+  const [users] = await connectionPool.query('SELECT id FROM users')
+  for (const user of users) {
+    const existingBudget = await getBudgetByUserMonthYear(user.id, month, year)
+    if (!existingBudget) {
+      await createBudget(user.id, month, year)
+      console.log(`Created budget for user ${user.id} for ${month}/${year}`)
+    }
+  }
+})
 
 module.exports = {
   createBudget,
