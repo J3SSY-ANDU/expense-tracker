@@ -1,4 +1,4 @@
-import { Backdrop, Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { useMemo } from "react";
@@ -49,29 +49,9 @@ export default function CategoriesBudgetsCard({
         [categoriesBudgets]
     );
 
-    const mostSpentCategory = useMemo(() => {
-        if (!categories || categories.length === 0) return { label: "", value: 0 };
-        const withExpenses = categories
-            .map((category) => ({
-                label: category.name,
-                value: Number(category.total_expenses ?? 0),
-            }))
-            .filter((c) => c.value > 0);
-        if (withExpenses.length === 0) return { label: "", value: 0 };
-        return withExpenses.reduce((max, category) => (category.value > max.value ? category : max), withExpenses[0]);
-    }, [categories]);
-
-    const leastSpentCategory = useMemo(() => {
-        if (!categories || categories.length === 0) return { label: "", value: 0 };
-        const withExpenses = categories
-            .map((category) => ({
-                label: category.name,
-                value: Number(category.total_expenses ?? 0),
-            }))
-            .filter((c) => c.value > 0);
-        if (withExpenses.length === 0) return { label: "", value: 0 };
-        return withExpenses.reduce((min, category) => (category.value < min.value ? category : min), withExpenses[0]);
-    }, [categories]);
+    const categoriesValues = filteredCategories.map((c) => c.value);
+    const totalCategories = categoriesValues.reduce((sum, v) => sum + v, 0);
+    const remainingValue = Math.max(income - totalCategories, 0);
 
     const chartData = useMemo(() => {
         // Filter only categories with budget > 0
@@ -133,9 +113,6 @@ export default function CategoriesBudgetsCard({
             "#a1c181", // moss green
             "#e5989b", // rose
         ];
-        const categoriesValues = filteredCategories.map((c) => c.value);
-        const totalCategories = categoriesValues.reduce((sum, v) => sum + v, 0);
-        const remainingValue = Math.max(income - totalCategories, 0);
 
         const data = [...categoriesValues, remainingValue];
         const labels = [...filteredCategories.map((c) => c.label), "Remaining"];
@@ -161,7 +138,7 @@ export default function CategoriesBudgetsCard({
                 },
             ],
         };
-    }, [income, filteredCategories]);
+    }, [filteredCategories, categoriesValues, remainingValue]);
 
     const chartOptions = useMemo(
         () => ({
@@ -186,51 +163,45 @@ export default function CategoriesBudgetsCard({
     return (
         <Card sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem", flex: 1, justifyContent: "center" }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1, mb: 3 }}>
-                <Typography component="div" sx={{ fontSize: 18, fontWeight: "600" }}>
-                    Budgets by Category
-                </Typography>
-                </Box>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem", flex: 1, justifyContent: "center" }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: "1px solid #ccc", pb: 1, mb: 3 }}>
+                        <Typography component="div" sx={{ fontSize: 18, fontWeight: "600" }}>
+                            Budgets by Category
+                        </Typography>
+                    </Box>
 
-                <Box sx={{ height: 240 }}>
-                <Doughnut data={chartData} options={chartOptions} />
-                </Box>
-                <Box
-                sx={{
-                    display: 'flex',
-                    mt: 1,
-                    pt: 1,
-                    margin: 'auto',
-                    borderTop: '1px solid #ccc',
-                    gap: '6rem',
-                }}
-                >
-                <Box>
-                    <Typography variant="caption" color="text.secondary">
-                    Most Spent
-                    </Typography>
-                    <Typography variant="body1">
-                    {mostSpentCategory.value > 0 ? currency.format(mostSpentCategory.value) : "-"}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                    {mostSpentCategory.value > 0 ? mostSpentCategory.label : ""}
-                    </Typography>
-                </Box>
+                    <Box sx={{ height: 240 }}>
+                        <Doughnut data={chartData} options={chartOptions} />
+                    </Box>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            mt: 1,
+                            pt: 1,
+                            margin: 'auto',
+                            borderTop: '1px solid #ccc',
+                            gap: '6rem',
+                        }}
+                    >
+                        <Box>
+                            <Typography variant="caption" color="text.secondary">
+                                Total Budgeted
+                            </Typography>
+                            <Typography variant="body1">
+                                {currency.format(totalCategories)}
+                            </Typography>
+                        </Box>
 
-                <Box>
-                    <Typography variant="caption" color="text.secondary">
-                    Least Spent
-                    </Typography>
-                    <Typography variant="body1">
-                    {leastSpentCategory.value > 0 && mostSpentCategory !== leastSpentCategory ? currency.format(leastSpentCategory.value) : "-"}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                    {leastSpentCategory.value > 0 && mostSpentCategory !== leastSpentCategory ? leastSpentCategory.label : ""}
-                    </Typography>
+                        <Box>
+                            <Typography variant="caption" color="text.secondary">
+                                Remaining
+                            </Typography>
+                            <Typography variant="body1">
+                                {currency.format(remainingValue)}
+                            </Typography>
+                        </Box>
+                    </Box>
                 </Box>
-                </Box>
-            </Box>
             </CardContent>
         </Card>
     )
