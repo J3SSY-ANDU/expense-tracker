@@ -160,24 +160,50 @@ const deleteBudget = async id => {
 }
 
 cron.schedule('0 0 1 * *', async () => {
-  console.log(
-    'Running scheduled budget reset at 12:00 a.m. on the 1st of every month...'
-  )
-  // Logic to create a new budget for the current month if not already created
+  try {
+    // Logic to create a new budget for the current month if not already created
 
-  // Get current month and year
-  const now = new Date()
-  const month = now.getMonth() + 1 // JS months are 0-based
-  const year = now.getFullYear()
+    // Get current month and year
+    const now = new Date()
+    const month = now.getMonth() + 1 // JS months are 0-based
+    const year = now.getFullYear()
 
-  // Get all users
-  const [users] = await connectionPool.query('SELECT id FROM users')
-  for (const user of users) {
-    const existingBudget = await getBudgetByUserMonthYear(user.id, month, year)
-    if (!existingBudget) {
-      await createBudget(user.id, month, year)
-      console.log(`Created budget for user ${user.id} for ${month}/${year}`)
+    // Get all users
+    const [users] = await connectionPool.query('SELECT id FROM users')
+    for (const user of users) {
+      const existingBudget = await getBudgetByUserMonthYear(
+        user.id,
+        month,
+        year
+      )
+      if (!existingBudget) {
+        // Handle previous month/year
+        let prevMonth = month - 1
+        let prevYear = year
+        if (prevMonth === 0) {
+          prevMonth = 12
+          prevYear -= 1
+        }
+        const previousBudget = await getBudgetByUserMonthYear(
+          user.id,
+          prevMonth,
+          prevYear
+        )
+        if (previousBudget) {
+          await createBudget(user.id, month, year, previousBudget.total_income)
+          console.log(
+            `Created budget for user ${user.id} for ${month}/${year} based on previous month's income`
+          )
+          continue
+        }
+        await createBudget(user.id, month, year)
+        console.log(
+          `Created new budget for user ${user.id} for ${month}/${year}`
+        )
+      }
     }
+  } catch (err) {
+    console.error('Error occurred while creating budgets:', err)
   }
 })
 
