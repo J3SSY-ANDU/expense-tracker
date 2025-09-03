@@ -188,7 +188,7 @@ export default function CategoriesBudgetsCard({
                                 Total Budgeted
                             </Typography>
                             <Typography variant="body1">
-                                {currency.format(totalCategories)}
+                                {totalCategories > 0 ? currency.format(totalCategories) : "-"}
                             </Typography>
                         </Box>
 
@@ -197,7 +197,7 @@ export default function CategoriesBudgetsCard({
                                 Remaining
                             </Typography>
                             <Typography variant="body1">
-                                {currency.format(remainingValue)}
+                                {remainingValue > 0 ? currency.format(remainingValue) : "-"}
                             </Typography>
                         </Box>
                     </Box>
