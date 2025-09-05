@@ -141,16 +141,17 @@ const authenticateUser = async (email, password) => {
  * @throws {Error} Throws an error if the user is not found, deletion fails, or any database/email operation fails.
  */
 const deleteUser = async id => {
+  let connection
   try {
     const user = await getUserById(id)
     if (!user) throw new Error('USER_NOT_FOUND')
-    let connection
     connection = await connectionPool.getConnection()
     await connection.beginTransaction()
 
     await connection.query(`DELETE FROM expenses WHERE user_id = ?`, [id])
     await connection.query(`DELETE FROM categories WHERE user_id = ?`, [id])
     await connection.query(`DELETE FROM history WHERE user_id = ?`, [id])
+    await connection.query(`DELETE FROM budgets WHERE user_id = ?`, [id])
     const [deleteResult] = await connection.query(
       `DELETE FROM users WHERE id = ?`,
       [id]
@@ -168,6 +169,8 @@ const deleteUser = async id => {
       connection.release()
     }
     throw error
+  } finally {
+    if (connection) connection.release()
   }
 }
 

@@ -11,6 +11,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import InfoIcon from "@mui/icons-material/Info";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import apiService from "./api/apiService";
 
 function ProfileContent() {
     return (
@@ -50,7 +51,7 @@ function DeleteAccountContent() {
             <Typography color="error" sx={{ mb: 2 }}>
                 Warning: This action is irreversible. All your data will be permanently deleted.
             </Typography>
-            <Button variant="outlined" color="error">Delete Account</Button>
+            <Button variant="outlined" color="error" onClick={() => apiService.deleteUser()}>Delete Account</Button>
         </Box>
     );
 }
